@@ -1,0 +1,11 @@
+## Interface: 11302
+## Title: Raid账本 by (farmer1992@gmail.com)
+## SavedVariablesPerCharacter: RaidLedger_Ledger
+
+lib\LibStub\LibStub.lua
+lib\lib-st\Core.lua
+lib\LibDeformat-3.0\LibDeformat-3.0.lua
+
+gui.lua
+gui.xml
+core.lua
