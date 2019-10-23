@@ -201,7 +201,6 @@ local LootLogFrame = ScrollingTable:CreateST({
                     local rowdata = table:GetRow(realrow)
                     local idx = rowdata["cols"][1].value
                     RaidLedger_Ledger["items"][idx]["looter"] = n
-                    UpdateLootTable()                
                 end
 
                 return true
@@ -243,11 +242,10 @@ local LootLogFrame = ScrollingTable:CreateST({
 
                 local t = self:GetText()
 
-                if t ~= "" then
+                if userInput and t ~= "" then
                     local rowdata = table:GetRow(realrow)
                     local idx = rowdata["cols"][1].value
                     RaidLedger_Ledger["items"][idx]["looter"] = t
-                    UpdateLootTable()
                 end
 
                 if t == "" then
