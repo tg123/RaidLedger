@@ -1,6 +1,8 @@
 ## Interface: 11302
-## Title: Raid账本 by (farmer1992@gmail.com)
+## Title: RaidLedger 金团账本
 ## SavedVariablesPerCharacter: RaidLedger_Ledger
+## Author: Boshi Lian(farmer1992@gmail.com)
+## Version: @project-version@
 
 lib\LibStub\LibStub.lua
 lib\lib-st\Core.lua
