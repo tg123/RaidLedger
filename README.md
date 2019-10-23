@@ -1,22 +1,44 @@
 # RaidLedger
 
+A ledger for GDKP/gold run raid.
+
+## Special Thanks to [ClassicRaidTracker](https://gitlab.com/wenlock/ClassicRaidTracker)
+
+I would not have been able to build RaidLedger without `ClassicRaidTracker`
+Some codes, scrolling ui and loot message parsing, are borrowed from `ClassicRaidTracker`.
+
+## English
+
+### Usage
+
+ * Open panel `/gtuan`
+ * Add item to ledger `/gtuan [itemlink]`
+
+### Features
+ 
+ * Create a summary and report to raid channel
+ * Buyout charges and looter can be modified at any time
+ * Smart looter name autocomplete. 1 for all members in subgroup 1, hunter for all hunters in raid
+ * Compensation for special raid members
+ * Calculate gold run income for raid members
+ * Loot during raid will be added to ledger automatically
+ * Easy to export as text in order to copy/paste to a third party website.
+
+
+## 中文
+
 专为为目前金团设计
 团长可以记账，方便快捷
 打工可以记账，童叟无欺
 
- * [Wowace](https://www.wowace.com/projects/raidledger)
  * [NGA连接](https://bbs.nga.cn/read.php?tid=18961750)
 
-## 使用
-界面呼出
-```
-/gtuan
-```
+### 使用
 
-添加物品
-```
-/gutan [物品]
-```
+ * 界面呼出 `/gtuan`
+ * 添加物品 `/gutan [物品]`
+
+### 功能
 
  * 消费前5名汇总广播
  * 随时修改价格，拾取人
