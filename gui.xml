@@ -50,10 +50,10 @@
                         </Anchor>
                     </Anchors>
                 </FontString>
-                <FontString name="$parentSumLabel" inherits="GameFontNormal" text="">
+                <FontString name="$parentSumLabel" inherits="GameFontNormal" text="" justifyH="RIGHT">
                 <Anchors>
                     <Anchor point="BOTTOMRIGHT">
-                    <Offset x="-40" y="95"/>
+                    <Offset x="-40" y="65"/>
                     </Anchor>
                 </Anchors>
                 </FontString>
@@ -98,9 +98,9 @@
 					</Frame>
 				</ScrollChild>
 			</ScrollFrame>		
-			<EditBox name="$parentCount" hidden="false" inherits="InputBoxTemplate" numeric="true" autoFocus="false" text="40">
+			<EditBox name="$parentCount" hidden="false" inherits="InputBoxTemplate" numeric="true" autoFocus="false" letters="4">
 				<Size>
-					<AbsDimension x="100" y="25"/>
+					<AbsDimension x="50" y="25"/>
 				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT">

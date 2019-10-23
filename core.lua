@@ -76,31 +76,35 @@ local function Sum()
     end
 
     local sum = 0
+    local compensation = 0
     for k, item in pairs(RaidLedger_Ledger["items"] or {}) do
         if item["item"] == FIN_AID then
-            sum = sum - (item["cost"] or 0)
+            compensation = compensation + (item["cost"] or 0)
         else
             sum = sum + (item["cost"] or 0)
         end
     end
 
     sum = math.max( sum, 0)
+    local total = math.max(sum - compensation, 0)
     local avg = 0
 
     if n > 0 then
-        avg = 1.0 * sum / n
+        avg = 1.0 * total / n
         avg = math.max( avg, 0)
         avg = math.floor( avg * 10000 ) / 10000
     end
 
-    return sum, avg , n
+    return sum, compensation, total, avg, n
 end
 
 local function UpdateSumLabel()
-    local sum, avg = Sum()
+    local income, comp, sum, avg = Sum()
+    income = GetMoneyString(income * 10000)
+    comp = GetMoneyString(comp * 10000)
     sum = GetMoneyString(sum * 10000)
     avg = GetMoneyString(avg * 10000)
-    RAIDLEDGER_ReportFrameSumLabel:SetText("总收入" .. sum .. "\r\n人均" .. avg)
+    RAIDLEDGER_ReportFrameSumLabel:SetText("总收入" .. income .. "\r\n - 总补助" .. comp .. "\r\n实际收入" .. sum ..  "\r\n人均" .. avg)
 end
 
 local function SendToCurrrentChannel(msg)
@@ -289,8 +293,7 @@ local LootLogFrame = ScrollingTable:CreateST({
             cellFrame.textBox:SetNumeric(true)
             cellFrame.textBox:SetAutoFocus(false)
             cellFrame.textBox:SetText(cellvalue)
-
-
+            cellFrame.textBox:SetMaxLetters(7)
 
             cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
                 local rowdata = table:GetRow(realrow)
@@ -524,12 +527,16 @@ RegEvent("ADDON_LOADED", function()
 
         end
 
-        local sum0, avg, n = Sum()
-        sum = GetMoneyStringL(sum0 * 10000)
+        local income, comp, sum, avg, n = Sum()
+        income = GetMoneyStringL(income * 10000)
+        comp = GetMoneyStringL(comp * 10000)
+        sum = GetMoneyStringL(sum * 10000)
         avg = GetMoneyStringL(avg * 10000)
 
         s = s .. "\r\n"
         s = s .. "参与分账人数:" .. n .. "\r\n"
+        s = s .. "总收入:" .. income .. "\r\n"
+        s = s .. "总补助:" .. comp .. "\r\n"
         s = s .. "合计收入:" .. sum .. "\r\n"
         s = s .. "人均收入:" .. avg .. "\r\n"
 
@@ -538,8 +545,10 @@ RegEvent("ADDON_LOADED", function()
 
     RAIDLEDGER_ReportFrameSayButton:SetScript("OnClick", function()
 
-        local sum0, avg, n = Sum()
-        sum = GetMoneyStringL(sum0 * 10000)
+        local income, compensation_sum, sum, avg, n = Sum()
+        income = GetMoneyStringL(income * 10000)
+        -- comp = GetMoneyStringL(avg * 10000)
+        sum = GetMoneyStringL(sum * 10000)
         avg = GetMoneyStringL(avg * 10000)
 
         local grp = {}
@@ -569,7 +578,6 @@ RegEvent("ADDON_LOADED", function()
 
         local looter = {}
         local compensation = {}
-        local compensation_sum = 0
 
         for l, k in pairs(grp) do
             table.insert( looter, {
@@ -579,7 +587,6 @@ RegEvent("ADDON_LOADED", function()
             })
 
             if k["compensation"] > 0 then
-                compensation_sum = compensation_sum + k["compensation"]
                 table.insert( compensation, {
                     ["beneficiary"] = l,
                     ["compensation"] = k["compensation"],
@@ -638,10 +645,9 @@ RegEvent("ADDON_LOADED", function()
             end
 
             SendToCurrrentChannel("补助花费 [" .. GetMoneyStringL(compensation_sum * 10000) .. "]: " .. compensation_str) 
-
         end
 
-        SendToCurrrentChannel("RaidLedger 统计总收入: " .. GetMoneyStringL((sum0 + compensation_sum) * 10000) ..  "(消费) - ".. GetMoneyStringL(compensation_sum * 10000) .. "(补助)  = [" .. sum .. "], 分账人数[" .. n .. "]" .. ", 人均收入[" .. avg .. "]") 
+        SendToCurrrentChannel("RaidLedger 统计总收入: " .. income ..  "(消费) - ".. GetMoneyStringL(compensation_sum * 10000) .. "(补助)  = [" .. sum .. "], 分账人数[" .. n .. "]" .. ", 人均收入[" .. avg .. "]") 
     end)
 
     RAIDLEDGER_ReportFrameClearButton:SetScript("OnClick", function()
