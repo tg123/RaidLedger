@@ -3,6 +3,10 @@ local deformat = LibStub("LibDeformat-3.0");
 
 local FIN_AID = "补助"
 
+local function Print(msg)
+    DEFAULT_CHAT_FRAME:AddMessage("|CFFFF0000<|r|CFFFFD100RaidLedger|r|CFFFF0000>|r"..(msg or "nil"))
+end
+
 local function GetMoneyStringL(money, separateThousands)
 	local goldString, silverString, copperString;
 	local gold = floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD));
@@ -317,7 +321,7 @@ UpdateLootTable = function()
     for k, item in pairs(RaidLedger_Ledger["items"] or {}) do
 
         if item["item"] then
-            table.insert(data, {
+            table.insert(data, 1, {
                 ["cols"] = {
                     {
                         ["value"] = #data + 1
@@ -407,7 +411,39 @@ RegEvent("CHAT_MSG_SYSTEM", function()
     UpdateCountLabel()
 end)
 
+local GuessLootEnable = false
+
+local function GuessLoot(msg)
+    if not GuessLootEnable then
+        return
+    end
+
+    local itemId = GetItemInfoFromHyperlink(msg)
+    if itemId then
+        local _, link = GetItemInfo(itemId)
+
+        Print("加入" .. link .. "到账本") 
+        AddLoot(link, nil, 0, true)
+        GuessLootEnable = false
+    end
+end
+
+-- RegEvent("CHAT_MSG_PARTY", function(msg)
+--     GuessLoot(msg)
+-- end)
+
+RegEvent("CHAT_MSG_RAID", function(msg)
+    GuessLoot(msg)
+end)
+
+local AutoAddLoot = true
+
 RegEvent("CHAT_MSG_LOOT", function(chatmsg)
+
+    if not AutoAddLoot then
+        return
+    end
+
     local playerName, itemLink, itemCount = deformat(chatmsg, LOOT_ITEM_MULTIPLE);
     -- next try: somebody else received single loot
     if (playerName == nil) then
@@ -675,9 +711,24 @@ SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
     if cmd == "" then
         UpdateCountLabel()
         RAIDLEDGER_ReportFrame:Show()
+
+        Print("/gtuan cap 捕获下一次团队聊天中的物品到记录")
+        Print("/gtuan toggle 开启/关闭自动拾取记录")
+
     elseif cmd == "clear" then
         RaidLedger_Ledger = {}
         UpdateLootTable()
+    elseif cmd == "cap" then
+        Print("下一个出现在团队聊天的物品将被自动加入记录")
+        GuessLootEnable = true
+    elseif cmd == "toggle" then
+        AutoAddLoot = not AutoAddLoot
+        if AutoAddLoot then
+            Print("自动记录开启")
+        else
+            Print("自动记录关闭")
+        end
+
     else
         local _, itemLink = GetItemInfo(strtrim(msg))
         if itemLink then
