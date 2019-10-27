@@ -158,14 +158,26 @@
 					</Anchor>
 				</Anchors>
 			</Button>            
-			<Button name="$parentFinAidButton" hidden="false" inherits="GameMenuButtonTemplate" text="添加补助">
+			<Button name="$parentFinAidButton" hidden="false" inherits="GameMenuButtonTemplate" text="+支出">
 				<Size>
-					<AbsDimension x="125" y="20"/>
+					<AbsDimension x="60" y="20"/>
 				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="40" y="95"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>            
+			<Button name="$parentFinItemButton" hidden="false" inherits="GameMenuButtonTemplate" text="+收入">
+				<Size>
+					<AbsDimension x="60" y="20"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="100" y="95"/>
 						</Offset>
 					</Anchor>
 				</Anchors>

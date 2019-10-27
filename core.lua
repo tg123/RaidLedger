@@ -1,3 +1,5 @@
+local _, ADDONSELF = ...
+
 local ScrollingTable = LibStub("ScrollingTable");
 local deformat = LibStub("LibDeformat-3.0");
 
@@ -252,6 +254,8 @@ local LootLogFrame = ScrollingTable:CreateST({
                             entry["item"] = itemLink
                             entry["displayname"] = nil
                             UpdateLootTable()
+                        else
+                            Print("转换失败, 名称可以是物品ID, 物品名称(可能会失败)")
                         end
 
                         -- print (itemLink)
