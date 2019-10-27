@@ -1,7 +1,11 @@
 local ScrollingTable = LibStub("ScrollingTable");
 local deformat = LibStub("LibDeformat-3.0");
 
-local FIN_AID = "补助"
+local FIN_AID = "补助" -- TODO to types
+
+local TYPE_COMP = "COMPENSATION"
+local TYPE_ITEM = "ITEM"
+
 
 local function Print(msg)
     DEFAULT_CHAT_FRAME:AddMessage("|CFFFF0000<|r|CFFFFD100RaidLedger|r|CFFFF0000>|r"..(msg or "nil"))
@@ -108,7 +112,7 @@ local function UpdateSumLabel()
     comp = GetMoneyString(comp * 10000)
     sum = GetMoneyString(sum * 10000)
     avg = GetMoneyString(avg * 10000)
-    RAIDLEDGER_ReportFrameSumLabel:SetText("总收入" .. income .. "\r\n - 总补助" .. comp .. "\r\n实际收入" .. sum ..  "\r\n人均" .. avg)
+    RAIDLEDGER_ReportFrameSumLabel:SetText("总收入" .. income .. "\r\n - 总支出" .. comp .. "\r\n实际收入" .. sum ..  "\r\n人均" .. avg)
 end
 
 local function SendToCurrrentChannel(msg)
@@ -177,8 +181,111 @@ local LootLogFrame = ScrollingTable:CreateST({
         end,
     },
     {
-        ["name"] = "物品",
+        ["name"] = "账目",
         ["width"] = 250,
+        ["DoCellUpdate"] = function(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+            if not fShow then
+                return
+            end
+
+            local rowdata = table:GetRow(realrow)
+            local idx = rowdata["cols"][1].value
+            local entry = RaidLedger_Ledger["items"][idx]
+
+            local celldata = table:GetCell(rowdata, column)
+            cellvalue = celldata.value
+
+            if not cellvalue then
+                local item = entry["item"]
+                local _, itemLink = GetItemInfo(item)
+
+                if itemLink then
+                    cellFrame.text:SetText(itemLink)
+                    if cellFrame.textBox then
+                        cellFrame.textBox:Hide()
+                    end
+                    return
+                end
+
+                cellvalue = item -- for old data
+            end
+
+            if not (cellFrame.textBox) then
+                cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
+            end
+
+            cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
+            cellFrame.textBox:SetWidth(120)
+            cellFrame.textBox:SetHeight(30)
+            cellFrame.textBox:SetAutoFocus(false)
+            cellFrame.textBox:SetText(cellvalue)
+
+            if entry["type"] == TYPE_COMP or entry["item"] == FIN_AID then
+                cellFrame.text:SetText("支出")
+            else 
+                cellFrame.text:SetText("收入")
+            end
+
+            cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
+                local n = newText ~= "" and newText or info.name
+
+                if n ~= "" then
+                    cellFrame.textBox:SetText(n)
+                    entry["displayname"] = n
+                end
+
+                return true
+            end
+           
+            AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, function(text)
+                local data = {}
+
+                if entry["type"] == TYPE_COMP or entry["item"] == FIN_AID then
+                    if text == "" or text == "#ONFOCUS" then
+                        for _, name in pairs({
+                            "坦克补助",
+                            "灭火补助",
+                            "治疗补助",
+                            "输出补助",
+                            "其他补助",
+                        }) do
+                            tinsert(data, {
+                                ["name"] = name,
+                                ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
+                            })
+                        end
+                    end
+
+                else
+                end
+
+                return data
+            end)
+
+            cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
+
+                AutoCompleteEditBox_OnTextChanged(self, userInput)
+
+                local t = self:GetText()
+
+                if userInput and t ~= "" then
+                    entry["displayname"] = t
+                end
+
+                if t == "" then
+                    t = "#ONFOCUS"
+                end
+                AutoComplete_Update(self, t, 1);
+            end)
+
+            cellFrame.textBox:SetScript("OnEditFocusGained", function(self)
+                local t = self:GetText()
+                if t == "" then
+                    t = "#ONFOCUS"
+                end
+                AutoComplete_Update(self, t, 1);
+            end)            
+        end
     },
     {
         ["name"] = "拾取",
@@ -330,7 +437,7 @@ UpdateLootTable = function()
                         ["value"] = item["item"]
                     }, -- icon
                     {
-                        ["value"] = item["item"]
+                        ["value"] = item["displayname"]
                     }, -- icon
                     {
                         ["value"] = item["looter"] or ""
@@ -348,34 +455,61 @@ UpdateLootTable = function()
     UpdateSumLabel()
 end
 
-local function AddLoot(item, looter, cost, force)
+local function AddLoot(item, looter, cost, force, type)
     if not RaidLedger_Ledger["items"] then
         RaidLedger_Ledger["items"] = {}
     end
 
-    if item == FIN_AID then
-        table.insert(RaidLedger_Ledger["items"], {
-            ["item"] = FIN_AID,
-            ["looter"] = looter,
-            ["cost"] = cost,
-        })
+    local type = type or TYPE_ITEM
+    local entry = {}
 
-    else
+    entry["item"] = item
+    entry["displayname"] = item
+    entry["looter"] = looter
+    entry["cost"] = cost
+    entry["type"] = type
 
+    if type == TYPE_ITEM then
         local _, itemLink, itemRarity = GetItemInfo(item)
 
-        if (not force) and (itemRarity < UIDropDownMenu_GetSelectedValue(RAIDLEDGER_ReportFrameFilterDropDown)) then
-            return
+        if not force then
+            if not itemLink then
+                return
+            end
+
+            if (itemRarity < UIDropDownMenu_GetSelectedValue(RAIDLEDGER_ReportFrameFilterDropDown)) then
+                return
+            end
+
         end
 
-        if itemLink then
-            table.insert(RaidLedger_Ledger["items"], {
-                ["item"] = itemLink,
-                ["looter"] = looter,
-                ["cost"] = cost,
-            })
-        end
+        entry["displayname"] = itemLink
     end
+
+    table.insert(RaidLedger_Ledger["items"], entry)
+
+    -- if item == FIN_AID then
+    --     table.insert(RaidLedger_Ledger["items"], {
+    --         ["item"] = FIN_AID,
+    --         ["displayname"] = FIN_AID,
+    --         ["looter"] = looter,
+    --         ["cost"] = cost,
+    --         ["type"] = TYPE_COMP,
+    --     })
+
+    -- else
+
+
+    --     if itemLink then
+    --         table.insert(RaidLedger_Ledger["items"], {
+    --             ["item"] = itemLink,
+    --             ["displayname"] = itemLink,
+    --             ["looter"] = looter,
+    --             ["cost"] = cost,
+    --             ["type"] = TYPE_ITEM,
+    --         })
+    --     end
+    -- end
 
 
     UpdateLootTable()
@@ -519,7 +653,8 @@ RegEvent("ADDON_LOADED", function()
     })
 
     RAIDLEDGER_ReportFrameFinAidButton:SetScript("OnClick", function()
-        AddLoot(FIN_AID)
+        AddLoot(FIN_AID, nil, 0, true, TYPE_COMP)
+        -- local function AddLoot(item, looter, cost, force, type)
     end)
 
     RAIDLEDGER_ReportFrameExportButton:SetText("以文本显示")
@@ -572,7 +707,7 @@ RegEvent("ADDON_LOADED", function()
         s = s .. "\r\n"
         s = s .. "参与分账人数:" .. n .. "\r\n"
         s = s .. "总收入:" .. income .. "\r\n"
-        s = s .. "总补助:" .. comp .. "\r\n"
+        s = s .. "总支出:" .. comp .. "\r\n"
         s = s .. "合计收入:" .. sum .. "\r\n"
         s = s .. "人均收入:" .. avg .. "\r\n"
 
