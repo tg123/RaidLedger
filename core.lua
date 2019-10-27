@@ -5,6 +5,7 @@ local FIN_AID = "补助" -- TODO to types
 
 local TYPE_COMP = "COMPENSATION"
 local TYPE_ITEM = "ITEM"
+local TYPE_INCOME = "INCOME" -- not used TODO
 
 
 local function Print(msg)
@@ -146,6 +147,9 @@ local LootLogFrame = ScrollingTable:CreateST({
 
             local rowdata = table:GetRow(realrow)
             local celldata = table:GetCell(rowdata, column)
+            local idx = rowdata["cols"][1].value
+            local entry = RaidLedger_Ledger["items"][idx]
+
             cellvalue = celldata.value;
             -- print(celldata.value)
             local itemTexture =  GetItemIcon(celldata.value)
@@ -156,17 +160,24 @@ local LootLogFrame = ScrollingTable:CreateST({
                 cellFrame.cellItemTexture = cellFrame:CreateTexture()
             end
 
-            cellFrame.cellItemTexture:SetTexture(itemTexture)
-
-            if not itemTexture then
-                return 
-            end
-
             cellFrame.cellItemTexture:SetTexCoord(0, 1, 0, 1)
             cellFrame.cellItemTexture:Show()
             cellFrame.cellItemTexture:SetPoint("CENTER", cellFrame.cellItemTexture:GetParent(), "CENTER")
             cellFrame.cellItemTexture:SetWidth(30)
             cellFrame.cellItemTexture:SetHeight(30)
+
+            if not itemTexture then
+                
+                if entry["type"] == TYPE_COMP then
+                    cellFrame.cellItemTexture:SetTexture(135768) -- minus
+                else
+                    cellFrame.cellItemTexture:SetTexture(135769) -- plus
+                end
+
+                return 
+            end
+
+            cellFrame.cellItemTexture:SetTexture(itemTexture)
 
             cellFrame:SetScript("OnEnter", function()
                 RAIDLEDGER_ItemToolTip:SetOwner(cellFrame, "ANCHOR_RIGHT")
@@ -191,14 +202,10 @@ local LootLogFrame = ScrollingTable:CreateST({
             local rowdata = table:GetRow(realrow)
             local idx = rowdata["cols"][1].value
             local entry = RaidLedger_Ledger["items"][idx]
+            local item = entry["item"]
 
-            local celldata = table:GetCell(rowdata, column)
-            cellvalue = celldata.value
-
-            if not cellvalue then
-                local item = entry["item"]
+            if entry["type"] ~= TYPE_COMP then
                 local _, itemLink = GetItemInfo(item)
-
                 if itemLink then
                     cellFrame.text:SetText(itemLink)
                     if cellFrame.textBox then
@@ -206,13 +213,15 @@ local LootLogFrame = ScrollingTable:CreateST({
                     end
                     return
                 end
-
-                cellvalue = item -- for old data
             end
+
+
+            cellvalue = RaidLedger_Ledger["items"][idx]["displayname"] or item -- for old data
 
             if not (cellFrame.textBox) then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
             end
+            cellFrame.textBox:Show()
 
             cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
             cellFrame.textBox:SetWidth(120)
@@ -226,16 +235,36 @@ local LootLogFrame = ScrollingTable:CreateST({
                 cellFrame.text:SetText("收入")
             end
 
+            local CONVERT = "#尝试转换为物品链接"
+
             cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
                 local n = newText ~= "" and newText or info.name
 
                 if n ~= "" then
+                    if entry["type"] ~= TYPE_COM and n == CONVERT then
+                        local txt = editBox:GetText()
+                        txt = strtrim(txt)
+                        txt = strtrim(txt, "[]")
+                        -- print(txt)
+                        local _, itemLink = GetItemInfo(txt)
+
+                        if itemLink then
+                            entry["item"] = itemLink
+                            entry["displayname"] = nil
+                            UpdateLootTable()
+                        end
+
+                        -- print (itemLink)
+                        return true
+                    end
+
                     cellFrame.textBox:SetText(n)
                     entry["displayname"] = n
                 end
 
                 return true
             end
+
            
             AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, function(text)
                 local data = {}
@@ -257,6 +286,10 @@ local LootLogFrame = ScrollingTable:CreateST({
                     end
 
                 else
+                    tinsert(data, {
+                        ["name"] = CONVERT,
+                        ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
+                    })
                 end
 
                 return data
@@ -268,9 +301,7 @@ local LootLogFrame = ScrollingTable:CreateST({
 
                 local t = self:GetText()
 
-                if userInput and t ~= "" then
-                    entry["displayname"] = t
-                end
+                entry["displayname"] = t
 
                 if t == "" then
                     t = "#ONFOCUS"
@@ -296,8 +327,11 @@ local LootLogFrame = ScrollingTable:CreateST({
             end
 
             local rowdata = table:GetRow(realrow)
-            local celldata = table:GetCell(rowdata, column)
-            cellvalue = celldata.value
+            local idx = rowdata["cols"][1].value
+            local entry = RaidLedger_Ledger["items"][idx]
+
+            -- local celldata = table:GetCell(rowdata, column)
+            cellvalue = RaidLedger_Ledger["items"][idx]["looter"] or ""
 
             if not (cellFrame.textBox) then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
@@ -389,8 +423,13 @@ local LootLogFrame = ScrollingTable:CreateST({
             end
 
             local rowdata = table:GetRow(realrow)
-            local celldata = table:GetCell(rowdata, column)
-            cellvalue = celldata.value
+            -- local celldata = table:GetCell(rowdata, column)
+            local idx = rowdata["cols"][1].value
+            local entry = RaidLedger_Ledger["items"][idx]
+
+            -- local celldata = table:GetCell(rowdata, column)
+            cellvalue = tostring(RaidLedger_Ledger["items"][idx]["cost"]) or ""
+            -- cellvalue = celldata.value
 
             if not (cellFrame.textBox) then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate")
@@ -410,7 +449,6 @@ local LootLogFrame = ScrollingTable:CreateST({
                 local rowdata = table:GetRow(realrow)
                 local idx = rowdata["cols"][1].value
                 RaidLedger_Ledger["items"][idx]["cost"] = tonumber(cellFrame.textBox:GetText()) or 0
-
                 
                 UpdateSumLabel()
                 UpdateLootTable()
@@ -484,6 +522,7 @@ local function AddLoot(item, looter, cost, force, type)
         end
 
         entry["displayname"] = itemLink
+        entry["itemid"] = GetItemInfoFromHyperlink(itemLink or "")
     end
 
     table.insert(RaidLedger_Ledger["items"], entry)
@@ -657,6 +696,11 @@ RegEvent("ADDON_LOADED", function()
         -- local function AddLoot(item, looter, cost, force, type)
     end)
 
+    RAIDLEDGER_ReportFrameFinItemButton:SetScript("OnClick", function()
+        AddLoot("", nil, 0, true, TYPE_ITEM)
+        -- local function AddLoot(item, looter, cost, force, type)
+    end)
+
     RAIDLEDGER_ReportFrameExportButton:SetText("以文本显示")
 
     RAIDLEDGER_ReportFrameExportButton:SetScript("OnClick", function()
@@ -685,13 +729,17 @@ RegEvent("ADDON_LOADED", function()
         for k, item in pairs(RaidLedger_Ledger["items"] or {}) do
             local l = item["looter"] or "[未分配]"
             local i = item["item"]
+            local d = item["displayname"]
             local c = item["cost"] or 0
+            local t = item["type"] or 0
 
             if i then
-                local n = GetItemInfo(i)
+                local n = GetItemInfo(i) or d
+                n = n ~= "" and n or nil
+                n = n or "其他收入"
 
-                if i == FIN_AID then
-                    n = FIN_AID
+                if i == FIN_AID or t == TYPE_COMP then
+                    n = d or FIN_AID
                 end
                 s = s .. "[" ..  n .. "] " .. l .. " " .. GetMoneyStringL(c * 10000) .. "\r\n"
             end
@@ -727,6 +775,7 @@ RegEvent("ADDON_LOADED", function()
         for k, item in pairs(RaidLedger_Ledger["items"] or {}) do
             local l = item["looter"]
             local i = item["item"]
+            local t = item["type"]
             if l and i then
 
                 if not grp[l] then
@@ -737,10 +786,14 @@ RegEvent("ADDON_LOADED", function()
                     }
                 end
 
-                if i == FIN_AID then
+                if i == FIN_AID or t == TYPE_COMP then
                     grp[l]["compensation"] = grp[l]["compensation"] + (item["cost"] or 0)
                 else
                     grp[l]["cost"] = grp[l]["cost"] + (item["cost"] or 0)
+                    
+                    if not GetItemInfoFromHyperlink(i) then
+                        i = item["displayname"]
+                    end
                     table.insert( grp[l]["items"], i)
                 end
 
