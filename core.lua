@@ -1,4 +1,4 @@
-local _, ADDONSELF = ...
+local ADDONNAME, ADDONSELF = ...
 
 local ScrollingTable = LibStub("ScrollingTable");
 local deformat = LibStub("LibDeformat-3.0");
@@ -168,6 +168,8 @@ local LootLogFrame = ScrollingTable:CreateST({
             cellFrame.cellItemTexture:SetWidth(30)
             cellFrame.cellItemTexture:SetHeight(30)
 
+            cellFrame:SetScript("OnEnter", nil)
+
             if not itemTexture then
                 
                 if entry["type"] == TYPE_COMP then
@@ -181,11 +183,15 @@ local LootLogFrame = ScrollingTable:CreateST({
 
             cellFrame.cellItemTexture:SetTexture(itemTexture)
 
-            cellFrame:SetScript("OnEnter", function()
-                RAIDLEDGER_ItemToolTip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-                RAIDLEDGER_ItemToolTip:SetHyperlink(celldata.value)
-                RAIDLEDGER_ItemToolTip:Show()
-              end)
+            local _, itemLink = GetItemInfo(celldata.value)
+
+            if itemLink then
+                cellFrame:SetScript("OnEnter", function()
+                    RAIDLEDGER_ItemToolTip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+                    RAIDLEDGER_ItemToolTip:SetHyperlink(itemLink)
+                    RAIDLEDGER_ItemToolTip:Show()
+                end)
+            end
 
             cellFrame:SetScript("OnLeave", function()
                 RAIDLEDGER_ItemToolTip:Hide()
@@ -649,7 +655,30 @@ RegEvent("CHAT_MSG_LOOT", function(chatmsg)
     end
 end)
 
-RegEvent("ADDON_LOADED", function()
+RegEvent("ADDON_LOADED", function(name)
+    if name ~= ADDONNAME then
+        return
+    end
+
+    hooksecurefunc("SetItemRef", function(link)
+        if RAIDLEDGER_ReportFrame:IsShown() then
+            local linkType, target = strsplit(":", link)
+
+            if linkType == "item" then
+                local _, itemLink = GetItemInfo(target)
+                if itemLink then
+                    Print("添加物品 " .. itemLink)
+                    AddLoot(itemLink, nil, 0, true, TYPE_ITEM)
+                end
+            elseif linkType == "player" then
+                local playerName = strsplit("-", target)
+                Print("添加补助 " .. playerName)
+                AddLoot(FIN_AID, playerName, 0, true, TYPE_COMP)
+            end
+        end
+    end)
+
+
     local FRAMENAME = 'RAIDLEDGER_ReportFrame'
 
     _G[FRAMENAME .. 'CloseButton']:SetScript('OnClick', function()
@@ -904,6 +933,8 @@ SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
         UpdateCountLabel()
         RAIDLEDGER_ReportFrame:Show()
 
+        Print("shift + 人名/物品 自动添加到记录")
+        Print("右键点击记录删除")
         Print("/gtuan cap 捕获下一次团队聊天中的物品到记录")
         Print("/gtuan toggle 开启/关闭自动拾取记录")
 
