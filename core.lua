@@ -661,7 +661,7 @@ RegEvent("ADDON_LOADED", function(name)
     end
 
     hooksecurefunc("SetItemRef", function(link)
-        if RAIDLEDGER_ReportFrame:IsShown() then
+        if RAIDLEDGER_ReportFrame:IsShown() and IsShiftKeyDown() then
             local linkType, target = strsplit(":", link)
 
             if linkType == "item" then
