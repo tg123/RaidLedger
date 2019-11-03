@@ -205,7 +205,7 @@ ADDONSELF.genreport = function(items, n)
         end
 
         if c > 0 then
-            SendToCurrrentChannel(L["RaidLedger: Top [%d] contributors"]:format(c)) 
+            SendToCurrrentChannel("RaidLedger: " .. L["Top [%d] contributors"]:format(c)) 
         end
 
         for i = 1, c do
