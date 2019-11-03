@@ -1,8 +1,12 @@
-local MAJOR, MINOR = "ScrollingTable", tonumber("@project-timestamp@") or 40300;
-local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR);
-if not lib then
-	return; -- Already loaded and no upgrade necessary.
-end
+local _, ADDONSELF = ...
+-- local MAJOR, MINOR = "ScrollingTable", tonumber("@project-timestamp@") or 40300;
+-- local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR);
+-- if not lib then
+-- 	return; -- Already loaded and no upgrade necessary.
+-- end
+ADDONSELF.st = {}
+local lib = ADDONSELF.st
+
 
 do
 	lib.SORT_ASC = 1;

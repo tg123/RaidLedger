@@ -1,2 +1,5 @@
 package-as: RaidLedger
 enable-nolib-creation: false
+ignore:
+  - README.md
+  - extract_locale.sh

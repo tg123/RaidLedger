@@ -5,12 +5,20 @@ Website: http://www.wowace.com/projects/libdeformat-3-0/
 Description: A library to convert a post-formatted string back to its original arguments given its format string.
 License: MIT
 ]]
+local _, ADDONSELF = ...
+-- local MAJOR, MINOR = "ScrollingTable", tonumber("@project-timestamp@") or 40300;
+-- local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR);
+-- if not lib then
+-- 	return; -- Already loaded and no upgrade necessary.
+-- end
+ADDONSELF.deformat = {}
+local LibDeformat = ADDONSELF.deformat
 
-local LibDeformat = LibStub:NewLibrary("LibDeformat-3.0", 1)
+-- local LibDeformat = LibStub:NewLibrary("LibDeformat-3.0", 1)
 
-if not LibDeformat then
-    return
-end
+-- if not LibDeformat then
+--     return
+-- end
 
 -- this function does nothing and returns nothing
 local function do_nothing()

@@ -1,13 +1,38 @@
 ## Interface: 11302
-## Title: RaidLedger 金团账本
-## SavedVariablesPerCharacter: RaidLedger_Ledger
+## Title: Raid Ledger
+## Title-deDE: @localization(locale="deDE", key="TITLE")@
+## Title-esES: @localization(locale="esES", key="TITLE")@
+## Title-esMX: @localization(locale="esMX", key="TITLE")@
+## Title-frFR: @localization(locale="frFR", key="TITLE")@
+## Title-itIT: @localization(locale="itIT", key="TITLE")@
+## Title-koKR: @localization(locale="koKR", key="TITLE")@
+## Title-ptBR: @localization(locale="ptBR", key="TITLE")@
+## Title-ruRU: @localization(locale="ruRU", key="TITLE")@
+## Title-zhCN: @localization(locale="zhCN", key="TITLE")@
+## Title-zhTW: @localization(locale="zhTW", key="TITLE")@
+## Notes: @localization(locale="enUS", key="TOC_NOTES")@
+## Notes-deDE: @localization(locale="deDE", key="TOC_NOTES")@
+## Notes-esES: @localization(locale="esES", key="TOC_NOTES")@
+## Notes-esMX: @localization(locale="esMX", key="TOC_NOTES")@
+## Notes-frFR: @localization(locale="frFR", key="TOC_NOTES")@
+## Notes-itIT: @localization(locale="itIT", key="TOC_NOTES")@
+## Notes-koKR: @localization(locale="koKR", key="TOC_NOTES")@
+## Notes-ptBR: @localization(locale="ptBR", key="TOC_NOTES")@
+## Notes-ruRU: @localization(locale="ruRU", key="TOC_NOTES")@
+## Notes-zhCN: @localization(locale="zhCN", key="TOC_NOTES")@
+## Notes-zhTW: @localization(locale="zhTW", key="TOC_NOTES")@
+## SavedVariablesPerCharacter: RaidLedgerDatabase
 ## Author: Boshi Lian(farmer1992@gmail.com)
 ## Version: @project-version@
 
-lib\LibStub\LibStub.lua
 lib\lib-st\Core.lua
 lib\LibDeformat-3.0\LibDeformat-3.0.lua
 
+locales.lua
+utils.lua
+event.lua
+
+db.lua
 gui.lua
-gui.xml
-core.lua
+
+cli.lua
