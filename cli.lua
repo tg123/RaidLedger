@@ -71,7 +71,7 @@ SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
 
         Print(L["Shift + item/name to add to record"])
         Print(L["Right click to remove record"])
-        Print("[".. L["/raidledger"] .. " toggle] " .. L["toogle Auto recording on/off"])
+        Print("[".. L["/raidledger"] .. " toggle] " .. L["toggle Auto recording on/off"])
 
     elseif cmd == "toggle" then
         AutoAddLoot = not AutoAddLoot
