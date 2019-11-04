@@ -9,7 +9,19 @@ RegEvent("ADDON_LOADED", function()
     end
 end)
 
-local db = {}
+local db = {
+    ledgerItemsChangedCallback = {}
+}
+
+function db:RegisterChangeCallback(cb)
+    table.insert( self.ledgerItemsChangedCallback, cb )
+end
+
+function db:OnLedgerItemsChange()
+    for _, cb in pairs(self.ledgerItemsChangedCallback) do
+        cb()
+    end
+end
 
 function db:GetConfig() 
     if not RaidLedgerDatabase["config"] then
@@ -56,6 +68,7 @@ function db:NewLedger()
     end
 
     self:SetCurrentLedger(#ledgers)
+    self:OnLedgerItemsChange()
 end
 
 function db:GetCurrentLedger()
@@ -101,6 +114,15 @@ function db:AddEntry(type, detail, beneficiary, cost)
         beneficiary = beneficiary or "",
         cost = cost or 0,
     })
+
+    self:OnLedgerItemsChange()
+end
+
+function db:RemoveEntry(idx)
+    local ledger = self:GetCurrentLedger()
+    table.remove(ledger["items"], idx)
+
+    self:OnLedgerItemsChange()
 end
 
 function db:AddCredit(reason, beneficiary, cost)

@@ -589,12 +589,9 @@ function GUI:Init()
 
                 if button == "RightButton" then
                                     
-                    local ledger = Database:GetCurrentLedger()
-
                     StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"].OnAccept = function()
                         StaticPopup_Hide("RAIDLEDGER_DELETE_ITEM")
-                        table.remove(ledger["items"], idx)
-                        GUI:UpdateLootTableFromDatabase()
+                        Database:RemoveEntry(idx)
                     end
                     StaticPopup_Show("RAIDLEDGER_DELETE_ITEM")                
                 else
@@ -650,6 +647,10 @@ end
 
 RegEvent("ADDON_LOADED", function()
     GUI:Init()
+    Database:RegisterChangeCallback(function() 
+        GUI:UpdateLootTableFromDatabase()
+    end)
+
     GUI:UpdateLootTableFromDatabase()
 end)
 
@@ -663,7 +664,6 @@ StaticPopupDialogs["RAIDLEDGER_CLEARMSG"] = {
     multiple = 0,
     OnAccept = function()
         Database:NewLedger()
-        GUI:UpdateLootTableFromDatabase()
     end,
 }
 

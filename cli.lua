@@ -16,13 +16,11 @@ hooksecurefunc("SetItemRef", function(link)
             if itemLink then
                 Print(L["Item added"] .. " " .. itemLink)
                 Database:AddLoot(itemLink, 1, "", 0, true)
-                GUI:UpdateLootTableFromDatabase()
             end
         elseif linkType == "player" then
             local playerName = strsplit("-", target)
             Print(L["Compensation added"] .. " " .. playerName)
             Database:AddDebit("", playerName)
-            GUI:UpdateLootTableFromDatabase()
         end
     end
 end)
@@ -59,7 +57,6 @@ RegEvent("CHAT_MSG_LOOT", function(chatmsg)
     -- print(itemLink)
     for i = 1, itemCount do 
         Database:AddLoot(itemLink, 1, playerName, 0);
-        GUI:UpdateLootTableFromDatabase()
     end
 end)
 
@@ -84,12 +81,10 @@ SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
         local _, itemLink = GetItemInfo(strtrim(msg))
         if itemLink then
             Database:AddLoot(itemLink, 1, "", 0, true)
-            GUI:UpdateLootTableFromDatabase()
             Print(L["Item added"] .. " " .. itemLink)
         end
     end
 
 end
--- -- SLASH_RAIDLEDGER1 = "/RL"
 SLASH_RAIDLEDGER1 = "/GTUAN"
 SLASH_RAIDLEDGER2 = "/RAIDLEDGER"
