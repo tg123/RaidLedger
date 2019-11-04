@@ -208,6 +208,12 @@ function GUI:Init()
         edit:SetMaxLetters(99999999)
         edit:SetMultiLine(true)
         edit:SetFontObject(GameTooltipText)
+        edit:SetScript("OnTextChanged", function(self)
+            ScrollingEdit_OnTextChanged(self, t)
+        end)
+        edit:SetScript("OnCursorChanged", ScrollingEdit_OnCursorChanged)
+        edit:SetScript("OnEscapePressed", edit.ClearFocus)
+        
         self.exportEditbox = edit
 
         local t = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
