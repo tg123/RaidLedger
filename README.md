@@ -7,12 +7,14 @@ A ledger for GDKP/gold run raid.
 I would not have been able to build RaidLedger without `ClassicRaidTracker`
 Some codes, scrolling ui and loot message parsing, are borrowed from `ClassicRaidTracker`.
 
+## Localization
+<https://www.curseforge.com/wow/addons/raidledger/localization>
+
 ## English
 
 ### Usage
 
- * Open panel `/gtuan`
- * Add item to ledger `/gtuan [itemlink]`
+ * Open panel `/raidledger`
 
 ### Features
  
@@ -36,7 +38,6 @@ Some codes, scrolling ui and loot message parsing, are borrowed from `ClassicRai
 ### 使用
 
  * 界面呼出 `/gtuan`
- * 添加物品 `/gutan [物品]`
 
 ### 功能
 
