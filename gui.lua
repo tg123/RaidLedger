@@ -256,7 +256,7 @@ function GUI:Init()
         b:SetText("+" .. L["Credit"])
         b:SetScript("OnClick", function() 
             Database:AddCredit("")
-            self:UpdateLootTableFromDatabase()
+            FauxScrollFrame_SetOffset(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
     end
 
@@ -269,7 +269,7 @@ function GUI:Init()
         b:SetText("+" .. L["Debit"])
         b:SetScript("OnClick", function() 
             Database:AddDebit(L["Compensation"])
-            self:UpdateLootTableFromDatabase()
+            FauxScrollFrame_SetOffset(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
     end
 
