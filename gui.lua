@@ -662,14 +662,7 @@ RegEvent("ADDON_LOADED", function()
     -- raid frame handler
 
     do
-
-        local hooked = false
-
-        hooksecurefunc("RaidFrame_LoadUI", function()
-            if hooked then
-                return
-            end
-
+        if _G.RaidFrame then
             local b = CreateFrame("Button", nil, _G.RaidFrame, "UIPanelButtonTemplate")
             b:SetWidth(100)
             b:SetHeight(20)
@@ -682,6 +675,14 @@ RegEvent("ADDON_LOADED", function()
                     GUI.mainframe:Show()
                 end
             end)
+        end
+
+        local hooked = false
+
+        hooksecurefunc("RaidFrame_LoadUI", function()
+            if hooked then
+                return
+            end
 
             local tooltip = GUI.commtooltip
 
