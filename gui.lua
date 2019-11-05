@@ -183,7 +183,7 @@ function GUI:Init()
             last = GetRosterNumber()
         end
         update()
-        RegEvent("RAID_ROSTER_UPDATE", update)
+        RegEvent("GROUP_ROSTER_UPDATE", update)
         RegEvent("CHAT_MSG_SYSTEM", update) -- fuck above not working
     end
     -- 
@@ -307,7 +307,8 @@ function GUI:Init()
     end
 
     do
-        self.itemtooltip = CreateFrame("GameTooltip", "RaidLedgerTooltip" .. time() , UIParent, "GameTooltipTemplate")
+        self.itemtooltip = CreateFrame("GameTooltip", "RaidLedgerTooltipItem" .. random(10000), UIParent, "GameTooltipTemplate")
+        self.commtooltip = CreateFrame("GameTooltip", "RaidLedgerTooltipComm" .. random(10000) , UIParent, "GameTooltipTemplate")
     end
 
     -- logframe
@@ -650,7 +651,6 @@ function GUI:Init()
     
 end
 
-
 RegEvent("ADDON_LOADED", function()
     GUI:Init()
     Database:RegisterChangeCallback(function() 
@@ -658,6 +658,72 @@ RegEvent("ADDON_LOADED", function()
     end)
 
     GUI:UpdateLootTableFromDatabase()
+
+    -- raid frame handler
+
+    do
+
+        local hooked = false
+
+        hooksecurefunc("RaidFrame_LoadUI", function()
+            if hooked then
+                return
+            end
+
+            local b = CreateFrame("Button", nil, _G.RaidFrame, "UIPanelButtonTemplate")
+            b:SetWidth(100)
+            b:SetHeight(20)
+            b:SetPoint("TOPRIGHT", -25, 0)
+            b:SetText(L["Raid Ledger"])
+            b:SetScript("OnClick", function()
+                if GUI.mainframe:IsShown() then
+                    GUI.mainframe:Hide()
+                else
+                    GUI.mainframe:Show()
+                end
+            end)
+
+            local tooltip = GUI.commtooltip
+
+            local enter = function(l, idx)
+                local r, e = Database:GetCurrentEarning()
+                local n = GUI:GetSplitNumber()
+                local _, avg = calcavg(r, e, n)
+
+                local c = 0
+                for i = 1, MAX_RAID_MEMBERS do
+                    local name, _, subgroup = GetRaidRosterInfo(i)
+                    if name and subgroup == idx then
+                        c = c + 1
+                    end
+                end
+
+                if c > 0 then
+                    local s = L["Per Member"] .. " :" .. GetMoneyString(avg) .. CRLF
+                           .. L["Subgroup total"] .. " :" .. GetMoneyString(c * avg)
+
+                    tooltip:SetOwner(l, "ANCHOR_TOP")
+                    tooltip:SetText(s)
+                    tooltip:Show()
+                end
+            end
+
+            local leave = function()
+                tooltip:Hide()
+                tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            end
+
+            for i = 1, NUM_RAID_GROUPS do
+                local l = _G["RaidGroup" .. i .."Label"]
+                if l then
+                    l:SetScript("OnEnter", function() enter(l, i) end)
+                    l:SetScript("OnLeave", leave)
+                end
+            end
+
+            hooked = true
+        end)
+    end
 end)
 
 StaticPopupDialogs["RAIDLEDGER_CLEARMSG"] = {
