@@ -314,17 +314,23 @@ function GUI:Init()
 
         local CONVERT = L["#Try to convert to item link"]
         local autoCompleteDebit = function(text)
+            text = string.upper(text)
+
             local data = {}
 
-            if text == "" or text == "#ONFOCUS" then
-                for _, name in pairs({
-                    L["Compensation: Tank"],
-                    L["Compensation: Healer"],
-                    L["Compensation: Aqual Quintessence"],
-                    L["Compensation: Repait Bot"],
-                    L["Compensation: DPS"],
-                    L["Compensation: Other"],
-                }) do
+            for _, name in pairs({
+                L["Compensation: Tank"],
+                L["Compensation: Healer"],
+                L["Compensation: Aqual Quintessence"],
+                L["Compensation: Repait Bot"],
+                L["Compensation: DPS"],
+                L["Compensation: Other"],
+            }) do
+                local b = text == ""
+                b = b or (text == "#ONFOCUS")
+                b = b or (strfind(string.upper(name), text))
+
+                if b then
                     tinsert(data, {
                         ["name"] = name,
                         ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
@@ -338,10 +344,16 @@ function GUI:Init()
         local autoCompleteCredit = function(text)
             local data = {}
 
-            tinsert(data, {
-                ["name"] = CONVERT,
-                ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
-            })
+            txt = strtrim(txt or "")
+            txt = strtrim(txt, "[]")
+            local name = GetItemInfo(text)
+
+            if name then
+                tinsert(data, {
+                    ["name"] = CONVERT,
+                    ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
+                })
+            end
 
             return data
         end
@@ -358,9 +370,9 @@ function GUI:Init()
 
                     local b = text == ""
                     b = b or (text == "#ONFOCUS")
-                    b = b or (strfind(name, text))
+                    b = b or (strfind(name, string.lower(text)))
                     b = b or (tonumber(text) == subgroup)
-                    b = b or (strfind(class, text))
+                    b = b or (strfind(class, string.lower(text)))
 
                     if b then
                         tinsert(data, {
