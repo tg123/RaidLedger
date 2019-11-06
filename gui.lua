@@ -51,8 +51,8 @@ function GUI:UpdateSummary(revenue, expense)
 
     local profit, avg = calcavg(self.revenue, self.expense, self:GetSplitNumber())
 
-    self.summaryLabel:SetText(L["Revenue"] .. " " .. GetMoneyString(revenue) .. CRLF
-                           .. L["Expense"] .. " " .. GetMoneyString(expense) .. CRLF
+    self.summaryLabel:SetText(L["Revenue"] .. " " .. GetMoneyString(self.revenue) .. CRLF
+                           .. L["Expense"] .. " " .. GetMoneyString(self.expense) .. CRLF
                            .. L["Net Profit"] .. " " .. GetMoneyString(profit) .. CRLF
                            .. L["Per Member"] .. " " .. GetMoneyString(avg)
                         )
