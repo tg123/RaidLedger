@@ -49,11 +49,7 @@ function GUI:UpdateSummary(revenue, expense)
     self.revenue = tonumber(revenue) or self.revenue
     self.expense = tonumber(expense) or self.expense
 
-    local revenue = self.revenue
-    local expense = self.expense
-    local profit = math.max(revenue - expense, 0)
-    local n = self:GetSplitNumber()
-    local profit, avg = calcavg(revenue, expense, n)
+    local profit, avg = calcavg(self.revenue, self.expense, self:GetSplitNumber())
 
     self.summaryLabel:SetText(L["Revenue"] .. " " .. GetMoneyString(revenue) .. CRLF
                            .. L["Expense"] .. " " .. GetMoneyString(expense) .. CRLF
@@ -70,7 +66,7 @@ function GUI:UpdateLootTableFromDatabase()
 
     local data = {}
 
-    for k, item in pairs(Database:GetCurrentLedger()["items"]) do
+    for _ in pairs(Database:GetCurrentLedger()["items"]) do
         table.insert(data, 1, {
             ["cols"] = {
                 {
@@ -98,7 +94,7 @@ local function GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, col
     return entry, idx
 end
 
-local function CreateCellUpdate(cb) 
+local function CreateCellUpdate(cb)
     return function(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
         if not fShow then
             return
@@ -186,9 +182,9 @@ function GUI:Init()
         RegEvent("GROUP_ROSTER_UPDATE", update)
         RegEvent("CHAT_MSG_SYSTEM", update) -- fuck above not working
     end
-    -- 
+    --
 
-    -- sum 
+    -- sum
     do
         local t = f:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         t:SetPoint("BOTTOMRIGHT", f, -40, 65)
@@ -199,6 +195,11 @@ function GUI:Init()
 
     -- export editbox
     do
+        local t = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
+        t:SetPoint("TOPLEFT", f, 25, -30)
+        t:SetWidth(580)
+        t:SetHeight(360)
+
         local edit = CreateFrame("EditBox", nil, t)
         edit:SetWidth(580)
         edit:SetHeight(320)
@@ -213,13 +214,9 @@ function GUI:Init()
         end)
         edit:SetScript("OnCursorChanged", ScrollingEdit_OnCursorChanged)
         edit:SetScript("OnEscapePressed", edit.ClearFocus)
-        
+
         self.exportEditbox = edit
 
-        local t = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
-        t:SetPoint("TOPLEFT", f, 25, -30)
-        t:SetWidth(580)
-        t:SetHeight(360)
         t:SetScrollChild(edit)
 
         t:Hide()
@@ -242,7 +239,7 @@ function GUI:Init()
         b:SetHeight(25)
         b:SetPoint("BOTTOMLEFT", 180, 15)
         b:SetText(L["Clear"])
-        b:SetScript("OnClick", function() 
+        b:SetScript("OnClick", function()
             StaticPopup_Show("RAIDLEDGER_CLEARMSG")
         end)
     end
@@ -254,7 +251,7 @@ function GUI:Init()
         b:SetHeight(25)
         b:SetPoint("BOTTOMLEFT", 40, 95)
         b:SetText("+" .. L["Credit"])
-        b:SetScript("OnClick", function() 
+        b:SetScript("OnClick", function()
             Database:AddCredit("")
             FauxScrollFrame_SetOffset(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
@@ -267,7 +264,7 @@ function GUI:Init()
         b:SetHeight(25)
         b:SetPoint("BOTTOMLEFT", 100, 95)
         b:SetText("+" .. L["Debit"])
-        b:SetScript("OnClick", function() 
+        b:SetScript("OnClick", function()
             Database:AddDebit(L["Compensation"])
             FauxScrollFrame_SetOffset(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
@@ -318,7 +315,7 @@ function GUI:Init()
         local CONVERT = L["#Try to convert to item link"]
         local autoCompleteDebit = function(text)
             local data = {}
-            
+
             if text == "" or text == "#ONFOCUS" then
                 for _, name in pairs({
                     L["Compensation: Tank"],
@@ -335,23 +332,23 @@ function GUI:Init()
                 end
             end
 
-            return data            
+            return data
         end
 
         local autoCompleteCredit = function(text)
             local data = {}
-            
+
             tinsert(data, {
                 ["name"] = CONVERT,
                 ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
             })
 
-            return data            
+            return data
         end
 
         local autoCompleteRaidRoster = function(text)
             local data = {}
-        
+
             for i = 1, MAX_RAID_MEMBERS do
                 local name, _, subgroup, _, class = GetRaidRosterInfo(i)
 
@@ -379,7 +376,7 @@ function GUI:Init()
 
         local popOnFocus = function(edit)
             edit:SetScript("OnTextChanged", function(self, userInput)
-            
+
                 AutoCompleteEditBox_OnTextChanged(self, userInput)
 
                 local t = self:GetText()
@@ -398,7 +395,7 @@ function GUI:Init()
                     t = "#ONFOCUS"
                 end
                 AutoComplete_Update(self, t, 1);
-            end)                  
+            end)
         end
 
         self.lootLogFrame = ScrollingTable:CreateST({
@@ -418,7 +415,7 @@ function GUI:Init()
                         cellFrame.cellItemTexture:SetWidth(30)
                         cellFrame.cellItemTexture:SetHeight(30)
                     end
-        
+
                     cellFrame:SetScript("OnEnter", nil)
 
                     if entry["type"] == "DEBIT" then
@@ -493,14 +490,14 @@ function GUI:Init()
                     -- TODO optimize
                     cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
                         local n = newText ~= "" and newText or info.name
-        
+
                         if n ~= "" then
                             if entry["type"] ~= "DEBIT" and n == CONVERT then
                                 local txt = editBox:GetText()
                                 txt = strtrim(txt)
                                 txt = strtrim(txt, "[]")
                                 local _, itemLink = GetItemInfo(txt)
-        
+
                                 if itemLink then
                                     entry["detail"]["item"] = itemLink
                                     entry["detail"]["displayname"] = nil
@@ -509,16 +506,16 @@ function GUI:Init()
                                 else
                                     Print(L["convert failed, text can be either item id or item name"])
                                 end
-        
+
                                 return true
                             end
-        
+
                             cellFrame.textBox:SetText(n)
                             entry["detail"]["displayname"] = n
                         end
-        
+
                         return true
-                    end                    
+                    end
 
                     cellFrame.textBox:Show()
                     cellFrame.textBox:SetText(detail["displayname"] or "")
@@ -541,19 +538,19 @@ function GUI:Init()
 
                     cellFrame.textBox.customTextChangedCallback = function(t)
                         entry["beneficiary"] = t
-                    end                
-                    
+                    end
+
                     cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
                         local n = newText ~= "" and newText or info.name
-        
+
                         if n ~= "" then
                             cellFrame.textBox:SetText(n)
                             entry["beneficiary"] = n
                         end
-        
+
                         return true
-                    end                    
-        
+                    end
+
                     cellFrame.textBox:SetText(entry.beneficiary or "")
                 end),
             },
@@ -578,7 +575,7 @@ function GUI:Init()
                         entry["cost"] = tonumber(cellFrame.textBox:GetText()) or 0
                         GUI:UpdateLootTableFromDatabase()
                     end)
-        
+
                 end),
             }
         }, 12, 30, nil, f)
@@ -595,12 +592,12 @@ function GUI:Init()
                 end
 
                 if button == "RightButton" then
-                                    
+
                     StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"].OnAccept = function()
                         StaticPopup_Hide("RAIDLEDGER_DELETE_ITEM")
                         Database:RemoveEntry(idx)
                     end
-                    StaticPopup_Show("RAIDLEDGER_DELETE_ITEM")                
+                    StaticPopup_Show("RAIDLEDGER_DELETE_ITEM")
                 else
                     ChatEdit_InsertLink(entry["detail"]["item"])
                 end
@@ -648,12 +645,12 @@ function GUI:Init()
             exportEditbox:SetText(GenExport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber()))
         end)
     end
-    
+
 end
 
 RegEvent("ADDON_LOADED", function()
     GUI:Init()
-    Database:RegisterChangeCallback(function() 
+    Database:RegisterChangeCallback(function()
         GUI:UpdateLootTableFromDatabase()
     end)
 

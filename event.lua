@@ -2,7 +2,7 @@ local ADDONNAME, ADDONSELF = ...
 
 local f = CreateFrame("Frame")
 local m = {}
-f:SetScript("OnEvent", function(self, event, ...) 
+f:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local name = select(1, ...)
 

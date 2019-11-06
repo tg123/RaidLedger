@@ -14,7 +14,7 @@ ADDONSELF.L = L
 
 --
 -- Use https://www.curseforge.com/wow/addons/raidledger/localization to translate thanks
--- 
+--
 local locale = GetLocale()
 
 if locale == 'enUs' then

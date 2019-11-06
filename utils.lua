@@ -107,7 +107,7 @@ ADDONSELF.genexport = function(items, n)
 
     revenue = revenue * 10000
     expense = expense * 10000
-    
+
     local profit, avg = calcavg(revenue, expense, n)
 
     revenue = GetMoneyStringL(revenue)
@@ -141,7 +141,7 @@ ADDONSELF.genreport = function(items, n)
         if l and i then
 
             if not grp[l] then
-                grp[l] = { 
+                grp[l] = {
                     ["cost"] = 0,
                     ["items"] = {},
                     ["compensation"] = 0,
@@ -152,7 +152,7 @@ ADDONSELF.genreport = function(items, n)
                 grp[l]["compensation"] = grp[l]["compensation"] + (item["cost"] or 0)
             else
                 grp[l]["cost"] = grp[l]["cost"] + (item["cost"] or 0)
-                
+
                 if not GetItemInfoFromHyperlink(i) then
                     i = item["displayname"]
                 end
@@ -189,11 +189,11 @@ ADDONSELF.genreport = function(items, n)
         end
     end
 
-    table.sort( looter, function(a, b) 
+    table.sort( looter, function(a, b)
         return a["cost"] > b["cost"]
     end)
 
-    table.sort( compensation, function(a, b) 
+    table.sort( compensation, function(a, b)
         return a["compensation"] > b["compensation"]
     end)
 
@@ -205,7 +205,7 @@ ADDONSELF.genreport = function(items, n)
         end
 
         if c > 0 then
-            SendToCurrrentChannel("RaidLedger: " .. L["Top [%d] contributors"]:format(c)) 
+            SendToCurrrentChannel("RaidLedger: " .. L["Top [%d] contributors"]:format(c))
         end
 
         for i = 1, c do
@@ -216,16 +216,16 @@ ADDONSELF.genreport = function(items, n)
                 for j = 1, math.min(#l["items"], 5) do
                     lootitems = lootitems .. l["items"][j] .. ","
                 end
-                
+
                 if #l["items"] > 5 then
                     lootitems = lootitems .. L["etc."]
                 end
 
-                SendToCurrrentChannel(l["looter"] .. " [" .. GetMoneyStringL(l["cost"] * 10000) .. "] " .. lootitems) 
+                SendToCurrrentChannel(l["looter"] .. " [" .. GetMoneyStringL(l["cost"] * 10000) .. "] " .. lootitems)
             end
         end
     end
-    
+
     if expense > 0 then
         local c = math.min( #compensation, 5)
 
@@ -239,7 +239,7 @@ ADDONSELF.genreport = function(items, n)
             compensation_str = compensation_str .. L["etc."]
         end
 
-        SendToCurrrentChannel(L["Expense"] .. " [" .. GetMoneyStringL(expense ) .. "]: " .. compensation_str) 
+        SendToCurrrentChannel(L["Expense"] .. " [" .. GetMoneyStringL(expense ) .. "]: " .. compensation_str)
     end
 
     local profit, avg = calcavg(revenue, expense, n)

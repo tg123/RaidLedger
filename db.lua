@@ -23,7 +23,7 @@ function db:OnLedgerItemsChange()
     end
 end
 
-function db:GetConfig() 
+function db:GetConfig()
     if not RaidLedgerDatabase["config"] then
         RaidLedgerDatabase["config"] = {}
     end
@@ -76,7 +76,7 @@ function db:GetCurrentLedger()
         self:NewLedger()
     end
 
-    local cur = RaidLedgerDatabase["current"] 
+    local cur = RaidLedgerDatabase["current"]
 
     return RaidLedgerDatabase["ledgers"][cur]
 end
@@ -95,9 +95,9 @@ function db:GetCurrentEarning()
 
     for _, item in pairs(ledger["items"]) do
         if item["type"] == TYPE_CREDIT then
-            revenue = revenue + (item["cost"] or 0) 
+            revenue = revenue + (item["cost"] or 0)
         elseif item["type"] == TYPE_DEBIT then
-            expense = expense + (item["cost"] or 0) 
+            expense = expense + (item["cost"] or 0)
         end
     end
 
