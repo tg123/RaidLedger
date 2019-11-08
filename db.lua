@@ -81,28 +81,32 @@ function db:GetCurrentLedger()
     return RaidLedgerDatabase["ledgers"][cur]
 end
 
+-- TODO should global const
 local TYPE_CREDIT = "CREDIT"
 local TYPE_DEBIT  = "DEBIT"
 local DETAIL_TYPE_ITEM = "ITEM"
 local DETAIL_TYPE_CUSTOM = "CUSTOM"
 
+local COST_TYPE_GOLD = "GOLD"
+local COST_TYPE_PROFIT_PERCENT = "PROFIT_PERCENT"
+local COST_TYPE_MUL_AVG = "MUL_AVG"
 
-function db:GetCurrentEarning()
-    local ledger = self:GetCurrentLedger()
+-- function db:GetCurrentEarning()
+--     local ledger = self:GetCurrentLedger()
 
-    local revenue = 0
-    local expense = 0
+--     local revenue = 0
+--     local expense = 0
 
-    for _, item in pairs(ledger["items"]) do
-        if item["type"] == TYPE_CREDIT then
-            revenue = revenue + (item["cost"] or 0)
-        elseif item["type"] == TYPE_DEBIT then
-            expense = expense + (item["cost"] or 0)
-        end
-    end
+--     for _, item in pairs(ledger["items"]) do
+--         if item["type"] == TYPE_CREDIT then
+--             revenue = revenue + (item["cost"] or 0)
+--         elseif item["type"] == TYPE_DEBIT then
+--             expense = expense + (item["cost"] or 0)
+--         end
+--     end
 
-    return revenue * 10000, expense * 10000
-end
+--     return revenue * 10000, expense * 10000
+-- end
 
 function db:AddEntry(type, detail, beneficiary, cost)
     local ledger = self:GetCurrentLedger()

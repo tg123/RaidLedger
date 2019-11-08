@@ -1,8 +1,6 @@
 local _, ADDONSELF = ...
 
 ADDONSELF.gui = {
-    revenue = 0,
-    expense = 0,
 }
 local GUI = ADDONSELF.gui
 
@@ -43,16 +41,17 @@ function GUI:Hide()
     self.mainframe:Hide()
 end
 
+function GUI:Summary()
+    return calcavg(Database:GetCurrentLedger()["items"], self:GetSplitNumber())
+end
+
 local CRLF = ADDONSELF.CRLF
 
-function GUI:UpdateSummary(revenue, expense)
-    self.revenue = tonumber(revenue) or self.revenue
-    self.expense = tonumber(expense) or self.expense
+function GUI:UpdateSummary()
+    local profit, avg, revenue, expense = self:Summary()
 
-    local profit, avg = calcavg(self.revenue, self.expense, self:GetSplitNumber())
-
-    self.summaryLabel:SetText(L["Revenue"] .. " " .. GetMoneyString(self.revenue) .. CRLF
-                           .. L["Expense"] .. " " .. GetMoneyString(self.expense) .. CRLF
+    self.summaryLabel:SetText(L["Revenue"] .. " " .. GetMoneyString(revenue) .. CRLF
+                           .. L["Expense"] .. " " .. GetMoneyString(expense) .. CRLF
                            .. L["Net Profit"] .. " " .. GetMoneyString(profit) .. CRLF
                            .. L["Per Member"] .. " " .. GetMoneyString(avg)
                         )
@@ -77,7 +76,7 @@ function GUI:UpdateLootTableFromDatabase()
     end
 
     self.lootLogFrame:SetData(data)
-    self:UpdateSummary(Database:GetCurrentEarning())
+    self:UpdateSummary()
 end
 
 local function GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, table)
@@ -100,10 +99,10 @@ local function CreateCellUpdate(cb)
             return
         end
 
-        local entry = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, table)
+        local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, table)
 
         if entry then
-            cb(cellFrame, entry)
+            cb(cellFrame, entry, idx)
         end
     end
 end
@@ -410,6 +409,224 @@ function GUI:Init()
             end)
         end
 
+        local iconUpdate = CreateCellUpdate(function(cellFrame, entry)
+            if not (cellFrame.cellItemTexture) then
+                cellFrame.cellItemTexture = cellFrame:CreateTexture()
+                cellFrame.cellItemTexture:SetTexCoord(0, 1, 0, 1)
+                cellFrame.cellItemTexture:Show()
+                cellFrame.cellItemTexture:SetPoint("CENTER", cellFrame.cellItemTexture:GetParent(), "CENTER")
+                cellFrame.cellItemTexture:SetWidth(30)
+                cellFrame.cellItemTexture:SetHeight(30)
+            end
+
+            cellFrame:SetScript("OnEnter", nil)
+
+            if entry["type"] == "DEBIT" then
+                cellFrame.cellItemTexture:SetTexture(135768) -- minus
+            else
+                cellFrame.cellItemTexture:SetTexture(135769) -- plus
+            end
+
+            local detail = entry["detail"]
+            if detail["type"] == "ITEM" then
+                local itemTexture =  GetItemIcon(detail["item"])
+                local _, itemLink = GetItemInfo(detail["item"])
+
+                if itemTexture then
+                    cellFrame.cellItemTexture:SetTexture(itemTexture)
+                end
+
+                if itemLink then
+                    cellFrame:SetScript("OnEnter", function()
+                        tooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+                        tooltip:SetHyperlink(itemLink)
+                        tooltip:Show()
+                    end)
+
+                    cellFrame:SetScript("OnLeave", function()
+                        tooltip:Hide()
+                        tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                    end)
+
+                end
+            end
+        end)
+
+        local entryUpdate = CreateCellUpdate(function(cellFrame, entry)
+
+            if not (cellFrame.textBox) then
+                cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
+                cellFrame.textBox:SetWidth(120)
+                cellFrame.textBox:SetHeight(30)
+                cellFrame.textBox:SetAutoFocus(false)
+                cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
+                popOnFocus(cellFrame.textBox)
+            end
+
+            cellFrame.textBox:Hide()
+
+            local detail = entry["detail"]
+            if detail["type"] == "ITEM" then
+                local _, itemLink = GetItemInfo(detail["item"])
+                if itemLink then
+                    cellFrame.text:SetText(itemLink)
+                    return
+                end
+            end
+
+            if entry["type"] == "DEBIT" then
+                cellFrame.text:SetText(L["Debit"])
+                AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteDebit)
+            else
+                cellFrame.text:SetText(L["Credit"])
+                AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteCredit)
+            end
+
+            cellFrame.textBox.customTextChangedCallback = function(t)
+                entry["detail"]["displayname"] = t
+            end
+
+            -- TODO optimize
+            cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
+                local n = newText ~= "" and newText or info.name
+
+                if n ~= "" then
+                    if entry["type"] ~= "DEBIT" and n == CONVERT then
+                        local txt = editBox:GetText()
+                        txt = strtrim(txt)
+                        txt = strtrim(txt, "[]")
+                        local _, itemLink = GetItemInfo(txt)
+
+                        if itemLink then
+                            entry["detail"]["item"] = itemLink
+                            entry["detail"]["displayname"] = nil
+                            entry["detail"]["type"] = "ITEM"
+                            self:UpdateLootTableFromDatabase()
+                        else
+                            Print(L["convert failed, text can be either item id or item name"])
+                        end
+
+                        return true
+                    end
+
+                    cellFrame.textBox:SetText(n)
+                    entry["detail"]["displayname"] = n
+                end
+
+                return true
+            end
+
+            cellFrame.textBox:Show()
+            cellFrame.textBox:SetText(detail["displayname"] or "")
+        end)
+
+        local beneficiaryUpdate = CreateCellUpdate(function(cellFrame, entry)
+            if not (cellFrame.textBox) then
+                cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
+                cellFrame.textBox:SetWidth(120)
+                cellFrame.textBox:SetHeight(30)
+                cellFrame.textBox:SetAutoFocus(false)
+                cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
+                AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteRaidRoster)
+                popOnFocus(cellFrame.textBox)
+            end
+
+            cellFrame.textBox.customTextChangedCallback = function(t)
+                entry["beneficiary"] = t
+            end
+
+            cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
+                local n = newText ~= "" and newText or info.name
+
+                if n ~= "" then
+                    cellFrame.textBox:SetText(n)
+                    entry["beneficiary"] = n
+                end
+
+                return true
+            end
+
+            cellFrame.textBox:SetText(entry.beneficiary or "")
+        end)
+
+        local menuFrame = CreateFrame("Frame", nil, UIParent, "UIDropDownMenuTemplate")
+
+        local valueTypeMenuCtx = {}
+        local setCostType = function(t)
+            local entry = valueTypeMenuCtx.entry
+            entry["costtype"] = t
+            self:UpdateLootTableFromDatabase()
+        end
+
+        local valueTypeMenu = {
+            {   
+                costtype = "GOLD",
+                text = GOLD_AMOUNT_TEXTURE_STRING:format(""), 
+                func = function() 
+                    setCostType("GOLD")
+                end, 
+            },
+            { 
+                costtype = "PROFIT_PERCENT",
+                text = " % " .. L["Net Profit"], 
+                func = function() 
+                    setCostType("PROFIT_PERCENT")
+                end, 
+            },
+            { 
+                costtype = "MUL_AVG",
+                text = " * " .. L["Per Member credit"], 
+                func = function() 
+                    setCostType("MUL_AVG")
+                end, 
+            },
+        }        
+
+        local valueUpdate = CreateCellUpdate(function(cellFrame, entry)
+            if not (cellFrame.textBox) then
+                cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate")
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER")
+                cellFrame.textBox:SetWidth(70)
+                cellFrame.textBox:SetHeight(30)
+                cellFrame.textBox:SetNumeric(true)
+                cellFrame.textBox:SetAutoFocus(false)
+                cellFrame.textBox:SetMaxLetters(7)
+            end
+            cellFrame.textBox:SetText(tostring(entry["cost"] or 0))
+
+            local type = entry["costtype"] or "GOLD"
+
+            if type == "PROFIT_PERCENT" then
+                cellFrame.text:SetText("%")
+            elseif type == "MUL_AVG" then
+                cellFrame.text:SetText("*")
+            else
+                -- GOLD by default
+                cellFrame.text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(""))
+            end
+
+            cellFrame:SetScript("OnClick", nil)
+
+            if entry["type"] == "DEBIT" then
+                cellFrame:SetScript("OnClick", function()
+                    valueTypeMenuCtx.entry = entry
+                    for _, m in pairs(valueTypeMenu) do
+                        m.checked = m.costtype == type
+                    end
+                
+                    EasyMenu(valueTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
+                end)
+            end
+
+            cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
+                entry["cost"] = tonumber(cellFrame.textBox:GetText()) or 0
+                GUI:UpdateLootTableFromDatabase()
+            end)
+
+        end)
+
         self.lootLogFrame = ScrollingTable:CreateST({
             {
                 ["name"] = "",
@@ -418,177 +635,23 @@ function GUI:Init()
             {
                 ["name"] = "",
                 ["width"] = 50,
-                ["DoCellUpdate"] = CreateCellUpdate(function(cellFrame, entry)
-                    if not (cellFrame.cellItemTexture) then
-                        cellFrame.cellItemTexture = cellFrame:CreateTexture()
-                        cellFrame.cellItemTexture:SetTexCoord(0, 1, 0, 1)
-                        cellFrame.cellItemTexture:Show()
-                        cellFrame.cellItemTexture:SetPoint("CENTER", cellFrame.cellItemTexture:GetParent(), "CENTER")
-                        cellFrame.cellItemTexture:SetWidth(30)
-                        cellFrame.cellItemTexture:SetHeight(30)
-                    end
-
-                    cellFrame:SetScript("OnEnter", nil)
-
-                    if entry["type"] == "DEBIT" then
-                        cellFrame.cellItemTexture:SetTexture(135768) -- minus
-                    else
-                        cellFrame.cellItemTexture:SetTexture(135769) -- plus
-                    end
-
-                    local detail = entry["detail"]
-                    if detail["type"] == "ITEM" then
-                        local itemTexture =  GetItemIcon(detail["item"])
-                        local _, itemLink = GetItemInfo(detail["item"])
-
-                        if itemTexture then
-                            cellFrame.cellItemTexture:SetTexture(itemTexture)
-                        end
-
-                        if itemLink then
-                            cellFrame:SetScript("OnEnter", function()
-                                tooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-                                tooltip:SetHyperlink(itemLink)
-                                tooltip:Show()
-                            end)
-
-                            cellFrame:SetScript("OnLeave", function()
-                                tooltip:Hide()
-                                tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-                            end)
-
-                        end
-                    end
-                end)
+                ["DoCellUpdate"] = iconUpdate,
             },
             {
                 ["name"] = L["Entry"],
                 ["width"] = 250,
-                ["DoCellUpdate"] = CreateCellUpdate(function(cellFrame, entry)
-
-                    if not (cellFrame.textBox) then
-                        cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
-                        cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
-                        cellFrame.textBox:SetWidth(120)
-                        cellFrame.textBox:SetHeight(30)
-                        cellFrame.textBox:SetAutoFocus(false)
-                        cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
-                        popOnFocus(cellFrame.textBox)
-                    end
-
-                    cellFrame.textBox:Hide()
-
-                    local detail = entry["detail"]
-                    if detail["type"] == "ITEM" then
-                        local _, itemLink = GetItemInfo(detail["item"])
-                        if itemLink then
-                            cellFrame.text:SetText(itemLink)
-                            return
-                        end
-                    end
-
-                    if entry["type"] == "DEBIT" then
-                        cellFrame.text:SetText(L["Debit"])
-                        AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteDebit)
-                    else
-                        cellFrame.text:SetText(L["Credit"])
-                        AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteCredit)
-                    end
-
-                    cellFrame.textBox.customTextChangedCallback = function(t)
-                        entry["detail"]["displayname"] = t
-                    end
-
-                    -- TODO optimize
-                    cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
-                        local n = newText ~= "" and newText or info.name
-
-                        if n ~= "" then
-                            if entry["type"] ~= "DEBIT" and n == CONVERT then
-                                local txt = editBox:GetText()
-                                txt = strtrim(txt)
-                                txt = strtrim(txt, "[]")
-                                local _, itemLink = GetItemInfo(txt)
-
-                                if itemLink then
-                                    entry["detail"]["item"] = itemLink
-                                    entry["detail"]["displayname"] = nil
-                                    entry["detail"]["type"] = "ITEM"
-                                    self:UpdateLootTableFromDatabase()
-                                else
-                                    Print(L["convert failed, text can be either item id or item name"])
-                                end
-
-                                return true
-                            end
-
-                            cellFrame.textBox:SetText(n)
-                            entry["detail"]["displayname"] = n
-                        end
-
-                        return true
-                    end
-
-                    cellFrame.textBox:Show()
-                    cellFrame.textBox:SetText(detail["displayname"] or "")
-                end)
+                ["DoCellUpdate"] = entryUpdate,
             },
             {
                 ["name"] = L["Beneficiary"],
                 ["width"] = 150,
-                ["DoCellUpdate"] = CreateCellUpdate(function(cellFrame, entry)
-                    if not (cellFrame.textBox) then
-                        cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
-                        cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
-                        cellFrame.textBox:SetWidth(120)
-                        cellFrame.textBox:SetHeight(30)
-                        cellFrame.textBox:SetAutoFocus(false)
-                        cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
-                        AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteRaidRoster)
-                        popOnFocus(cellFrame.textBox)
-                    end
-
-                    cellFrame.textBox.customTextChangedCallback = function(t)
-                        entry["beneficiary"] = t
-                    end
-
-                    cellFrame.textBox.customAutoCompleteFunction = function(editBox, newText, info)
-                        local n = newText ~= "" and newText or info.name
-
-                        if n ~= "" then
-                            cellFrame.textBox:SetText(n)
-                            entry["beneficiary"] = n
-                        end
-
-                        return true
-                    end
-
-                    cellFrame.textBox:SetText(entry.beneficiary or "")
-                end),
+                ["DoCellUpdate"] = beneficiaryUpdate,
             },
             {
                 ["name"] = L["Value"],
                 ["width"] = 100,
                 ["align"] = "RIGHT",
-                ["DoCellUpdate"] = CreateCellUpdate(function(cellFrame, entry)
-                    if not (cellFrame.textBox) then
-                        cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate")
-                        cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER")
-                        cellFrame.textBox:SetWidth(70)
-                        cellFrame.textBox:SetHeight(30)
-                        cellFrame.textBox:SetNumeric(true)
-                        cellFrame.textBox:SetAutoFocus(false)
-                        cellFrame.textBox:SetMaxLetters(7)
-                    end
-                    cellFrame.text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(""))
-                    cellFrame.textBox:SetText(tostring(entry["cost"] or 0))
-
-                    cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
-                        entry["cost"] = tonumber(cellFrame.textBox:GetText()) or 0
-                        GUI:UpdateLootTableFromDatabase()
-                    end)
-
-                end),
+                ["DoCellUpdate"] = valueUpdate,
             }
         }, 12, 30, nil, f)
 
@@ -696,9 +759,7 @@ RegEvent("ADDON_LOADED", function()
             local tooltip = GUI.commtooltip
 
             local enter = function(l, idx)
-                local r, e = Database:GetCurrentEarning()
-                local n = GUI:GetSplitNumber()
-                local _, avg = calcavg(r, e, n)
+                local _, avg = calcavg(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber())
 
                 local c = 0
                 for i = 1, MAX_RAID_MEMBERS do

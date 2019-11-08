@@ -51,64 +51,126 @@ local function SendToCurrrentChannel(msg)
     end
 end
 
+local function noop(...) end
+
 local CRLF = "\r\n"
+
 
 ADDONSELF.CRLF = CRLF
 
+local calcavg = function(items, n, oncredit, ondebit)
+    oncredit = oncredit or noop
+    ondebit  = ondebit or noop
 
-local calcavg = function(revenue, expense, n)
+    local revenue = 0
+    local expense = 0
+    local saltN = n
+
+
+    local profitPercentItems = {}
+    local mulAvgItems = {}
+
+    for _, item in pairs(items or {}) do
+        local c = item["cost"] or 0
+        local t = item["type"]
+        local ct = item["costtype"] or "GOLD"
+
+        if t == "CREDIT" then
+            revenue = revenue + c * 10000
+            oncredit(item, c * 10000)
+        elseif t == "DEBIT" then
+            if ct == "GOLD" then
+                expense = expense + c * 10000
+                ondebit(item, c * 10000)
+            elseif ct == "PROFIT_PERCENT" then
+                table.insert( profitPercentItems, item)
+            elseif ct == "MUL_AVG" then
+                saltN = saltN + c
+                table.insert(mulAvgItems, item)
+            end
+        end
+    end
+
+    -- before profit
+
     local profit = math.max(revenue - expense, 0)
+    -- after profit
+
+    do
+        -- recalculate expense
+        for _, item in pairs(profitPercentItems) do
+            local p = item["cost"] or 0
+            local c = math.floor(profit * (p / 100.0))
+
+            expense = expense + c
+            ondebit(item, c)
+        end
+    end
+
+    profit = math.max(revenue - expense, 0)
+
     local avg = 0
 
-    if n > 0 then
-        avg = 1.0 * profit / n
+    if saltN > 0 then
+        avg = 1.0 * profit / saltN
         avg = math.max( avg, 0)
         avg = math.floor( avg )
     end
 
-    return profit, avg
+    do
+        -- recalculate expense
+        for _, item in pairs(mulAvgItems) do
+            local m = item["cost"] or 0
+            local c = m * avg
+            expense = expense + c
+            ondebit(item, c)
+        end
+    end
+    
+    profit = math.max(revenue - expense, 0)
+
+    return profit, avg, revenue, expense
 end
+
 ADDONSELF.calcavg = calcavg
+
+
+local function GenExportLine(item, c)
+    local l = item["beneficiary"] or L["[Unknown]"]
+    local i = item["detail"]["item"] or ""
+    local d = item["detail"]["displayname"] or ""
+    local t = item["type"]
+    local ct = item["costtype"]
+
+    local n = GetItemInfo(i) or d
+    n = n ~= "" and n or nil
+    n = n or L["Other"]
+
+    if t == "DEBIT" then
+        n = d or L["Compensation"]
+    end
+
+    local s = "[" ..  n .. "] " .. l .. " " .. GetMoneyStringL(c) 
+
+    if ct == "PROFIT_PERCENT" then
+        s = s .. " (" .. (item["cost"] or 0) .. " %" .. L["Net Profit"] .. ")"
+    elseif ct == "MUL_AVG" then
+        s = s .. " (" .. (item["cost"] or 0) .. " *" .. L["Per Member credit"] .. ")"
+    end
+
+    return s
+end
 
 ADDONSELF.genexport = function(items, n)
     local s = L["Raid Ledger"] .. CRLF
     s = s .. L["Feedback"] .. ": farmer1992@gmail.com" .. CRLF
     s = s .. CRLF
 
-    local revenue = 0
-    local expense = 0
-
-    for _, item in pairs(items or {}) do
-        local l = item["beneficiary"] or L["[Unknown]"]
-        local i = item["detail"]["item"] or ""
-        local d = item["detail"]["displayname"] or ""
-        local c = item["cost"] or 0
-        local t = item["type"]
-
-        if i then
-            local n = GetItemInfo(i) or d
-            n = n ~= "" and n or nil
-            n = n or L["Other"]
-
-            if t == "DEBIT" then
-                n = d or L["Compensation"]
-            end
-
-            if t == "CREDIT" then
-                revenue = revenue + c
-            elseif t == "DEBIT" then
-                expense = expense + c
-            end
-
-            s = s .. "[" ..  n .. "] " .. l .. " " .. GetMoneyStringL(c * 10000) .. CRLF
-        end
-
+    local l = function(item, c)
+        s = s .. GenExportLine(item, c) .. CRLF
     end
 
-    revenue = revenue * 10000
-    expense = expense * 10000
-
-    local profit, avg = calcavg(revenue, expense, n)
+    local profit, avg, revenue, expense  = calcavg(items, n, l, l)
 
     revenue = GetMoneyStringL(revenue)
     expense = GetMoneyStringL(expense)
@@ -126,50 +188,45 @@ ADDONSELF.genexport = function(items, n)
 end
 
 ADDONSELF.genreport = function(items, n)
-    local revenue = 0
-    local expense = 0
-
     local grp = {}
 
-    for _, item in pairs(items) do
+    local profit, avg, revenue, expense  = calcavg(items, n, function(item, c)
         local l = item["beneficiary"] or L["[Unknown]"]
         local i = item["detail"]["item"] or ""
         local d = item["detail"]["displayname"] or ""
         local c = item["cost"] or 0
         local t = item["type"]
-
-        if l and i then
-
-            if not grp[l] then
-                grp[l] = {
-                    ["cost"] = 0,
-                    ["items"] = {},
-                    ["compensation"] = 0,
-                }
-            end
-
-            if t == "DEBIT" then
-                grp[l]["compensation"] = grp[l]["compensation"] + (item["cost"] or 0)
-            else
-                grp[l]["cost"] = grp[l]["cost"] + (item["cost"] or 0)
-
-                if not GetItemInfoFromHyperlink(i) then
-                    i = item["displayname"]
-                end
-                table.insert( grp[l]["items"], i)
-            end
-
-            if t == "CREDIT" then
-                revenue = revenue + c
-            elseif t == "DEBIT" then
-                expense = expense + c
-            end
-
+        if not grp[l] then
+            grp[l] = {
+                ["cost"] = 0,
+                ["items"] = {},
+                ["compensation"] = 0,
+            }
         end
-    end
 
-    revenue = revenue * 10000
-    expense = expense * 10000
+        grp[l]["cost"] = grp[l]["cost"] + (item["cost"] or 0)
+
+        if not GetItemInfoFromHyperlink(i) then
+            i = item["displayname"]
+        end
+        table.insert( grp[l]["items"], i)
+
+    end, function(item, c)
+        local l = item["beneficiary"] or L["[Unknown]"]
+        local i = item["detail"]["item"] or ""
+        local d = item["detail"]["displayname"] or ""
+        local t = item["type"]
+        if not grp[l] then
+            grp[l] = {
+                ["cost"] = 0,
+                ["items"] = {},
+                ["compensation"] = 0,
+            }
+        end
+
+        grp[l]["compensation"] = grp[l]["compensation"] + c
+    end)
+
 
     local looter = {}
     local compensation = {}
@@ -221,7 +278,7 @@ ADDONSELF.genreport = function(items, n)
                     lootitems = lootitems .. L["etc."]
                 end
 
-                SendToCurrrentChannel(l["looter"] .. " [" .. GetMoneyStringL(l["cost"] * 10000) .. "] " .. lootitems)
+                SendToCurrrentChannel(i .. ". " .. l["looter"] .. " [" .. GetMoneyStringL(l["cost"] * 10000) .. "] " .. lootitems)
             end
         end
     end
@@ -232,7 +289,7 @@ ADDONSELF.genreport = function(items, n)
         local compensation_str = ""
 
         for i = 1, c do
-            compensation_str = compensation_str .. "[" .. compensation[i]["beneficiary"] .. "(" ..  GetMoneyStringL(compensation[i]["compensation"] * 10000) .. ")],"
+            compensation_str = compensation_str .. "[" .. compensation[i]["beneficiary"] .. "(" ..  GetMoneyStringL(compensation[i]["compensation"]) .. ")],"
         end
 
         if #compensation > 5 then
@@ -241,8 +298,6 @@ ADDONSELF.genreport = function(items, n)
 
         SendToCurrrentChannel(L["Expense"] .. " [" .. GetMoneyStringL(expense ) .. "]: " .. compensation_str)
     end
-
-    local profit, avg = calcavg(revenue, expense, n)
 
     revenue = GetMoneyStringL(revenue)
     expense = GetMoneyStringL(expense)
