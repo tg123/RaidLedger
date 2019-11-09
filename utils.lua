@@ -103,6 +103,7 @@ local calcavg = function(items, n, oncredit, ondebit)
             local c = math.floor(profit * (p / 100.0))
 
             expense = expense + c
+            item["costcache"] = c
             ondebit(item, c)
         end
     end
@@ -123,6 +124,7 @@ local calcavg = function(items, n, oncredit, ondebit)
             local m = item["cost"] or 0
             local c = m * avg
             expense = expense + c
+            item["costcache"] = c
             ondebit(item, c)
         end
     end

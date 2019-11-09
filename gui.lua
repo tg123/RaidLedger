@@ -309,7 +309,6 @@ function GUI:Init()
 
     -- logframe
     do
-        local tooltip = self.itemtooltip
 
         local CONVERT = L["#Try to convert to item link"]
         local autoCompleteDebit = function(text)
@@ -410,6 +409,7 @@ function GUI:Init()
         end
 
         local iconUpdate = CreateCellUpdate(function(cellFrame, entry)
+            local tooltip = self.itemtooltip
             if not (cellFrame.cellItemTexture) then
                 cellFrame.cellItemTexture = cellFrame:CreateTexture()
                 cellFrame.cellItemTexture:SetTexCoord(0, 1, 0, 1)
@@ -585,6 +585,7 @@ function GUI:Init()
         }        
 
         local valueUpdate = CreateCellUpdate(function(cellFrame, entry)
+            local tooltip = self.commtooltip
             if not (cellFrame.textBox) then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate")
                 cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER")
@@ -608,6 +609,8 @@ function GUI:Init()
             end
 
             cellFrame:SetScript("OnClick", nil)
+            cellFrame:SetScript("OnEnter", nil)
+
 
             if entry["type"] == "DEBIT" then
                 cellFrame:SetScript("OnClick", function()
@@ -618,6 +621,19 @@ function GUI:Init()
                 
                     EasyMenu(valueTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
                 end)
+
+                if entry["costcache"] then
+                    cellFrame:SetScript("OnEnter", function()
+                        tooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+                        tooltip:SetText(GetMoneyString(entry["costcache"]))
+                        tooltip:Show()
+                    end)
+
+                    cellFrame:SetScript("OnLeave", function()
+                        tooltip:Hide()
+                        tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                    end)
+                end
             end
 
             cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
