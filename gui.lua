@@ -107,7 +107,20 @@ local function CreateCellUpdate(cb)
     end
 end
 
+-- tricky way to clear all editbox focus
+local clearAllFocus = (function()
+    local fedit = CreateFrame("EditBox")
+    fedit:SetAutoFocus(false)
+    fedit:SetScript("OnEditFocusGained", fedit.ClearFocus)
+
+    return function()
+        fedit:SetFocus()
+        fedit:ClearFocus()
+    end
+end)()
+
 function GUI:Init()
+
 
     local f = CreateFrame("Frame", nil, UIParent)
     f:SetWidth(650)
@@ -129,6 +142,7 @@ function GUI:Init()
     f:RegisterForDrag("LeftButton")
     f:SetScript("OnDragStart", f.StartMoving)
     f:SetScript("OnDragStop", f.StopMovingOrSizing)
+    f:SetScript("OnMouseDown", clearAllFocus)
     f:Hide()
 
     self.mainframe = f
@@ -654,14 +668,13 @@ function GUI:Init()
             end
 
             cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
-
                 local t = cellFrame.textBox:GetText()
+                local v = tonumber(t) or 0
 
-                if string.sub(t, -1) == "." or (string.sub(t, -1) == "0" and t ~= "0") then
+                if entry["cost"] == v then
                     return
                 end
 
-                local v = tonumber(t) or 0
                 if v < 0.0001 then
                     v = 0
                 end
@@ -705,6 +718,7 @@ function GUI:Init()
 
         self.lootLogFrame:RegisterEvents({
             ["OnClick"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, sttable, button, ...)
+                clearAllFocus()
                 local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, sttable)
 
                 if not entry then
