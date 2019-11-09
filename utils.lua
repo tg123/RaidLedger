@@ -191,7 +191,14 @@ ADDONSELF.genexport = function(items, n)
     return s
 end
 
-ADDONSELF.genreport = function(items, n)
+ADDONSELF.genreport = function(items, n, channel)
+    local SendToChat = SendToCurrrentChannel
+    if channel then
+        SendToChat = function(msg)
+            SendChatMessage(msg, channel)
+        end
+    end
+
     local grp = {}
 
     local profit, avg, revenue, expense  = calcavg(items, n, function(item, c)
@@ -266,7 +273,7 @@ ADDONSELF.genreport = function(items, n)
         end
 
         if c > 0 then
-            SendToCurrrentChannel("RaidLedger: " .. L["Top [%d] contributors"]:format(c))
+            SendToChat("RaidLedger: " .. L["Top [%d] contributors"]:format(c))
         end
 
         for i = 1, c do
@@ -282,7 +289,7 @@ ADDONSELF.genreport = function(items, n)
                     lootitems = lootitems .. L["etc."]
                 end
 
-                SendToCurrrentChannel(i .. ". " .. l["looter"] .. " [" .. GetMoneyStringL(l["cost"] * 10000) .. "] " .. lootitems)
+                SendToChat(i .. ". " .. l["looter"] .. " [" .. GetMoneyStringL(l["cost"] * 10000) .. "] " .. lootitems)
             end
         end
     end
@@ -300,7 +307,7 @@ ADDONSELF.genreport = function(items, n)
             compensation_str = compensation_str .. L["etc."]
         end
 
-        SendToCurrrentChannel(L["Expense"] .. " [" .. GetMoneyStringL(expense ) .. "]: " .. compensation_str)
+        SendToChat(L["Expense"] .. " [" .. GetMoneyStringL(expense ) .. "]: " .. compensation_str)
     end
 
     revenue = GetMoneyStringL(revenue)
@@ -308,10 +315,10 @@ ADDONSELF.genreport = function(items, n)
     profit = GetMoneyStringL(profit)
     avg = GetMoneyStringL(avg)
 
-    SendToCurrrentChannel(L["Revenue"] .. ": " .. revenue .. " "
+    SendToChat(L["Revenue"] .. ": " .. revenue .. " "
                                         .. L["Expense"] .. ": " .. expense .. " "
                                         .. L["Net Profit"] .. ": " .. profit .. " "
                                         .. L["Split into"] .. ": " .. n .. ".")
 
-    SendToCurrrentChannel("RaidLedger " .. L["Per Member credit"] .. ": " .. avg)
+    SendToChat("RaidLedger " .. L["Per Member credit"] .. ": " .. avg)
 end

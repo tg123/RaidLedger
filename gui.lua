@@ -147,6 +147,8 @@ function GUI:Init()
 
     self.mainframe = f
 
+    local menuFrame = CreateFrame("Frame", nil, UIParent, "UIDropDownMenuTemplate")
+
     -- title
     do
         local t = f:CreateTexture(nil, "ARTWORK")
@@ -565,7 +567,6 @@ function GUI:Init()
             cellFrame.textBox:SetText(entry.beneficiary or "")
         end)
 
-        local menuFrame = CreateFrame("Frame", nil, UIParent, "UIDropDownMenuTemplate")
 
         local valueTypeMenuCtx = {}
         local setCostType = function(t)
@@ -746,9 +747,55 @@ function GUI:Init()
         b:SetWidth(120)
         b:SetHeight(25)
         b:SetPoint("BOTTOMLEFT", 40, 15)
-        b:SetText(L["Report"])
-        b:SetScript("OnClick", function()
-            GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber())
+        b:SetText(RAID)
+        -- b:SetText(L["Report"] .. " :" .. RAID)
+        b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+        local icon = b:CreateTexture(nil, 'ARTWORK')
+        icon:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ArmoryChat")
+        icon:SetPoint('TOPLEFT', 10, -5)
+        icon:SetSize(16, 16)
+
+        local channel = "RAID"
+
+        local setReportChannel = function(self)
+            channel = self.arg1
+            b:SetText(self.value)
+        end
+
+        local channelTypeMenu = {
+            {   
+                arg1 = "RAID",
+                text = RAID, 
+                func = setReportChannel, 
+            },
+            {   
+                arg1 = "GUILD",
+                text = GUILD, 
+                func = setReportChannel, 
+            },
+            {   
+                arg1 = "YELL",
+                text = YELL, 
+                func = setReportChannel, 
+            },
+            {   
+                arg1 = nil,
+                text = L["Last used"], 
+                func = setReportChannel, 
+            },
+        }        
+
+        b:SetScript("OnClick", function(self, button)
+            if button == "RightButton" then
+
+                for _, m in pairs(channelTypeMenu) do
+                    m.checked = m.arg1 == channel
+                end
+
+                EasyMenu(channelTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
+            else
+                GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), channel)
+            end
         end)
     end
 
