@@ -818,22 +818,52 @@ RegEvent("ADDON_LOADED", function()
             local tooltip = GUI.commtooltip
 
             local enter = function(l, idx)
-                local _, avg = calcavg(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber())
+                tooltip:SetOwner(l, "ANCHOR_TOP")
+                tooltip:SetText(L["Member credit for subgroup"])
 
                 local c = 0
+                local members = {}
+
                 for i = 1, MAX_RAID_MEMBERS do
-                    local name, _, subgroup = GetRaidRosterInfo(i)
+                    local name, _, subgroup, _, _, classFilename = GetRaidRosterInfo(i)
                     if name and subgroup == idx then
+                        local _, _, _, colorCode = GetClassColor(classFilename);
+                        members[name] = {
+                            text = WrapTextInColorCode(name, colorCode),
+                            cost = 0,
+                        }
                         c = c + 1
                     end
                 end
 
-                if c > 0 then
-                    local s = L["Per Member"] .. " :" .. GetMoneyString(avg) .. CRLF
-                           .. L["Subgroup total"] .. " :" .. GetMoneyString(c * avg)
+                local special = false
+                local teamtotal = 0
+                local _, avg = calcavg(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), nil, function(entry, cost)
+                    local b = entry["beneficiary"]
 
-                    tooltip:SetOwner(l, "ANCHOR_TOP")
-                    tooltip:SetText(s)
+                    if members[b] then
+                        special = true
+                        members[b].cost = members[b].cost + cost
+                        teamtotal = teamtotal + cost
+                    end
+                end)
+
+                teamtotal = teamtotal + c * avg
+
+                if c > 0 then
+                    tooltip:AddLine(L["Subgroup total"] .. ": " .. GetMoneyString(teamtotal))
+                    tooltip:AddLine(L["Per Member"] .. ": " .. GetMoneyString(avg))
+
+                    if special then
+                        tooltip:AddLine(L["Special Members"])
+                        for _, member in pairs(members) do
+                            if member.cost > 0 then
+                                tooltip:AddLine(member.text .. ": " .. GetMoneyString(avg + member.cost) )
+                            end
+                        end
+
+                    end
+
                     tooltip:Show()
                 end
             end
