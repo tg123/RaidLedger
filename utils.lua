@@ -76,12 +76,14 @@ local calcavg = function(items, n, oncredit, ondebit)
         local ct = item["costtype"] or "GOLD"
 
         if t == "CREDIT" then
-            revenue = revenue + c * 10000
-            oncredit(item, c * 10000)
+            c = math.floor( c * 10000 )
+            revenue = revenue + c
+            oncredit(item, c)
         elseif t == "DEBIT" then
             if ct == "GOLD" then
-                expense = expense + c * 10000
-                ondebit(item, c * 10000)
+                c = math.floor( c * 10000 )
+                expense = expense + c
+                ondebit(item, c)
             elseif ct == "PROFIT_PERCENT" then
                 table.insert( profitPercentItems, item)
             elseif ct == "MUL_AVG" then
@@ -122,7 +124,7 @@ local calcavg = function(items, n, oncredit, ondebit)
         -- recalculate expense
         for _, item in pairs(mulAvgItems) do
             local m = item["cost"] or 0
-            local c = m * avg
+            local c = math.floor(m * avg)
             expense = expense + c
             item["costcache"] = c
             ondebit(item, c)

@@ -584,6 +584,22 @@ function GUI:Init()
             },
         }        
 
+        local mustnumber = function(self, char)
+            local t = self:GetText()
+            local b = strbyte(char)
+
+            -- allow number or dot only if no dot in str
+            if (48 <= b and b <= 57) then
+                return
+            end
+            
+            if char == "." and string.find(t, ".", 1, true) == #t then
+                return
+            end
+
+            self:SetText(string.sub(t, 0, #t - 1))
+        end
+
         local valueUpdate = CreateCellUpdate(function(cellFrame, entry)
             local tooltip = self.commtooltip
             if not (cellFrame.textBox) then
@@ -591,9 +607,10 @@ function GUI:Init()
                 cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER")
                 cellFrame.textBox:SetWidth(70)
                 cellFrame.textBox:SetHeight(30)
-                cellFrame.textBox:SetNumeric(true)
+                -- cellFrame.textBox:SetNumeric(true)
                 cellFrame.textBox:SetAutoFocus(false)
-                cellFrame.textBox:SetMaxLetters(7)
+                cellFrame.textBox:SetMaxLetters(10)
+                cellFrame.textBox:SetScript("OnChar", mustnumber)
             end
             cellFrame.textBox:SetText(tostring(entry["cost"] or 0))
 
@@ -637,7 +654,19 @@ function GUI:Init()
             end
 
             cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
-                entry["cost"] = tonumber(cellFrame.textBox:GetText()) or 0
+
+                local t = cellFrame.textBox:GetText()
+
+                if string.sub(t, -1) == "." or (string.sub(t, -1) == "0" and t ~= "0") then
+                    return
+                end
+
+                local v = tonumber(t) or 0
+                if v < 0.0001 then
+                    v = 0
+                end
+
+                entry["cost"] = v
                 GUI:UpdateLootTableFromDatabase()
             end)
 
