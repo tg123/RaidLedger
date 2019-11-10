@@ -77,12 +77,14 @@ local calcavg = function(items, n, oncredit, ondebit)
 
         if t == "CREDIT" then
             c = math.floor( c * 10000 )
+            item["costcache"] = c
             revenue = revenue + c
             oncredit(item, c)
         elseif t == "DEBIT" then
             if ct == "GOLD" then
                 c = math.floor( c * 10000 )
                 expense = expense + c
+                item["costcache"] = c
                 ondebit(item, c)
             elseif ct == "PROFIT_PERCENT" then
                 table.insert( profitPercentItems, item)
@@ -192,50 +194,59 @@ ADDONSELF.genexport = function(items, n)
 end
 
 ADDONSELF.genreport = function(items, n, channel)
-    local SendToChat = SendToCurrrentChannel
-    if channel then
-        SendToChat = function(msg)
-            SendChatMessage(msg, channel)
-        end
-    end
-
+    local lines = {}
     local grp = {}
 
     local profit, avg, revenue, expense  = calcavg(items, n, function(item, c)
         local l = item["beneficiary"] or L["[Unknown]"]
         local i = item["detail"]["item"] or ""
         local d = item["detail"]["displayname"] or ""
-        local c = item["cost"] or 0
         local t = item["type"]
         if not grp[l] then
             grp[l] = {
                 ["cost"] = 0,
                 ["items"] = {},
+                ["citems"] = {},
                 ["compensation"] = 0,
             }
         end
 
-        grp[l]["cost"] = grp[l]["cost"] + (item["cost"] or 0)
+        grp[l]["cost"] = grp[l]["cost"] + c
 
         if not GetItemInfoFromHyperlink(i) then
-            i = item["displayname"]
+            i = d
         end
-        table.insert( grp[l]["items"], i)
+        table.insert( grp[l]["items"], i .. " " .. GetMoneyStringL(c))
+
+        -- table.insert(lines, string.format(L["Credit"] .. ": %s -> [%s] %s", i, l, GetMoneyStringL(c)))
 
     end, function(item, c)
         local l = item["beneficiary"] or L["[Unknown]"]
-        local i = item["detail"]["item"] or ""
         local d = item["detail"]["displayname"] or ""
         local t = item["type"]
+        local ct = item["costtype"] or "GOLD"
+
         if not grp[l] then
             grp[l] = {
                 ["cost"] = 0,
                 ["items"] = {},
+                ["citems"] = {},
                 ["compensation"] = 0,
             }
         end
 
+        -- local s = string.format(L["Debit"] .. ": [%s] -> [%s] %s", d, l, GetMoneyStringL(c))
+        local s = d .. " " .. GetMoneyStringL(c)
+
+        if ct == "PROFIT_PERCENT" then
+            s = s .. " (" .. (item["cost"] or 0) .. " % " .. L["Net Profit"] .. ")"
+        elseif ct == "MUL_AVG" then
+            s = s .. " (" .. (item["cost"] or 0) .. " * " .. L["Per Member credit"] .. ")"
+        end
+
         grp[l]["compensation"] = grp[l]["compensation"] + c
+        table.insert( grp[l]["citems"], s)
+        -- table.insert(lines, s)
     end)
 
 
@@ -253,6 +264,7 @@ ADDONSELF.genreport = function(items, n, channel)
             table.insert( compensation, {
                 ["beneficiary"] = l,
                 ["compensation"] = k["compensation"],
+                ["citems"] = k["citems"],
             })
         end
     end
@@ -266,48 +278,41 @@ ADDONSELF.genreport = function(items, n, channel)
     end)
 
     if #looter > 0 then
-        local c = math.min( #looter, 5)
+        local c = math.min(#looter, 40)
 
         while c > 0 and looter[c]["cost"] == 0 do
             c = c - 1
         end
 
         if c > 0 then
-            SendToChat("RaidLedger: " .. L["Top [%d] contributors"]:format(c))
+            table.insert(lines, "RaidLedger:.... " .. L["Credit"] .. " ....")
+            table.insert(lines, "RaidLedger: " .. L["Top [%d] contributors"]:format(c))
         end
 
         for i = 1, c do
             if looter[i] then
                 local l = looter[i]
+                table.insert(lines, i .. ". " .. L["Credit"] .. " " .. l["looter"] .. " [" .. GetMoneyStringL(l["cost"]) .. "]")
 
-                local lootitems = ""
-                for j = 1, math.min(#l["items"], 5) do
-                    lootitems = lootitems .. l["items"][j] .. ","
+                for _, item in pairs(l["items"]) do
+                    table.insert(lines, "... " .. l["looter"] .. " " .. item)
                 end
-
-                if #l["items"] > 5 then
-                    lootitems = lootitems .. L["etc."]
-                end
-
-                SendToChat(i .. ". " .. l["looter"] .. " [" .. GetMoneyStringL(l["cost"] * 10000) .. "] " .. lootitems)
             end
         end
     end
 
     if expense > 0 then
-        local c = math.min( #compensation, 5)
+        table.insert(lines, "RaidLedger:.... " .. L["Debit"] .. " ....")
 
-        local compensation_str = ""
+        local c = math.min( #compensation, 40)
 
         for i = 1, c do
-            compensation_str = compensation_str .. "[" .. compensation[i]["beneficiary"] .. "(" ..  GetMoneyStringL(compensation[i]["compensation"]) .. ")],"
+            local l = compensation[i]
+            table.insert(lines, i .. ". " .. L["Debit"] .. " " .. l["beneficiary"] .. " [" .. GetMoneyStringL(l["compensation"]) .. "]")
+            for _, item in pairs(l["citems"]) do
+                table.insert(lines, "... " .. l["beneficiary"] .. " " .. item)
+            end
         end
-
-        if #compensation > 5 then
-            compensation_str = compensation_str .. L["etc."]
-        end
-
-        SendToChat(L["Expense"] .. " [" .. GetMoneyStringL(expense ) .. "]: " .. compensation_str)
     end
 
     revenue = GetMoneyStringL(revenue)
@@ -315,10 +320,28 @@ ADDONSELF.genreport = function(items, n, channel)
     profit = GetMoneyStringL(profit)
     avg = GetMoneyStringL(avg)
 
-    SendToChat(L["Revenue"] .. ": " .. revenue .. " "
-                                        .. L["Expense"] .. ": " .. expense .. " "
-                                        .. L["Net Profit"] .. ": " .. profit .. " "
-                                        .. L["Split into"] .. ": " .. n .. ".")
+    table.insert(lines, L["Revenue"] .. ": " .. revenue)
+    table.insert(lines, L["Expense"] .. ": " .. expense)
+    table.insert(lines, L["Net Profit"] .. ": " .. profit)
+    table.insert(lines, L["Split into"]  .. ": " .. n)
+    table.insert(lines, "RaidLedger: ..." .. L["Per Member credit"] .. ": [" .. avg .. " ]...")
 
-    SendToChat("RaidLedger " .. L["Per Member credit"] .. ": " .. avg)
+    local SendToChat = SendToCurrrentChannel
+    if channel then
+        SendToChat = function(msg)
+            SendChatMessage(msg, channel)
+        end
+    end
+
+    local SendToChatTimer = function(t)
+        SendToChat(t.Arg1)
+    end
+
+    -- borrow from [details]
+    for i = 1, #lines do 
+        local timer = C_Timer.NewTimer (i * 200 / 1000, SendToChatTimer)
+        timer.Arg1 = lines[i]
+    end
+
+
 end

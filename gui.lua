@@ -643,7 +643,6 @@ function GUI:Init()
             cellFrame:SetScript("OnClick", nil)
             cellFrame:SetScript("OnEnter", nil)
 
-
             if entry["type"] == "DEBIT" then
                 cellFrame:SetScript("OnClick", function()
                     valueTypeMenuCtx.entry = entry
@@ -654,18 +653,19 @@ function GUI:Init()
                     EasyMenu(valueTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
                 end)
 
-                if entry["costcache"] then
-                    cellFrame:SetScript("OnEnter", function()
-                        tooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-                        tooltip:SetText(GetMoneyString(entry["costcache"]))
-                        tooltip:Show()
-                    end)
+            end
 
-                    cellFrame:SetScript("OnLeave", function()
-                        tooltip:Hide()
-                        tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-                    end)
-                end
+            if entry["costcache"] then
+                cellFrame:SetScript("OnEnter", function()
+                    tooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+                    tooltip:SetText(GetMoneyString(entry["costcache"]))
+                    tooltip:Show()
+                end)
+
+                cellFrame:SetScript("OnLeave", function()
+                    tooltip:Hide()
+                    tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                end)
             end
 
             cellFrame.textBox:SetScript("OnTextChanged", function(self, userInput)
@@ -866,7 +866,6 @@ RegEvent("ADDON_LOADED", function()
 
             local enter = function(l, idx)
                 tooltip:SetOwner(l, "ANCHOR_TOP")
-                tooltip:SetText(L["Member credit for subgroup"])
 
                 local c = 0
                 local members = {}
@@ -898,6 +897,7 @@ RegEvent("ADDON_LOADED", function()
                 teamtotal = teamtotal + c * avg
 
                 if c > 0 then
+                    tooltip:SetText(L["Member credit for subgroup"])
                     tooltip:AddLine(L["Subgroup total"] .. ": " .. GetMoneyString(teamtotal))
                     tooltip:AddLine(L["Per Member"] .. ": " .. GetMoneyString(avg))
 
