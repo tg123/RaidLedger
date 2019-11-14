@@ -119,7 +119,7 @@ do
 		for i = 1, num do
 			local row = self.rows[i];
 			if not row then
-				row = CreateFrame("Button", self.frame:GetName().."Row"..i, self.frame);
+				row = CreateFrame("Button", nil, self.frame);
 				self.rows[i] = row;
 				if i > 1 then
 					row:SetPoint("TOPLEFT", self.rows[i-1], "BOTTOMLEFT", 0, 0);
@@ -137,7 +137,7 @@ do
 			for j = 1, #self.cols do
 				local col = row.cols[j];
 				if not col then
-					col = CreateFrame("Button", row:GetName().."col"..j, row);
+					col = CreateFrame("Button", nil, row);
 					col.text = row:CreateFontString(col:GetName().."text", "OVERLAY", "GameFontNormal");
 					row.cols[j] = col;
 					local align = self.cols[j].align or "LEFT";
@@ -195,7 +195,7 @@ do
 
 		local row = self.head
 		if not row then
-			row = CreateFrame("Frame", self.frame:GetName().."Head", self.frame);
+			row = CreateFrame("Frame", nil, self.frame);
 			row:SetPoint("BOTTOMLEFT", self.frame, "TOPLEFT", 4, 0);
 			row:SetPoint("BOTTOMRIGHT", self.frame, "TOPRIGHT", -4, 0);
 			row:SetHeight(self.rowHeight);
@@ -220,7 +220,7 @@ do
 			local colFrameName = row:GetName().."Col"..i;
 			local col = nil
 			if not col then
-				col = CreateFrame("Button", colFrameName, row);
+				col = CreateFrame("Button", nil, row);
 				col:RegisterForClicks("AnyUp");	 -- LS: right clicking on header
 
 				if self.events then
@@ -624,9 +624,7 @@ do
 
 	function lib:CreateST(cols, numRows, rowHeight, highlight, parent)
 		local st = {};
-		self.framecount = self.framecount or 1;
-		local f = CreateFrame("Frame", "ScrollTable" .. self.framecount, parent or UIParent);
-		self.framecount = self.framecount + 1;
+		local f = CreateFrame("Frame", nil, parent);
 		st.showing = true;
 		st.frame = f;
 
@@ -724,7 +722,7 @@ do
 		f:SetBackdropColor(0.1,0.1,0.1);
 
 		-- build scroll frame
-		local scrollframe = CreateFrame("ScrollFrame", f:GetName().."ScrollFrame", f, "FauxScrollFrameTemplate");
+		local scrollframe = CreateFrame("ScrollFrame", nil, f, "FauxScrollFrameTemplate");
 		st.scrollframe = scrollframe;
 		scrollframe:Show();
 		scrollframe:SetScript("OnHide", function(self, ...)
@@ -734,14 +732,14 @@ do
 		scrollframe:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -4);
 		scrollframe:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -26, 3);
 
-		local scrolltrough = CreateFrame("Frame", f:GetName().."ScrollTrough", scrollframe);
+		local scrolltrough = CreateFrame("Frame", nil, scrollframe);
 		scrolltrough:SetWidth(17);
 		scrolltrough:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -3);
 		scrolltrough:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -4, 4);
 		scrolltrough.background = scrolltrough:CreateTexture(nil, "BACKGROUND");
 		scrolltrough.background:SetAllPoints(scrolltrough);
 		scrolltrough.background:SetColorTexture(0.05, 0.05, 0.05, 1.0);
-		local scrolltroughborder = CreateFrame("Frame", f:GetName().."ScrollTroughBorder", scrollframe);
+		local scrolltroughborder = CreateFrame("Frame", nil, scrollframe);
 		scrolltroughborder:SetWidth(1);
 		scrolltroughborder:SetPoint("TOPRIGHT", scrolltrough, "TOPLEFT");
 		scrolltroughborder:SetPoint("BOTTOMRIGHT", scrolltrough, "BOTTOMLEFT");
