@@ -51,7 +51,7 @@ local function SendToCurrrentChannel(msg)
     end
 end
 
-local function noop(...) end
+local function noop() end
 
 local CRLF = "\r\n"
 
@@ -201,7 +201,6 @@ ADDONSELF.genreport = function(items, n, channel)
         local l = item["beneficiary"] or L["[Unknown]"]
         local i = item["detail"]["item"] or ""
         local d = item["detail"]["displayname"] or ""
-        local t = item["type"]
         if not grp[l] then
             grp[l] = {
                 ["cost"] = 0,
@@ -223,7 +222,6 @@ ADDONSELF.genreport = function(items, n, channel)
     end, function(item, c)
         local l = item["beneficiary"] or L["[Unknown]"]
         local d = item["detail"]["displayname"] or ""
-        local t = item["type"]
         local ct = item["costtype"] or "GOLD"
 
         if not grp[l] then
