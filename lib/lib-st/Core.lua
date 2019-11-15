@@ -31,7 +31,7 @@ do
 
 	local SetWidth = function(self)
 		local width = 13;
-		for num, col in pairs(self.cols) do
+		for _, col in pairs(self.cols) do
 			width = width + col.width;
 		end
 		self.frame:SetWidth(width+20);
@@ -168,8 +168,8 @@ do
 				col.text:SetPoint("BOTTOM", col, "BOTTOM", 0, 0);
 				col.text:SetWidth(self.cols[j].width - 2*lrpadding);
 			end
-			j = #self.cols + 1;
-			col = row.cols[j];
+			local j = #self.cols + 1;
+			local col = row.cols[j];
 			while col do
 				col:Hide();
 				j = j + 1;
@@ -217,7 +217,6 @@ do
 			end
 
 			-- Now proceed to set up the columns.
-			local colFrameName = row:GetName().."Col"..i;
 			local col = nil
 			if not col then
 				col = CreateFrame("Button", nil, row);
@@ -436,11 +435,11 @@ do
 		return result;
 	end
 
-	function GetDefaultHighlightBlank(self)
+	local function GetDefaultHighlightBlank(self)
 		return self.defaulthighlightblank;
 	end
 
-	function SetDefaultHighlightBlank(self, red, green, blue, alpha)
+	local function SetDefaultHighlightBlank(self, red, green, blue, alpha)
 		if not self.defaulthighlightblank then
 			self.defaulthighlightblank = defaulthighlightblank;
 		end
@@ -451,11 +450,11 @@ do
 		if alpha then self.defaulthighlightblank["a"] = alpha; end
 	end
 
-	function GetDefaultHighlight(self)
+	local function GetDefaultHighlight(self)
 		return self.defaulthighlight;
 	end
 
-	function SetDefaultHighlight(self, red, green, blue, alpha)
+	local function SetDefaultHighlight(self, red, green, blue, alpha)
 		if not self.defaulthighlight then
 			self.defaulthighlight = defaulthighlight;
 		end
@@ -530,17 +529,17 @@ do
 
 			local colorargs = nil;
 			if not color then
-			 	color = cols[column].color;
-			 	if not color then
-			 		color = rowdata.color;
-			 		if not color then
-			 			color = defaultcolor;
-			 		else
-			 			colorargs = rowdata.colorargs;
-			 		end
-			 	else
-			 		colorargs = cols[column].colorargs;
-			 	end
+				color = cols[column].color;
+				if not color then
+					color = rowdata.color;
+					if not color then
+						color = defaultcolor;
+					else
+						colorargs = rowdata.colorargs;
+					end
+				else
+					colorargs = cols[column].colorargs;
+				end
 			else
 				colorargs = celldata.colorargs;
 			end
