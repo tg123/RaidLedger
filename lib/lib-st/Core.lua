@@ -138,7 +138,7 @@ do
 				local col = row.cols[j];
 				if not col then
 					col = CreateFrame("Button", nil, row);
-					col.text = row:CreateFontString(col:GetName().."text", "OVERLAY", "GameFontNormal");
+					col.text = row:CreateFontString(nil, "OVERLAY", "GameFontNormal");
 					row.cols[j] = col;
 					local align = self.cols[j].align or "LEFT";
 					col.text:SetJustifyH(align);
@@ -232,7 +232,7 @@ do
 			end
 			row.cols[i] = col;
 
-			local fs = col:CreateFontString(col:GetName().."fs", "OVERLAY", "GameFontNormal");
+			local fs = col:CreateFontString(nil, "OVERLAY", "GameFontNormal");
 			fs:SetAllPoints(col);
 			fs:SetPoint("LEFT", col, "LEFT", lrpadding, 0);
 			fs:SetPoint("RIGHT", col, "RIGHT", -lrpadding, 0);
