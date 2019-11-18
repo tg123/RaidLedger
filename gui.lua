@@ -114,8 +114,22 @@ local clearAllFocus = (function()
     fedit:SetScript("OnEditFocusGained", fedit.ClearFocus)
 
     return function()
-        fedit:SetFocus()
-        fedit:ClearFocus()
+        local focusFrame = GetCurrentKeyBoardFocus()
+
+        if not focusFrame then
+            return
+        end
+
+        local p = focusFrame:GetParent()
+        local owned = false
+        while p ~= nil do
+            if p == GUI.mainframe then
+                fedit:SetFocus()
+                fedit:ClearFocus()
+                return
+            end
+            p = p:GetParent()
+        end
     end
 end)()
 
@@ -828,6 +842,10 @@ function GUI:Init()
     end
 
 end
+
+RegEvent("VARIABLES_LOADED", function()
+    GUI:UpdateLootTableFromDatabase()
+end)
 
 RegEvent("ADDON_LOADED", function()
     GUI:Init()
