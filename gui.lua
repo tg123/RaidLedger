@@ -180,6 +180,23 @@ function GUI:Init()
     end
     -- title
 
+
+    local mustnumber = function(self, char)
+        local t = self:GetText()
+        local b = strbyte(char)
+
+        -- allow number or dot only if no dot in str
+        if (48 <= b and b <= 57) then
+            return
+        end
+        
+        if char == "." and string.find(t, ".", 1, true) == #t then
+            return
+        end
+
+        self:SetText(string.sub(t, 0, #t - 1))
+    end    
+
     -- split member and editbox
     do
         local t = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
@@ -188,8 +205,9 @@ function GUI:Init()
         t:SetPoint("BOTTOMLEFT", f, 350, 95)
         t:SetAutoFocus(false)
         t:SetMaxLetters(4)
-        t:SetNumeric(true)
+        -- t:SetNumeric(true)
         t:SetScript("OnTextChanged", function() self:UpdateSummary() end)
+        t:SetScript("OnChar", mustnumber)
 
         self.countEdit = t
     end
@@ -613,21 +631,6 @@ function GUI:Init()
             },
         }        
 
-        local mustnumber = function(self, char)
-            local t = self:GetText()
-            local b = strbyte(char)
-
-            -- allow number or dot only if no dot in str
-            if (48 <= b and b <= 57) then
-                return
-            end
-            
-            if char == "." and string.find(t, ".", 1, true) == #t then
-                return
-            end
-
-            self:SetText(string.sub(t, 0, #t - 1))
-        end
 
         local valueUpdate = CreateCellUpdate(function(cellFrame, entry)
             local tooltip = self.commtooltip
