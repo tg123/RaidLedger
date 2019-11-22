@@ -8,47 +8,37 @@ I would not have been able to build RaidLedger without `ClassicRaidTracker`
 Some codes, scrolling ui and loot message parsing, are borrowed from `ClassicRaidTracker`.
 
 ## Localization
-<https://www.curseforge.com/wow/addons/raidledger/localization>
+ <https://www.curseforge.com/wow/addons/raidledger/localization>
 
-## English
+ * [中文介绍](README-zhCN.md)
 
-### Usage
+### How to toggle the ledger panel
 
- * Open panel `/raidledger`
+You can use either way:
+ * via `/raidledger`
+ * Click `Raid Ledger` button on raid panel
 
 ### Features
  
  * Create a summary and report to raid channel
- * Buyout charges and looter can be modified at any time
- * Smart looter name autocomplete. 1 for all members in subgroup 1, hunter for all hunters in raid
+ * Smart looter name autocomplete. `1` for all members in subgroup `1`, `hunter` for all hunters in raid group
+ * Loot charges (credit for team) and looter can be modified at any time
+ * Customized reason credit for team, e.g. `Package: all rare loot` for 100G
  * Compensation for special raid members
- * Calculate gold run income for raid members
+    * `%` Percentage Net Profit mode
+    * `*` Multiple Per Member credit mode
+    * `Gold` Addtitonal gold mode
+   
+ * Calculate gold run per member credit for each raid members
  * Loot during raid will be added to ledger automatically
+    
+    `/raidledlger toggle` to change mode
+    
+    * On
+    * In Raid Only
+    * Off
+    
  * Easy to export as text in order to copy/paste to a third party website.
-
-
-## 中文
-
-专为为目前金团设计
-团长可以记账，方便快捷
-打工可以记账，童叟无欺
-
- * [NGA连接](https://bbs.nga.cn/read.php?tid=18961750)
-
-### 使用
-
- * 界面呼出 `/gtuan`
-
-### 功能
-
- * 消费前5名汇总广播
- * 随时修改价格，拾取人
- * 智能自动完成，输入 1 会显示小队1 的成员 输入 猎人 会把 猎人 或者名字带有猎人的人都列出来
- * 可以添加补助，会在总钱数中自动扣除
- * 人数自动计算平均费用
- * 拾取的物品会自动加到账簿 当然还可以手动添加 (物品) 右键点击物品 可以删除记录
- * 可以导出文本 发到 微信群等地方
-
 
 ## Third Party Licenses
  
@@ -64,9 +54,4 @@ Some codes, scrolling ui and loot message parsing, are borrowed from `ClassicRai
    by ckknight
 
    [The GNU General Public License (GPL) Version 2.1](https://www.wowace.com/project/13763/license)
- 
- * <https://www.wowace.com/projects/libstub>
 
-   by Kaelten
-
-   [Public Domain](https://www.wowace.com/project/14328/license)
