@@ -33,6 +33,7 @@ utils.lua
 event.lua
 
 db.lua
+options.lua
 gui.lua
 
 cli.lua

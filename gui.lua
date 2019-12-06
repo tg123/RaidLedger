@@ -275,7 +275,7 @@ function GUI:Init()
         b:SetWidth(100)
         b:SetHeight(25)
         b:SetPoint("BOTTOMRIGHT", -40, 15)
-        b:SetText(L["Close"])
+        b:SetText(CLOSE)
         b:SetScript("OnClick", function() f:Hide() end)
     end
 
@@ -317,37 +317,18 @@ function GUI:Init()
         end)
     end
 
-    -- dropbox filter
+    -- options
     do
-        local t = CreateFrame("Frame", nil, f, "UIDropDownMenuTemplate")
-        t:SetPoint("BOTTOMLEFT", f, 320, 10)
-
-        local tt = t:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        tt:SetPoint("BOTTOMLEFT", t, "TOPLEFT", 20, 0)
-        tt:SetText(L["Auto record quality"])
-
-        local onclick = function(self)
-            UIDropDownMenu_SetSelectedValue(t, self.value)
-            Database:SetConfig("filterlevel", self.value)
-        end
-
-        UIDropDownMenu_Initialize(t, function()
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = ALL
-            info.value = -1
-            info.func = onclick
-            info.classicChecks = true
-            UIDropDownMenu_AddButton(info)
-            for i = 0, getn(ITEM_QUALITY_COLORS)-4  do
-                info.text = _G["ITEM_QUALITY"..i.."_DESC"]
-                info.value = i
-                info.func = onclick
-                info.checked = nil
-                UIDropDownMenu_AddButton(info)
-            end
+        local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
+        b:SetWidth(100)
+        b:SetHeight(25)
+        b:SetPoint("BOTTOMLEFT", 400, 15)
+        b:SetText(OPTIONS)
+        b:SetScript("OnClick", function()
+            -- tricky may fail first time, show do twice to ensure open the panel
+            InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
+            InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
         end)
-
-        UIDropDownMenu_SetSelectedValue(t, Database:GetConfigOrDefault("filterlevel", LE_ITEM_QUALITY_RARE))
     end
 
     do
