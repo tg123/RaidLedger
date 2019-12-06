@@ -320,7 +320,7 @@ function GUI:Init()
         b:SetText("+" .. L["Credit"])
         b:SetScript("OnClick", function()
             Database:AddCredit("")
-            FauxScrollFrame_SetOffset(self.lootLogFrame.scrollframe, 0) -- move to top
+            ScrollFrame_OnVerticalScroll(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
     end
 
@@ -333,7 +333,7 @@ function GUI:Init()
         b:SetText("+" .. L["Debit"])
         b:SetScript("OnClick", function()
             Database:AddDebit(L["Compensation"])
-            FauxScrollFrame_SetOffset(self.lootLogFrame.scrollframe, 0) -- move to top
+            ScrollFrame_OnVerticalScroll(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
     end
 
@@ -345,6 +345,8 @@ function GUI:Init()
         b:SetPoint("BOTTOMLEFT", 400, 15)
         b:SetText(OPTIONS)
         b:SetScript("OnClick", function()
+            print(self.lootLogFrame.scrollframe)
+            
             -- tricky may fail first time, show do twice to ensure open the panel
             InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
             InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])

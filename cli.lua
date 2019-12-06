@@ -22,6 +22,7 @@ hooksecurefunc("SetItemRef", function(link)
             Print(L["Compensation added"] .. " " .. playerName)
             Database:AddDebit("", playerName)
         end
+        ScrollFrame_OnVerticalScroll(GUI.lootLogFrame.scrollframe, 0)
     end
 end)
 
