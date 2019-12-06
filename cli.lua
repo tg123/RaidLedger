@@ -91,6 +91,7 @@ SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
 
         Print(L["Shift + item/name to add to record"])
         Print(L["Right click to remove record"])
+        Print(L["Shift + Right click to remove ALL SAME record"])
         -- ShowCurrentAutoLootType()
         -- Print("[".. L["/raidledger"] .. " toggle] " .. L["toggle Auto recording on/off"])
 

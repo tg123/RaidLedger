@@ -33,6 +33,26 @@ local function GetRosterNumber()
     return #all
 end
 
+local function RemoveAll(item)
+    local again = true
+    while again do
+        again = false
+        local items = Database:GetCurrentLedger()["items"]
+        for idx, entry in pairs(items or {}) do
+            local detail = entry["detail"]
+            if detail["type"] == "ITEM" then
+                local _, itemLink = GetItemInfo(detail["item"])
+                if itemLink == item then
+                    again = true
+                    Database:RemoveEntry(idx)
+                    break
+                end
+            end
+        end
+    end
+
+end
+
 function GUI:Show()
     self.mainframe:Show()
 end
@@ -716,6 +736,8 @@ function GUI:Init()
         self.lootLogFrame.frame:SetPoint("TOPLEFT", f, "TOPLEFT", 30, -50)
 
         self.lootLogFrame:RegisterEvents({
+
+
             ["OnClick"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, sttable, button, ...)
                 clearAllFocus()
                 local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, sttable)
@@ -725,11 +747,29 @@ function GUI:Init()
                 end
 
                 if button == "RightButton" then
+                    StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"].text = L["Remove this record?"]
 
-                    StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"].OnAccept = function()
-                        StaticPopup_Hide("RAIDLEDGER_DELETE_ITEM")
-                        Database:RemoveEntry(idx)
+                    if IsShiftKeyDown() then
+                        StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"].text = L["Remove ALL SAME record?"]
+
+                        StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"].OnAccept = function()
+                            StaticPopup_Hide("RAIDLEDGER_DELETE_ITEM")
+                            -- Database:RemoveEntry(idx)
+
+                            local detail = entry["detail"]
+                            if detail["type"] == "ITEM" then
+                                local _, itemLink = GetItemInfo(detail["item"])
+                                RemoveAll(itemLink)
+                            end
+
+                        end
+                    else
+                        StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"].OnAccept = function()
+                            StaticPopup_Hide("RAIDLEDGER_DELETE_ITEM")
+                            Database:RemoveEntry(idx)
+                        end
                     end
+
                     StaticPopup_Show("RAIDLEDGER_DELETE_ITEM")
                 else
                     ChatEdit_InsertLink(entry["detail"]["item"])
