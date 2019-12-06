@@ -345,8 +345,6 @@ function GUI:Init()
         b:SetPoint("BOTTOMLEFT", 400, 15)
         b:SetText(OPTIONS)
         b:SetScript("OnClick", function()
-            print(self.lootLogFrame.scrollframe)
-            
             -- tricky may fail first time, show do twice to ensure open the panel
             InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
             InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
