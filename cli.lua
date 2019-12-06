@@ -31,9 +31,10 @@ local AUTOADDLOOT_TYPE_ALL = 0
 local AUTOADDLOOT_TYPE_RAID = 1
 local AUTOADDLOOT_TYPE_DISABLE = 2
 
-local AutoAddLoot = AUTOADDLOOT_TYPE_RAID
+-- local AutoAddLoot = AUTOADDLOOT_TYPE_RAID
 
 RegEvent("CHAT_MSG_LOOT", function(chatmsg)
+    local AutoAddLoot = Database:GetConfigOrDefault("autoaddloot", AUTOADDLOOT_TYPE_RAID)
     if AutoAddLoot == AUTOADDLOOT_TYPE_DISABLE then
         return
     elseif AutoAddLoot == AUTOADDLOOT_TYPE_RAID and not IsInRaid() then
@@ -68,19 +69,19 @@ RegEvent("CHAT_MSG_LOOT", function(chatmsg)
     end
 end)
 
-RegEvent("ADDON_LOADED", function()
-    AutoAddLoot = Database:GetConfigOrDefault("autoaddloot", AUTOADDLOOT_TYPE_RAID)
-end)
+-- RegEvent("ADDON_LOADED", function()
+--     AutoAddLoot = Database:GetConfigOrDefault("autoaddloot", AUTOADDLOOT_TYPE_RAID)
+-- end)
 
-local function ShowCurrentAutoLootType()
-    if AutoAddLoot == AUTOADDLOOT_TYPE_ALL then
-        Print(L["Auto recording loot: On"])
-    elseif AutoAddLoot == AUTOADDLOOT_TYPE_RAID then
-        Print(L["Auto recording loot: In Raid Only"])
-    elseif AutoAddLoot == AUTOADDLOOT_TYPE_DISABLE then
-        Print(L["Auto recording loot: Off"])
-    end
-end
+-- local function ShowCurrentAutoLootType()
+--     if AutoAddLoot == AUTOADDLOOT_TYPE_ALL then
+--         Print(L["Auto recording loot: On"])
+--     elseif AutoAddLoot == AUTOADDLOOT_TYPE_RAID then
+--         Print(L["Auto recording loot: In Raid Only"])
+--     elseif AutoAddLoot == AUTOADDLOOT_TYPE_DISABLE then
+--         Print(L["Auto recording loot: Off"])
+--     end
+-- end
 
 SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
     local cmd, what = msg:match("^(%S*)%s*(%S*)%s*$")
@@ -90,13 +91,13 @@ SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
 
         Print(L["Shift + item/name to add to record"])
         Print(L["Right click to remove record"])
-        ShowCurrentAutoLootType()
-        Print("[".. L["/raidledger"] .. " toggle] " .. L["toggle Auto recording on/off"])
+        -- ShowCurrentAutoLootType()
+        -- Print("[".. L["/raidledger"] .. " toggle] " .. L["toggle Auto recording on/off"])
 
-    elseif cmd == "toggle" then
-        AutoAddLoot = (AutoAddLoot + 1) % 3
-        Database:SetConfig("autoaddloot", AutoAddLoot)
-        ShowCurrentAutoLootType()
+    -- elseif cmd == "toggle" then
+    --     AutoAddLoot = (AutoAddLoot + 1) % 3
+    --     Database:SetConfig("autoaddloot", AutoAddLoot)
+    --     ShowCurrentAutoLootType()
     else
         local _, itemLink = GetItemInfo(strtrim(msg))
         if itemLink then
