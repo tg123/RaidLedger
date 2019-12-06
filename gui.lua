@@ -268,6 +268,7 @@ function GUI:Init()
         t:SetHeight(360)
 
         local edit = CreateFrame("EditBox", nil, t)
+        edit.cursorOffset = 0
         edit:SetWidth(580)
         edit:SetHeight(320)
         edit:SetPoint("TOPLEFT", t, 10, 0)
