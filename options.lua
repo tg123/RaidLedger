@@ -177,7 +177,7 @@ RegEvent("ADDON_LOADED", function()
                                 return
                             end
 
-                            table.insert( output, {
+                            table.insert( output, 1, {
                                 costtype = costtype,
                                 cost = cost,
                                 reason = reason,
@@ -203,9 +203,7 @@ RegEvent("ADDON_LOADED", function()
         local create = function(name)
             local template = {
                 name = name
-                -- name = self.editBox:GetText()
             }
-            -- print(template.name)
             table.insert(templates, template)
 
             local info = UIDropDownMenu_CreateInfo()
@@ -252,9 +250,6 @@ RegEvent("ADDON_LOADED", function()
 
         StaticPopupDialogs["RAIDLEDGER_DEBIT_TEMPLATE_NAME"].OnShow = function(self)
             local c = popctx.current
-            -- print(self)
-            -- print(self:GetParent())
-            -- print(StaticPopupDialogs["RAIDLEDGER_DEBIT_TEMPLATE_NAME"])
 
             if c and templates[c] then
                 self.editBox:SetText(templates[c].name or "")
@@ -267,13 +262,16 @@ RegEvent("ADDON_LOADED", function()
 
             -- if c then rename
             if c and templates[c] then
-                templates[c].name = self.editBox:GetText()
+                local n = self.editBox:GetText()
+                if n ~= "" then
+                    templates[c].name = n
+                    UIDropDownMenu_SetText(t, n)
+                end
                 return
             end
 
             create(self.editBox:GetText())
-            UIDropDownMenu_SetSelectedValue(t, #templates)
-            editDebitTemplate:SetText("")
+            onclick({value = #templates})
         end
 
         do
@@ -361,8 +359,8 @@ RegEvent("ADDON_LOADED", function()
                         elseif ct == "MUL_AVG" then
                             x = d .. " " .. c .. " *"
                         end
-                        s = s .. x .. "\r\n"
-                        all[s] = true
+                        s = x .. "\r\n" .. s
+                        all[x] = true
                     end
                 end
 
