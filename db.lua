@@ -23,7 +23,7 @@ function db:OnLedgerItemsChange()
     end
 end
 
-function db:GetConfig()
+local function GetConfig()
     if not RaidLedgerDatabase["config"] then
         RaidLedgerDatabase["config"] = {}
     end
@@ -32,12 +32,12 @@ function db:GetConfig()
 end
 
 function db:SetConfig(key, v)
-    local config = self:GetConfig()
+    local config = GetConfig()
     config[key] = v
 end
 
 function db:GetConfigOrDefault(key, def)
-    local config = self:GetConfig()
+    local config = GetConfig()
 
     if not config[key] then
         config[key] = def

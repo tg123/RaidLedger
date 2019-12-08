@@ -114,7 +114,6 @@ RegEvent("ADDON_LOADED", function()
         edit:SetTextInsets(20, 20, 20, 20)
         edit:SetWidth(500)
         edit:SetHeight(150)
-        -- edit:SetPoint("CENTER")
         edit:SetAutoFocus(false)
         edit:EnableMouse(true)
         edit:SetMaxLetters(99999999)
@@ -139,11 +138,87 @@ RegEvent("ADDON_LOADED", function()
         tt:SetPoint("BOTTOMLEFT", t, "TOPLEFT", 20, 0)
         tt:SetText(L["Debit Template"])
 
+        local templates = Database:GetConfigOrDefault("debittemplates", {})
+
         local onclick = function(self)
-            UIDropDownMenu_SetSelectedValue(t, self.value)
-            Database:SetConfig("debittemplateidx", self.value)
+            local idx = self.value
+            UIDropDownMenu_SetSelectedValue(t, idx)
+            Database:SetConfig("debittemplateidx", idx)
+            local v = templates[idx] and templates[idx].value or ""
+            editDebitTemplate:SetText(v)
         end
 
+        local create = function(name)
+            local template = {
+                name = name
+                -- name = self.editBox:GetText()
+            }
+            -- print(template.name)
+            table.insert(templates, template)
+
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = template.name
+            info.value = #templates
+            info.func = onclick
+            UIDropDownMenu_AddButton(info)
+        end
+
+        local save = function(force)
+            local c = UIDropDownMenu_GetSelectedValue(t)
+            local v = editDebitTemplate:GetText()
+            if not force and v == "" then
+                return
+            end
+            if (not c) or (not templates[c]) then
+                create(date())
+                UIDropDownMenu_SetSelectedValue(t, #templates)
+                c = #templates
+            end
+
+            templates[c].value = v
+        end
+        editDebitTemplate:SetScript("OnTextChanged", save)
+
+        UIDropDownMenu_Initialize(t, function()
+            for i, template in pairs(templates) do
+                -- print(template.name)
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = template.name
+                info.value = i
+                info.func = onclick
+                UIDropDownMenu_AddButton(info)
+            end
+        end)
+
+        UIDropDownMenu_SetSelectedValue(t, Database:GetConfigOrDefault("debittemplateidx", nil))    
+
+        local popctx = {}
+
+        StaticPopupDialogs["RAIDLEDGER_DEBIT_TEMPLATE_NAME"].OnShow = function(self)
+            local c = popctx.current
+            -- print(self)
+            -- print(self:GetParent())
+            -- print(StaticPopupDialogs["RAIDLEDGER_DEBIT_TEMPLATE_NAME"])
+
+            if c and templates[c] then
+                self.editBox:SetText(templates[c].name or "")
+            end
+        end
+
+
+        StaticPopupDialogs["RAIDLEDGER_DEBIT_TEMPLATE_NAME"].OnAccept = function(self)
+            local c = popctx.current
+
+            -- if c then rename
+            if c and templates[c] then
+                templates[c].name = self.editBox:GetText()
+                return
+            end
+
+            create(self.editBox:GetText())
+            UIDropDownMenu_SetSelectedValue(t, #templates)
+            editDebitTemplate:SetText("")
+        end
 
         do
             local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
@@ -152,6 +227,8 @@ RegEvent("ADDON_LOADED", function()
             b:SetPoint("TOPLEFT", t, 160, 0)
             b:SetText(NEW)
             b:SetScript("OnClick", function()
+                popctx.current = nil
+                StaticPopup_Show("RAIDLEDGER_DEBIT_TEMPLATE_NAME")
             end)
         end
 
@@ -161,8 +238,7 @@ RegEvent("ADDON_LOADED", function()
             b:SetHeight(25)
             b:SetPoint("TOPLEFT", t, 235, 0)
             b:SetText(SAVE)
-            b:SetScript("OnClick", function()
-            end)
+            b:SetScript("OnClick", function() save(true) end)
         end
 
         do
@@ -172,6 +248,17 @@ RegEvent("ADDON_LOADED", function()
             b:SetPoint("TOPLEFT", t, 310, 0)
             b:SetText(DELETE)
             b:SetScript("OnClick", function()
+                local c = UIDropDownMenu_GetSelectedValue(t)
+
+                if c then
+                    table.remove( templates, c)
+                end
+
+                if #templates == 0 then
+                    UIDropDownMenu_SetSelectedValue(t, nil)
+                else
+                    onclick({value = #templates})
+                end
             end)
         end
        
@@ -182,6 +269,12 @@ RegEvent("ADDON_LOADED", function()
             b:SetPoint("TOPLEFT", t, 385, 0)
             b:SetText(L["Rename"])
             b:SetScript("OnClick", function()
+                local c = UIDropDownMenu_GetSelectedValue(t)
+
+                if c and templates[c] then
+                    popctx.current = c
+                    StaticPopup_Show("RAIDLEDGER_DEBIT_TEMPLATE_NAME")
+                end
             end)
         end
 
@@ -195,23 +288,24 @@ RegEvent("ADDON_LOADED", function()
             end)
         end
 
-        -- UIDropDownMenu_Initialize(t, function()
-        --     local info = UIDropDownMenu_CreateInfo()
-        --     info.text = ALL
-        --     info.value = -1
-        --     info.func = onclick
-        --     info.classicChecks = true
-        --     UIDropDownMenu_AddButton(info)
-        --     for i = 0, getn(ITEM_QUALITY_COLORS)-4  do
-        --         info.text = _G["ITEM_QUALITY"..i.."_DESC"]
-        --         info.value = i
-        --         info.func = onclick
-        --         info.checked = nil
-        --         UIDropDownMenu_AddButton(info)
-        --     end
-        -- end)
-
-        -- UIDropDownMenu_SetSelectedValue(t, Database:GetConfigOrDefault("filterlevel", LE_ITEM_QUALITY_RARE))        
+          
     end
 
 end)
+
+
+
+StaticPopupDialogs["RAIDLEDGER_DEBIT_TEMPLATE_NAME"] = {
+    text = L["Name of Debit template"],
+    button1 = ACCEPT,
+    button2 = CANCEL,
+    hasEditBox = true,
+    timeout = 0,
+    whileDead = 1,
+    hideOnEscape = 1,
+    multiple = 0,
+    OnAccept = function()
+    end,
+    OnShow = function()
+    end,
+}
