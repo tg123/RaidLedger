@@ -108,7 +108,7 @@ local COST_TYPE_MUL_AVG = "MUL_AVG"
 --     return revenue * 10000, expense * 10000
 -- end
 
-function db:AddEntry(type, detail, beneficiary, cost)
+function db:AddEntry(type, detail, beneficiary, cost, costtype)
     local ledger = self:GetCurrentLedger()
 
     table.insert(ledger["items"], {
@@ -117,6 +117,7 @@ function db:AddEntry(type, detail, beneficiary, cost)
         detail = detail or {},
         beneficiary = beneficiary or "",
         cost = cost or 0,
+        costtype = costtype or "GOLD",
     })
 
     self:OnLedgerItemsChange()
@@ -135,10 +136,10 @@ function db:AddCredit(reason, beneficiary, cost)
     }, beneficiary, cost)
 end
 
-function db:AddDebit(reason, beneficiary, cost)
+function db:AddDebit(reason, beneficiary, cost, costtype)
     self:AddEntry(TYPE_DEBIT, {
         ["displayname"] = reason
-    }, beneficiary, cost)
+    }, beneficiary, cost, costtype)
 end
 
 function db:AddLoot(item, count, beneficiary, cost, force)

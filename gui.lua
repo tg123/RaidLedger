@@ -182,6 +182,10 @@ function GUI:Init()
     self.mainframe = f
 
     local menuFrame = CreateFrame("Frame", nil, UIParent, "UIDropDownMenuTemplate")
+    do
+        self.itemtooltip = CreateFrame("GameTooltip", "RaidLedgerTooltipItem" .. random(10000), UIParent, "GameTooltipTemplate")
+        self.commtooltip = CreateFrame("GameTooltip", "RaidLedgerTooltipComm" .. random(10000) , UIParent, "GameTooltipTemplate")
+    end
 
     -- title
     do
@@ -333,9 +337,38 @@ function GUI:Init()
         b:SetPoint("BOTTOMLEFT", 100, 95)
         b:SetText("+" .. L["Debit"])
         b:SetScript("OnClick", function()
-            Database:AddDebit(L["Compensation"])
+
+            if IsControlKeyDown() then
+                local t = ADDONSELF.GetCurrentDebitTemplate()
+                if #t == 0 then
+                    Print(L["Cannot find any debit entry in template, please check your template in options"])
+                    return
+                end
+
+                for _, d in pairs(t) do
+                    Database:AddDebit(d.reason, "", d.cost, d.costtype)
+                end
+
+            else
+                Database:AddDebit(L["Compensation"])
+            end
+
             ScrollFrame_OnVerticalScroll(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
+
+        local tooltip = GUI.commtooltip
+
+        b:SetScript("OnEnter", function()
+            tooltip:SetOwner(b, "ANCHOR_RIGHT")
+            tooltip:SetText(L["CTRL + Click to apply debit template"])
+            tooltip:Show()
+        end)
+
+        b:SetScript("OnLeave", function()
+            tooltip:Hide()
+            tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+        end)
+
     end
 
     -- options
@@ -350,11 +383,6 @@ function GUI:Init()
             InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
             InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
         end)
-    end
-
-    do
-        self.itemtooltip = CreateFrame("GameTooltip", "RaidLedgerTooltipItem" .. random(10000), UIParent, "GameTooltipTemplate")
-        self.commtooltip = CreateFrame("GameTooltip", "RaidLedgerTooltipComm" .. random(10000) , UIParent, "GameTooltipTemplate")
     end
 
     -- logframe
@@ -836,6 +864,19 @@ function GUI:Init()
                 GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), channel)
             end
         end)
+
+        local tooltip = GUI.commtooltip
+
+        b:SetScript("OnEnter", function()
+            tooltip:SetOwner(b, "ANCHOR_RIGHT")
+            tooltip:SetText(L["Right click to choose channel"])
+            tooltip:Show()
+        end)
+
+        b:SetScript("OnLeave", function()
+            tooltip:Hide()
+            tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+        end)        
     end
 
     -- export btn

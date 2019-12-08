@@ -140,6 +140,58 @@ RegEvent("ADDON_LOADED", function()
 
         local templates = Database:GetConfigOrDefault("debittemplates", {})
 
+        ADDONSELF.GetCurrentDebitTemplate = function()
+            local idx = UIDropDownMenu_GetSelectedValue(t) or "NOTEXISTS"
+            local s = templates[idx] and templates[idx].value or ""
+            local output = {}
+
+            s = string.gsub(s,"(#.[^\n]*\n)", "")
+
+            for _, line in ipairs({strsplit("\n", s)}) do
+                line = strtrim(line)
+                if line ~= nil and line ~= "" then
+                    local x = {strsplit(" ", line)}
+                    if #x >= 3 then
+                        (function()
+                            local costtype = x[#x]
+                            table.remove(x, #x)
+                            local cost = tonumber(x[#x])
+                            table.remove(x, #x)
+                            local reason = strtrim(table.concat(x, " "))
+
+                            if costtype == "G" then
+                                costtype = "GOLD"
+                            elseif costtype == "%" then
+                                costtype = "PROFIT_PERCENT"
+                            elseif costtype == "*" then
+                                costtype = "MUL_AVG"
+                            else
+                                return
+                            end
+
+                            if not cost then
+                                return
+                            end
+
+                            if reason == "" then
+                                return
+                            end
+
+                            table.insert( output, {
+                                costtype = costtype,
+                                cost = cost,
+                                reason = reason,
+                            } )
+                        end)()
+                    end
+
+                end
+
+            end
+
+            return output
+        end
+
         local onclick = function(self)
             local idx = self.value
             UIDropDownMenu_SetSelectedValue(t, idx)
@@ -177,7 +229,7 @@ RegEvent("ADDON_LOADED", function()
 
             templates[c].value = v
         end
-        editDebitTemplate:SetScript("OnTextChanged", save)
+        editDebitTemplate:SetScript("OnTextChanged", function() save(false) end)
 
         UIDropDownMenu_Initialize(t, function()
             for i, template in pairs(templates) do
@@ -190,7 +242,11 @@ RegEvent("ADDON_LOADED", function()
             end
         end)
 
-        UIDropDownMenu_SetSelectedValue(t, Database:GetConfigOrDefault("debittemplateidx", nil))    
+        do
+            local idx = Database:GetConfigOrDefault("debittemplateidx", nil)
+            UIDropDownMenu_SetSelectedValue(t, idx)    
+            onclick({value = idx})
+        end
 
         local popctx = {}
 
@@ -256,6 +312,7 @@ RegEvent("ADDON_LOADED", function()
 
                 if #templates == 0 then
                     UIDropDownMenu_SetSelectedValue(t, nil)
+                    editDebitTemplate:SetText("")
                 else
                     onclick({value = #templates})
                 end
@@ -285,6 +342,32 @@ RegEvent("ADDON_LOADED", function()
             b:SetPoint("TOPLEFT", t, 460, 0)
             b:SetText(L["Import from ledger"])
             b:SetScript("OnClick", function()
+                local items = Database:GetCurrentLedger()["items"]
+                local all = {}
+                local s = ""
+
+                for _, item in pairs(items or {}) do
+                    local c = item["cost"] or 0
+                    local t = item["type"]
+                    local ct = item["costtype"] or "GOLD"
+                    local d = item["detail"]["displayname"] or ""
+
+                    if t == "DEBIT" then
+                        local x
+                        if ct == "GOLD" then
+                            x = d .. " " .. c .. " G"
+                        elseif ct == "PROFIT_PERCENT" then
+                            x = d .. " " .. c .. " %"
+                        elseif ct == "MUL_AVG" then
+                            x = d .. " " .. c .. " *"
+                        end
+                        s = s .. x .. "\r\n"
+                        all[s] = true
+                    end
+                end
+
+                editDebitTemplate:SetText(strtrim(editDebitTemplate:GetText() .. "\r\n" .. s))
+                save()
             end)
         end
 
