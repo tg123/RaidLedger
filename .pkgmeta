@@ -4,3 +4,4 @@ ignore:
   - README.md
   - README-zhCN.md
   - extract_locale.sh
+  - LICENSE
