@@ -196,6 +196,10 @@ RegEvent("ADDON_LOADED", function()
             local idx = self.value
             UIDropDownMenu_SetSelectedValue(t, idx)
             Database:SetConfig("debittemplateidx", idx)
+
+            local n = templates[idx] and templates[idx].name or ""
+            UIDropDownMenu_SetText(t, n)
+
             local v = templates[idx] and templates[idx].value or ""
             editDebitTemplate:SetText(v)
         end
@@ -310,6 +314,7 @@ RegEvent("ADDON_LOADED", function()
 
                 if #templates == 0 then
                     UIDropDownMenu_SetSelectedValue(t, nil)
+                    UIDropDownMenu_SetText(t, "")
                     editDebitTemplate:SetText("")
                 else
                     onclick({value = #templates})
