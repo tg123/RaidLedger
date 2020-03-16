@@ -255,6 +255,17 @@ function GUI:Init()
     end
     --
 
+    do
+        local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
+        b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+        b:SetPoint("BOTTOMLEFT", f, 195, 60)
+        b.text:SetText(L["Round per member credit down"])
+
+        self.rouddownCheck = b
+    end
+    --
+
     -- sum
     do
         local t = f:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -861,7 +872,10 @@ function GUI:Init()
 
                 EasyMenu(channelTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
             else
-                GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), channel, IsControlKeyDown())
+                GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), channel, {
+                    short = IsControlKeyDown(),
+                    rounddown = GUI.rouddownCheck:GetChecked(),
+                })
             end
         end)
 
@@ -903,7 +917,9 @@ function GUI:Init()
                 b:SetText(L["Close text export"])
             end
 
-            exportEditbox:SetText(GenExport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber()))
+            exportEditbox:SetText(GenExport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), {
+                rounddown = self.rouddownCheck:GetChecked()
+            }))
         end)
     end
 

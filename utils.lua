@@ -167,7 +167,7 @@ local function GenExportLine(item, c)
     return s
 end
 
-ADDONSELF.genexport = function(items, n)
+ADDONSELF.genexport = function(items, n, conf)
     local s = L["Raid Ledger"] .. CRLF
     s = s .. L["Feedback"] .. ": farmer1992@gmail.com" .. CRLF
     s = s .. CRLF
@@ -177,6 +177,10 @@ ADDONSELF.genexport = function(items, n)
     end
 
     local profit, avg, revenue, expense  = calcavg(items, n, l, l)
+
+    if conf.rounddown then
+        avg = math.floor(avg / 10000) * 10000
+    end
 
     revenue = GetMoneyStringL(revenue)
     expense = GetMoneyStringL(expense)
@@ -188,12 +192,12 @@ ADDONSELF.genexport = function(items, n)
     s = s .. L["Expense"] .. ":" .. expense .. CRLF
     s = s .. L["Net Profit"] .. ":" .. profit .. CRLF
     s = s .. L["Split into"] .. ":" .. n .. CRLF
-    s = s .. L["Gain per member"] .. ":" .. avg .. CRLF
+    s = s .. L["Per Member credit"] .. ":" .. avg .. (conf.rounddown and (" (" .. L["Round down"] .. ")") or "") .. CRLF
 
     return s
 end
 
-ADDONSELF.genreport = function(items, n, channel, short)
+ADDONSELF.genreport = function(items, n, channel, conf)
     local lines = {}
     local grp = {}
 
@@ -313,10 +317,14 @@ ADDONSELF.genreport = function(items, n, channel, short)
         end
     end
 
-    if short then
+    if conf.short then
         wipe(lines)
     end
 
+    if conf.rounddown then
+        avg = math.floor(avg / 10000) * 10000
+    end
+    
     revenue = GetMoneyStringL(revenue)
     expense = GetMoneyStringL(expense)
     profit = GetMoneyStringL(profit)
@@ -326,7 +334,7 @@ ADDONSELF.genreport = function(items, n, channel, short)
     table.insert(lines, L["Expense"] .. ": " .. expense)
     table.insert(lines, L["Net Profit"] .. ": " .. profit)
     table.insert(lines, L["Split into"]  .. ": " .. n)
-    table.insert(lines, "RaidLedger: ..." .. L["Per Member credit"] .. ": [" .. avg .. " ]...")
+    table.insert(lines, "RaidLedger: ..." .. L["Per Member credit"] .. ": [" .. avg .. (conf.rounddown and (" (" .. L["Round down"] .. ")]...") or "]..."))
 
     local SendToChat = SendToCurrrentChannel
     if channel then
