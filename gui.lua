@@ -422,7 +422,6 @@ function GUI:Init()
             for _, name in pairs({
                 L["Compensation: Tank"],
                 L["Compensation: Healer"],
-                L["Compensation: Aqual Quintessence"],
                 L["Compensation: Repait Bot"],
                 L["Compensation: DPS"],
                 L["Compensation: Other"],
