@@ -233,6 +233,16 @@ function GUI:Init()
         t:SetScript("OnTextChanged", function() self:UpdateSummary() end)
         t:SetScript("OnChar", mustnumber)
 
+        local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
+        b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+        b:SetPoint("RIGHT", t, 40, 0)
+        b.text:SetText(L["Lock"])
+
+        t.islocked = function()
+            return b:GetChecked()
+        end
+
         self.countEdit = t
     end
 
@@ -246,7 +256,11 @@ function GUI:Init()
                 return
             end
             t:SetText(L["Split into (Current %d)"]:format(n))
-            self.countEdit:SetText(n)
+
+            if not self.countEdit.islocked() then
+                self.countEdit:SetText(n)
+            end
+
             last = GetRosterNumber()
         end
         update()
