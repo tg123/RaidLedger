@@ -122,7 +122,7 @@ local function CreateCellUpdate(cb)
         local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, table)
 
         if entry then
-            cb(cellFrame, entry, idx)
+            cb(cellFrame, entry, idx, rowFrame)
         end
     end
 end
@@ -234,9 +234,6 @@ function GUI:Init()
         t:SetScript("OnChar", mustnumber)
 
         local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
-        -- b:SetNormalTexture("Interface\\Buttons\\LockButton-UnLocked-Up")
-        -- b:SetPushedTexture("Interface\\Buttons\\LockButton-UnLocked-Down")
-        -- b:SetCheckedTexture("Interface\\Buttons\\LockButton-Locked-Up")
         b:SetPoint("RIGHT", t, 40, 0)
 
         b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -527,7 +524,7 @@ function GUI:Init()
             end)
         end
 
-        local iconUpdate = CreateCellUpdate(function(cellFrame, entry)
+        local iconUpdate = CreateCellUpdate(function(cellFrame, entry, idx, rowFrame)
             local tooltip = self.itemtooltip
             if not (cellFrame.cellItemTexture) then
                 cellFrame.cellItemTexture = cellFrame:CreateTexture()
@@ -537,6 +534,31 @@ function GUI:Init()
                 cellFrame.cellItemTexture:SetWidth(30)
                 cellFrame.cellItemTexture:SetHeight(30)
             end
+
+            if not cellFrame.lockcheck then
+                cellFrame.lockcheck = CreateFrame("CheckButton", nil, cellFrame, "UICheckButtonTemplate")
+                cellFrame.lockcheck:SetNormalTexture("Interface\\Buttons\\LockButton-UnLocked-Up")
+                cellFrame.lockcheck:SetPushedTexture("Interface\\Buttons\\LockButton-UnLocked-Down")
+                cellFrame.lockcheck:SetCheckedTexture("Interface\\Buttons\\LockButton-Locked-Up")
+                cellFrame.lockcheck:SetPoint("LEFT", cellFrame, "LEFT", -20, 0)
+
+                cellFrame.lockcheck:SetScript("OnClick", function()
+                    
+                    for _, c in pairs(rowFrame.cols) do
+                        if c.textBox then
+                            if cellFrame.lockcheck:GetChecked() then
+                                c.textBox:Disable()
+                                entry["lock"] = true
+                            else
+                                c.textBox:Enable()
+                                entry["lock"] = false
+                            end
+                        end
+                    end
+                end)
+            end
+
+            cellFrame.lockcheck:SetChecked(entry["lock"])
 
             cellFrame:SetScript("OnEnter", nil)
 
