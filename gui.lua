@@ -234,10 +234,27 @@ function GUI:Init()
         t:SetScript("OnChar", mustnumber)
 
         local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
+        -- b:SetNormalTexture("Interface\\Buttons\\LockButton-UnLocked-Up")
+        -- b:SetPushedTexture("Interface\\Buttons\\LockButton-UnLocked-Down")
+        -- b:SetCheckedTexture("Interface\\Buttons\\LockButton-Locked-Up")
+        b:SetPoint("RIGHT", t, 40, 0)
+
         b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
-        b:SetPoint("RIGHT", t, 40, 0)
-        b.text:SetText(L["Lock"])
+        b.text:SetText(L["Input only"])
+
+        local tooltip = GUI.commtooltip
+
+        b:SetScript("OnEnter", function()
+            tooltip:SetOwner(b, "ANCHOR_RIGHT")
+            tooltip:SetText(L["Set split into number when team size changes automatically"])
+            tooltip:Show()
+        end)
+
+        b:SetScript("OnLeave", function()
+            tooltip:Hide()
+            tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+        end)
 
         t.islocked = function()
             return b:GetChecked()
