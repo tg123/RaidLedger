@@ -151,7 +151,27 @@ function db:AddLoot(item, count, beneficiary, cost, force)
         return
     end
 
-    if (itemRarity >= filter) or (force) then
+    if force then
+        self:AddEntry(TYPE_CREDIT, {
+            item = itemLink,
+            type = DETAIL_TYPE_ITEM,
+            count = count or 1,
+        }, beneficiary, cost)
+    end
+
+    if itemRarity >= filter then
+        -- TODO bad smell code
+        local ledger = self:GetCurrentLedger()
+        for _, entry in pairs(ledger["items"]) do
+            if entry.detail then
+                if entry.detail.item == itemLink and entry.beneficiary == beneficiary and entry.cost == 0 then
+                    entry.detail.count = entry.detail.count + (count or 1)
+                    self:OnLedgerItemsChange()
+                    return
+                end
+            end
+        end
+
         self:AddEntry(TYPE_CREDIT, {
             item = itemLink,
             type = DETAIL_TYPE_ITEM,
