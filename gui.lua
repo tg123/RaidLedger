@@ -533,6 +533,12 @@ function GUI:Init()
                 cellFrame.cellItemTexture:SetPoint("CENTER", cellFrame.cellItemTexture:GetParent(), "CENTER")
                 cellFrame.cellItemTexture:SetWidth(30)
                 cellFrame.cellItemTexture:SetHeight(30)
+
+                cellFrame.counttext = cellFrame:CreateFontString(nil, 'OVERLAY')
+                cellFrame.counttext:SetFontObject('NumberFontNormal')
+                cellFrame.counttext:SetPoint('BOTTOMRIGHT', -10, 3)
+                cellFrame.counttext:SetJustifyH('RIGHT')
+                
             end
 
             if not cellFrame.lockcheck then
@@ -561,6 +567,7 @@ function GUI:Init()
             cellFrame.lockcheck:SetChecked(entry["lock"])
 
             cellFrame:SetScript("OnEnter", nil)
+            cellFrame.counttext:Hide()
 
             if entry["type"] == "DEBIT" then
                 cellFrame.cellItemTexture:SetTexture(135768) -- minus
@@ -589,6 +596,11 @@ function GUI:Init()
                         tooltip:SetOwner(UIParent, "ANCHOR_NONE")
                     end)
 
+                end
+
+                if detail["count"] then
+                    cellFrame.counttext:SetText(detail["count"])
+                    cellFrame.counttext:Show()
                 end
             end
         end)
