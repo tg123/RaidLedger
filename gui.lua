@@ -570,8 +570,18 @@ function GUI:Init()
 
             if not cellFrame.stackHook then
                 cellFrame.SplitStack = function(owner, split)
-                    cellFrame.curEntry["detail"]["count"] = split
-                    cellFrame.counttext:SetText(split)
+                    local cur = owner.curEntry
+
+                    if IsShiftKeyDown() then
+                        local left = math.max(1, cur["detail"]["count"] - split)
+                        cur["detail"]["count"] = left
+                        owner.counttext:SetText(left)
+
+                        Database:AddLoot(cur["detail"]["item"], split, cur["beneficiary"], 0, true)
+                    else
+                        cur["detail"]["count"] = split
+                        owner.counttext:SetText(split)
+                    end
                 end
                 
                 cellFrame:SetScript("OnClick", function()
