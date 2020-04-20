@@ -526,19 +526,23 @@ function GUI:Init()
 
         local iconUpdate = CreateCellUpdate(function(cellFrame, entry, idx, rowFrame)
             local tooltip = self.itemtooltip
-            if not (cellFrame.cellItemTexture) then
+            
+            cellFrame.curEntry = entry
+
+            if not cellFrame.cellItemTexture then
                 cellFrame.cellItemTexture = cellFrame:CreateTexture()
                 cellFrame.cellItemTexture:SetTexCoord(0, 1, 0, 1)
                 cellFrame.cellItemTexture:Show()
                 cellFrame.cellItemTexture:SetPoint("CENTER", cellFrame.cellItemTexture:GetParent(), "CENTER")
                 cellFrame.cellItemTexture:SetWidth(30)
                 cellFrame.cellItemTexture:SetHeight(30)
+            end
 
+            if not cellFrame.counttext then
                 cellFrame.counttext = cellFrame:CreateFontString(nil, 'OVERLAY')
                 cellFrame.counttext:SetFontObject('NumberFontNormal')
                 cellFrame.counttext:SetPoint('BOTTOMRIGHT', -10, 3)
                 cellFrame.counttext:SetJustifyH('RIGHT')
-                
             end
 
             if not cellFrame.lockcheck then
@@ -563,6 +567,25 @@ function GUI:Init()
                     end
                 end)
             end
+
+            if not cellFrame.stackHook then
+                cellFrame.SplitStack = function(owner, split)
+                    cellFrame.curEntry["detail"]["count"] = split
+                    cellFrame.counttext:SetText(split)
+                end
+                
+                cellFrame:SetScript("OnClick", function()
+                    if cellFrame.curEntry["detail"]["type"] == "ITEM" then
+                        OpenStackSplitFrame(999, cellFrame, "BOTTOMLEFT", "TOPLEFT", 1)
+                        StackSplitText:SetText(cellFrame.curEntry["detail"]["count"])
+                        StackSplitFrame.split = cellFrame.curEntry["detail"]["count"]
+                        UpdateStackSplitFrame(999)
+                    end
+                end)
+
+                cellFrame.stackHook = true
+            end
+
 
             cellFrame.lockcheck:SetChecked(entry["lock"])
 
