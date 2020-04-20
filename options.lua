@@ -28,7 +28,7 @@ RegEvent("ADDON_LOADED", function()
 
         local tt = t:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         tt:SetPoint("BOTTOMLEFT", t, "TOPLEFT", 20, 0)
-        tt:SetText(L["Auto record quality"])
+        tt:SetText(L["Auto recording quality"])
 
         local onclick = function(self)
             UIDropDownMenu_SetSelectedValue(t, self.value)
@@ -386,6 +386,51 @@ RegEvent("ADDON_LOADED", function()
             end)
         end
 
+        local editDebitTemplate
+        do
+            local t = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
+
+            local tt = t:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            tt:SetPoint("BOTTOMLEFT", t, "TOPLEFT", 10, 0)
+            tt:SetText(L["Auto recording blacklist"])
+
+            t:SetPoint("TOPLEFT", f, 25, -400)
+            t:SetWidth(550)
+            t:SetHeight(100)
+            t:SetBackdrop({ 
+                bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+                edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+                tile = true,
+                tileEdge = true,
+                tileSize = 16,
+                edgeSize = 16,
+                insets = { left = 2, right = 2, top = 2, bottom = 2 },    
+            })
+            t:SetBackdropColor(0, 0, 0);
+        
+    
+            local edit = CreateFrame("EditBox", nil, t)
+            edit.cursorOffset = 0
+            edit:SetTextInsets(20, 20, 20, 20)
+            edit:SetWidth(500)
+            edit:SetHeight(150)
+            edit:SetAutoFocus(false)
+            edit:EnableMouse(true)
+            edit:SetMaxLetters(99999999)
+            edit:SetMultiLine(true)
+            edit:SetFontObject(GameTooltipText)
+            edit:SetScript("OnTextChanged", function(self)
+                ScrollingEdit_OnTextChanged(self, t)
+                Database:SetConfig("filteritems", edit:GetText())
+            end)
+            edit:SetScript("OnCursorChanged", ScrollingEdit_OnCursorChanged)
+            edit:SetScript("OnEscapePressed", edit.ClearFocus)
+    
+            t:SetScrollChild(edit)
+
+            edit:SetText(Database:GetConfigOrDefault("filteritems", GetItemInfo(14344)))
+        end    
+    
           
     end
 

@@ -142,8 +142,28 @@ function db:AddDebit(reason, beneficiary, cost, costtype)
     }, beneficiary, cost, costtype)
 end
 
+local function GetFilteritemsSet(s)
+    local set = {}
+
+    s = string.gsub(s,"(#.[^\n]*\n)", "")
+
+    for _, line in ipairs({strsplit("\n", s)}) do
+        line = strtrim(line, " \t\r\n[]")
+        set[line] = true
+
+        local itemName = GetItemInfo(line)
+
+        if itemName then
+            set[itemName] = true
+        end
+
+    end
+
+    return set
+end
+
 function db:AddLoot(item, count, beneficiary, cost, force)
-    local _, itemLink, itemRarity = GetItemInfo(item)
+    local itemName, itemLink, itemRarity = GetItemInfo(item)
 
     local filter = self:GetConfigOrDefault("filterlevel", LE_ITEM_QUALITY_RARE)
 
@@ -157,9 +177,14 @@ function db:AddLoot(item, count, beneficiary, cost, force)
             type = DETAIL_TYPE_ITEM,
             count = count or 1,
         }, beneficiary, cost)
-    end
+    elseif itemRarity >= filter then
 
-    if itemRarity >= filter then
+        local s = GetFilteritemsSet(self:GetConfigOrDefault("filteritems", ""))
+
+        if s[itemName] then
+            return
+        end
+
         -- TODO bad smell code
         local ledger = self:GetCurrentLedger()
         for _, entry in pairs(ledger["items"]) do
