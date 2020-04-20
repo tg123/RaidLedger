@@ -65,9 +65,7 @@ RegEvent("CHAT_MSG_LOOT", function(chatmsg)
     end
     -- if code reaches this point, we should have a valid looter and a valid itemLink
     -- print(itemLink)
-    for _ = 1, itemCount do
-        Database:AddLoot(itemLink, 1, playerName, 0);
-    end
+    Database:AddLoot(itemLink, itemCount, playerName, 0);
 end)
 
 -- RegEvent("ADDON_LOADED", function()
