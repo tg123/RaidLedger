@@ -61,14 +61,12 @@ function GUI:Hide()
     self.mainframe:Hide()
 end
 
-function GUI:Summary()
-    return calcavg(Database:GetCurrentLedger()["items"], self:GetSplitNumber())
-end
-
 local CRLF = ADDONSELF.CRLF
 
 function GUI:UpdateSummary()
-    local profit, avg, revenue, expense = self:Summary()
+    local profit, avg, revenue, expense = calcavg(Database:GetCurrentLedger()["items"], self:GetSplitNumber(), nil, nil, {
+        rounddown = GUI.rouddownCheck:GetChecked(),
+    })
 
     self.summaryLabel:SetText(L["Revenue"] .. " " .. GetMoneyString(revenue) .. CRLF
                            .. L["Expense"] .. " " .. GetMoneyString(expense) .. CRLF
@@ -289,6 +287,7 @@ function GUI:Init()
         b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
         b:SetPoint("BOTTOMLEFT", f, 195, 60)
         b.text:SetText(L["Round per member credit down"])
+        b:SetScript("OnClick", function() GUI:UpdateSummary() end)
 
         self.rouddownCheck = b
     end
@@ -1089,7 +1088,9 @@ RegEvent("ADDON_LOADED", function()
                         members[b].cost = members[b].cost + cost
                         teamtotal = teamtotal + cost
                     end
-                end)
+                end, {
+                    rounddown = GUI.rouddownCheck:GetChecked(),
+                })
 
                 teamtotal = teamtotal + c * avg
 

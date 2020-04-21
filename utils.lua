@@ -58,9 +58,10 @@ local CRLF = "\r\n"
 
 ADDONSELF.CRLF = CRLF
 
-local calcavg = function(items, n, oncredit, ondebit)
+local calcavg = function(items, n, oncredit, ondebit, conf)
     oncredit = oncredit or noop
     ondebit  = ondebit or noop
+    conf = conf or {}
 
     local revenue = 0
     local expense = 0
@@ -122,6 +123,10 @@ local calcavg = function(items, n, oncredit, ondebit)
         avg = math.floor( avg )
     end
 
+    if conf.rounddown then
+        avg = math.floor(avg / 10000) * 10000
+    end
+
     do
         -- recalculate expense
         for _, item in pairs(mulAvgItems) do
@@ -176,11 +181,9 @@ ADDONSELF.genexport = function(items, n, conf)
         s = s .. GenExportLine(item, c) .. CRLF
     end
 
-    local profit, avg, revenue, expense  = calcavg(items, n, l, l)
-
-    if conf.rounddown then
-        avg = math.floor(avg / 10000) * 10000
-    end
+    local profit, avg, revenue, expense  = calcavg(items, n, l, l, {
+        rounddown = conf.rounddown,
+    })
 
     revenue = GetMoneyStringL(revenue)
     expense = GetMoneyStringL(expense)
@@ -249,7 +252,9 @@ ADDONSELF.genreport = function(items, n, channel, conf)
         grp[l]["compensation"] = grp[l]["compensation"] + c
         table.insert( grp[l]["citems"], s)
         -- table.insert(lines, s)
-    end)
+    end, {
+        rounddown = conf.rounddown,
+    })
 
 
     local looter = {}
@@ -319,10 +324,6 @@ ADDONSELF.genreport = function(items, n, channel, conf)
 
     if conf.short then
         wipe(lines)
-    end
-
-    if conf.rounddown then
-        avg = math.floor(avg / 10000) * 10000
     end
     
     revenue = GetMoneyStringL(revenue)
