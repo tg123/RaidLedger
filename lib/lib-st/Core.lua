@@ -636,6 +636,7 @@ do
 		st.SetDisplayCols = SetDisplayCols;
 		st.SetData = SetData;
 		st.SortData = SortData;
+		st.BeforeSortDataUI = nil;
 		st.CompareSort = CompareSort;
 		st.RegisterEvents = RegisterEvents;
 		st.FireUserEvent = FireUserEvent;
@@ -702,6 +703,9 @@ do
 							sortorder = lib.SORT_ASC;
 						end
 						cols[column].sort = sortorder;
+						if table.BeforeSortDataUI then
+							table:BeforeSortDataUI()
+						end
 						table:SortData();
 
 					else

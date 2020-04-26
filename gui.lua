@@ -883,6 +883,10 @@ function GUI:Init()
         self.lootLogFrame.head:SetHeight(15)
         self.lootLogFrame.frame:SetPoint("TOPLEFT", f, "TOPLEFT", 30, -50)
 
+        self.lootLogFrame.BeforeSortDataUI = function()
+            self:UpdateLootTableFromDatabase()
+        end
+
         self.lootLogFrame:RegisterEvents({
 
 
