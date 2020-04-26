@@ -636,7 +636,6 @@ do
 		st.SetDisplayCols = SetDisplayCols;
 		st.SetData = SetData;
 		st.SortData = SortData;
-		st.BeforeSortDataUI = nil;
 		st.CompareSort = CompareSort;
 		st.RegisterEvents = RegisterEvents;
 		st.FireUserEvent = FireUserEvent;
@@ -688,36 +687,33 @@ do
 				end
 				return true;
 			end,
-			["OnClick"] = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, button, ...)		-- LS: added "button" argument
-				if button == "LeftButton" then	-- LS: only handle on LeftButton click (right passes thru)
-					if not (row or realrow) then
-						for i, col in ipairs(st.cols) do
-							if i ~= column then -- clear out all other sort marks
-								cols[i].sort = nil;
-							end
-						end
-						local sortorder = lib.SORT_DSC;
-						if not cols[column].sort and cols[column].defaultsort then
-							sortorder = cols[column].defaultsort; -- sort by columns default sort first;
-						elseif cols[column].sort and cols[column].sort == lib.SORT_DSC then
-							sortorder = lib.SORT_ASC;
-						end
-						cols[column].sort = sortorder;
-						if table.BeforeSortDataUI then
-							table:BeforeSortDataUI()
-						end
-						table:SortData();
+			-- ["OnClick"] = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, button, ...)		-- LS: added "button" argument
+			-- 	if button == "LeftButton" then	-- LS: only handle on LeftButton click (right passes thru)
+			-- 		if not (row or realrow) then
+			-- 			for i, col in ipairs(st.cols) do
+			-- 				if i ~= column then -- clear out all other sort marks
+			-- 					cols[i].sort = nil;
+			-- 				end
+			-- 			end
+			-- 			local sortorder = lib.SORT_DSC;
+			-- 			if not cols[column].sort and cols[column].defaultsort then
+			-- 				sortorder = cols[column].defaultsort; -- sort by columns default sort first;
+			-- 			elseif cols[column].sort and cols[column].sort == lib.SORT_DSC then
+			-- 				sortorder = lib.SORT_ASC;
+			-- 			end
+			-- 			cols[column].sort = sortorder;
+			-- 			table:SortData();
 
-					else
-						-- if table:GetSelection() == realrow then
-						-- 	table:ClearSelection();
-						-- else
-						-- 	table:SetSelection(realrow);
-						-- end
-					end
-					return true;
-				end
-			end,
+			-- 		else
+			-- 			if table:GetSelection() == realrow then
+			-- 				table:ClearSelection();
+			-- 			else
+			-- 				table:SetSelection(realrow);
+			-- 			end
+			-- 		end
+			-- 		return true;
+			-- 	end
+			-- end,
 		};
 		st.data = {};
 
