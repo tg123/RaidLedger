@@ -83,24 +83,12 @@ function GUI:UpdateLootTableFromDatabase()
 
     local data = {}
 
-    for id, item in pairs(Database:GetCurrentLedger()["items"]) do
+    for _ in pairs(Database:GetCurrentLedger()["items"]) do
         table.insert(data, 1, {
             ["cols"] = {
                 {
-                    ["value"] = id
+                    ["value"] = #data + 1
                 }, -- id
-                {
-                    ["value"] = id
-                }, -- 
-                {
-                    ["value"] = item["detail"]["item"] or item["detail"]["displayname"]
-                }, -- 
-                {
-                    ["value"] = item["beneficiary"]
-                }, -- 
-                {
-                    ["value"] = item["cost"]
-                }, -- 
             },
         })
     end
@@ -753,7 +741,7 @@ function GUI:Init()
         local setCostType = function(t)
             local entry = valueTypeMenuCtx.entry
             entry["costtype"] = t
-            self:UpdateSummary()
+            self:UpdateLootTableFromDatabase()
         end
 
         local valueTypeMenu = {
@@ -847,7 +835,7 @@ function GUI:Init()
                 end
 
                 entry["cost"] = v
-                GUI:UpdateSummary()
+                GUI:UpdateLootTableFromDatabase()
             end)
 
         end)
@@ -882,10 +870,6 @@ function GUI:Init()
 
         self.lootLogFrame.head:SetHeight(15)
         self.lootLogFrame.frame:SetPoint("TOPLEFT", f, "TOPLEFT", 30, -50)
-
-        self.lootLogFrame.BeforeSortDataUI = function()
-            self:UpdateLootTableFromDatabase()
-        end
 
         self.lootLogFrame:RegisterEvents({
 
