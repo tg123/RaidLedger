@@ -83,12 +83,24 @@ function GUI:UpdateLootTableFromDatabase()
 
     local data = {}
 
-    for _ in pairs(Database:GetCurrentLedger()["items"]) do
+    for id, item in pairs(Database:GetCurrentLedger()["items"]) do
         table.insert(data, 1, {
             ["cols"] = {
                 {
-                    ["value"] = #data + 1
+                    ["value"] = id
                 }, -- id
+                {
+                    ["value"] = id
+                }, -- 
+                {
+                    ["value"] = item["detail"]["item"] or item["detail"]["displayname"]
+                }, -- 
+                {
+                    ["value"] = item["beneficiary"]
+                }, -- 
+                {
+                    ["value"] = item["cost"]
+                }, -- 
             },
         })
     end
@@ -741,7 +753,7 @@ function GUI:Init()
         local setCostType = function(t)
             local entry = valueTypeMenuCtx.entry
             entry["costtype"] = t
-            self:UpdateLootTableFromDatabase()
+            self:UpdateSummary()
         end
 
         local valueTypeMenu = {
@@ -835,7 +847,7 @@ function GUI:Init()
                 end
 
                 entry["cost"] = v
-                GUI:UpdateLootTableFromDatabase()
+                GUI:UpdateSummary()
             end)
 
         end)
