@@ -1123,6 +1123,10 @@ function GUI:Init()
                 cellFrame.textBox:SetAutoFocus(false)
                 cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
                 popOnFocus(cellFrame.textBox)
+
+                if entry["lock"] then
+                    cellFrame.textBox:Disable()
+                end
             end
 
             cellFrame.textBox:Hide()
@@ -1192,6 +1196,10 @@ function GUI:Init()
                 cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
                 AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteRaidRoster)
                 popOnFocus(cellFrame.textBox)
+
+                if entry["lock"] then
+                    cellFrame.textBox:Disable()
+                end                
             end
 
             if not cellFrame.bidButton then
@@ -1270,6 +1278,10 @@ function GUI:Init()
                 cellFrame.textBox:SetAutoFocus(false)
                 cellFrame.textBox:SetMaxLetters(10)
                 cellFrame.textBox:SetScript("OnChar", mustnumber)
+
+                if entry["lock"] then
+                    cellFrame.textBox:Disable()
+                end
             end
             cellFrame.textBox:SetText(tostring(entry["cost"] or 0))
 
