@@ -151,7 +151,7 @@ ADDONSELF.calcavg = calcavg
 local function GenExportLine(item, c)
     local l = item["beneficiary"] or L["[Unknown]"]
     local i = item["detail"]["item"] or ""
-    local c = item["detail"]["count"] or 1
+    local cnt = item["detail"]["count"] or 1
     local d = item["detail"]["displayname"] or ""
     local t = item["type"]
     local ct = item["costtype"]
@@ -164,7 +164,7 @@ local function GenExportLine(item, c)
         n = d or L["Compensation"]
     end
 
-    local s = "[" ..  n .. "] " .. " (" .. c .. ") " .. l .. " " .. GetMoneyStringL(c) 
+    local s = "[" ..  n .. "] " .. " (" .. cnt .. ") " .. l .. " " .. GetMoneyStringL(c) 
 
     if ct == "PROFIT_PERCENT" then
         s = s .. " (" .. (item["cost"] or 0) .. " %" .. L["Net Profit"] .. ")"
@@ -211,7 +211,7 @@ ADDONSELF.genreport = function(items, n, channel, conf)
         local l = item["beneficiary"] or L["[Unknown]"]
         local i = item["detail"]["item"] or ""
         local d = item["detail"]["displayname"] or ""
-        local c = item["detail"]["count"] or 1
+        local cnt = item["detail"]["count"] or 1
         if not grp[l] then
             grp[l] = {
                 ["cost"] = 0,
@@ -226,7 +226,7 @@ ADDONSELF.genreport = function(items, n, channel, conf)
         if not GetItemInfoFromHyperlink(i) then
             i = d
         end
-        table.insert( grp[l]["items"], i .. " (" .. c .. ") " .. GetMoneyStringL(c))
+        table.insert( grp[l]["items"], i .. " (" .. cnt .. ") " .. GetMoneyStringL(c))
 
         -- table.insert(lines, string.format(L["Credit"] .. ": %s -> [%s] %s", i, l, GetMoneyStringL(c)))
 
