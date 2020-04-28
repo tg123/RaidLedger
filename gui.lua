@@ -275,6 +275,8 @@ function GUI:Init()
         end
 
         do
+            local tooltip = self.itemtooltip
+
             local itemTexture = bf:CreateTexture()
             itemTexture:SetTexCoord(0, 1, 0, 1)
             itemTexture:Show()
@@ -282,6 +284,7 @@ function GUI:Init()
             itemTexture:SetWidth(30)
             itemTexture:SetHeight(30)            
             itemTexture:SetTexture(134400)
+
 
             bf.itemTexture = itemTexture
 
@@ -293,13 +296,26 @@ function GUI:Init()
             local itemtext = CreateFrame("Button", nil, bf);
             itemtext.text = itemtext:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
-            itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 0, 0);
-            itemtext:SetPoint('LEFT', itemTexture, "RIGHT", 5, 0)
-            itemtext:SetSize(400, 30)
+            itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 45, 0);
+            itemtext:SetPoint('LEFT', itemTexture, "RIGHT", -40, 0)
+            itemtext:SetSize(30, 30)
             itemtext:EnableMouse(true)
             itemtext:RegisterForClicks("AnyUp")
             itemtext:SetScript("OnClick", function()
                 ChatEdit_InsertLink(itemtext.link)
+            end)
+
+            itemtext:SetScript("OnEnter", function()
+                if itemtext.link then
+                    tooltip:SetOwner(itemtext, "ANCHOR_CURSOR")
+                    tooltip:SetHyperlink(itemtext.link)
+                    tooltip:Show()
+                end
+            end)
+
+            itemtext:SetScript("OnLeave", function()
+                tooltip:Hide()
+                tooltip:SetOwner(itemtext, "ANCHOR_NONE")
             end)
 
             bf.SetItem = function(item, count)
@@ -315,6 +331,8 @@ function GUI:Init()
                 if itemLink then
                     itemtext.link = itemLink
                     itemtext.text:SetText(itemLink)
+                    itemtext:SetWidth(itemtext.text:GetStringWidth() + 45)
+
                 else
                     itemtext.link = nil
                     itemtext.text:SetText(item)
