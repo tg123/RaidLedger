@@ -83,14 +83,17 @@ function GUI:UpdateLootTableFromDatabase()
 
     local data = {}
 
-    for _ in pairs(Database:GetCurrentLedger()["items"]) do
-        table.insert(data, 1, {
-            ["cols"] = {
-                {
-                    ["value"] = #data + 1
-                }, -- id
-            },
-        })
+    for id, item in pairs(Database:GetCurrentLedger()["items"]) do
+
+        if not (self.hidelockedCheck:GetChecked() and item["lock"]) then
+            table.insert(data, 1, {
+                ["cols"] = {
+                    {
+                        ["value"] = id
+                    }, -- id
+                },
+            })
+        end
     end
 
     self.lootLogFrame:SetData(data)
@@ -217,7 +220,21 @@ function GUI:Init()
         end
 
         self:SetText(string.sub(t, 0, #t - 1))
-    end    
+    end
+
+    do
+        local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
+        b:SetPoint("TOPLEFT", f, 25, -10)
+
+        b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+        b.text:SetText(L["Hide locked items"])
+        b:SetScript("OnClick", function()
+            GUI:UpdateLootTableFromDatabase()
+        end)
+
+        self.hidelockedCheck = b
+    end
 
     -- split member and editbox
     do
@@ -557,13 +574,15 @@ function GUI:Init()
                         if c.textBox then
                             if cellFrame.lockcheck:GetChecked() then
                                 c.textBox:Disable()
-                                entry["lock"] = true
+                                cellFrame.curEntry["lock"] = true
                             else
                                 c.textBox:Enable()
-                                entry["lock"] = false
+                                cellFrame.curEntry["lock"] = false
                             end
                         end
                     end
+
+                    GUI:UpdateLootTableFromDatabase()
                 end)
             end
 
