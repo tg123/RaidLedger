@@ -602,8 +602,7 @@ function GUI:Init()
                 local entry = bf.curEntry
                 local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
 
-                SendChatMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting
-                 price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
+                SendChatMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
 
                 ctx.timer = C_Timer.NewTicker(1, function()
                     ctx.countdown = ctx.countdown - 1
