@@ -163,7 +163,8 @@ local function GetFilteritemsSet(s)
 end
 
 function db:AddLoot(item, count, beneficiary, cost, force)
-    local itemName, itemLink, itemRarity = GetItemInfo(item)
+    local itemName, itemLink, itemRarity, _, _, _, _, itemStackCount = GetItemInfo(item)
+    itemStackCount = itemStackCount or 0
 
     local filter = self:GetConfigOrDefault("filterlevel", LE_ITEM_QUALITY_RARE)
 
@@ -189,7 +190,7 @@ function db:AddLoot(item, count, beneficiary, cost, force)
         local ledger = self:GetCurrentLedger()
         for _, entry in pairs(ledger["items"]) do
             if entry.detail then
-                if entry.detail.item == itemLink and entry.beneficiary == beneficiary and entry.cost == 0 then
+                if entry.detail.item == itemLink and entry.beneficiary == beneficiary and entry.cost == 0 and itemStackCount > 1 then
                     entry.detail.count = entry.detail.count + (count or 1)
                     self:OnLedgerItemsChange()
                     return
