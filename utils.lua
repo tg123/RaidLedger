@@ -36,6 +36,8 @@ local function GetMoneyStringL(money, separateThousands)
 
 	return moneyString;
 end
+ADDONSELF.GetMoneyStringL = GetMoneyStringL
+
 
 local function SendToCurrrentChannel(msg)
     local chatType = DEFAULT_CHAT_FRAME.editBox:GetAttribute("chatType")

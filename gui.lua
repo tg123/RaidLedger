@@ -12,6 +12,7 @@ local Print = ADDONSELF.print
 local calcavg = ADDONSELF.calcavg
 local GenExport = ADDONSELF.genexport
 local GenReport = ADDONSELF.genreport
+local GetMoneyStringL = ADDONSELF.GetMoneyStringL
 
 local function GetRosterNumber()
     local all = {}
@@ -382,7 +383,7 @@ function GUI:Init()
 
             s:SetValue(100)
 
-            bf.countdown = s
+            bf.startprice = s
         end
 
         do
@@ -474,7 +475,7 @@ function GUI:Init()
                         s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
                     end)
         
-                    s:SetValue(100)
+                    s:SetValue(50)
                     s:Hide()
         
                     b.slide = s
@@ -524,15 +525,126 @@ function GUI:Init()
         end
 
         do
+            local ctx = nil
+
+         
+
+            local bidprice = function()
+                if not ctx then
+                    return 0
+                end
+
+                local bid = ctx.currentprice
+
+                if ctx.currentwinner then
+                    if ctx.mode == "GOLD" then
+                        bid = bid + ctx.inc * 10000
+                    elseif ctx.mode == "PERCENT" then
+                        bid = math.floor(bid * (1 + (ctx.inc / 100)) / 10000) * 10000
+                    end
+                end
+
+                return bid
+            end
+
+            local evt = function(text, playerName)
+                if not ctx then
+                    return
+                end
+
+                local ask = tonumber(text)
+                if not ask then
+                    return
+                end
+
+                playerName = strsplit("-", playerName)
+                local bid = bidprice() / 10000
+                local entry = bf.curEntry
+                local item = entry["detail"]["item"] or entry["detail"]["displayname"] or ""
+
+                if ask >= bid then
+                    ctx.currentwinner = playerName
+                    ctx.currentprice = ask * 10000
+                    ctx.countdown = bf.countdown:GetValue()
+
+                    SendChatMessage(L["Bid accept"] .. " " .. item .. " " .. L["current price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
+                else
+                    SendChatMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid), "RAID")
+                end
+                
+            end
+
+            RegEvent("CHAT_MSG_RAID_LEADER", evt)
+            RegEvent("CHAT_MSG_RAID", evt)
+
             local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
             b:SetWidth(100)
             b:SetHeight(25)
             b:SetPoint("BOTTOMRIGHT", -40, 15)
             b:SetText(START)
-            -- b:SetScript("OnClick", function() f:Hide() end)
+            b:SetScript("OnClick", function() 
+                if ctx then
+                    bf.CancelBid()
+                    return
+                end
+
+                local mode, inc = bf.GetBidMode()
+                ctx = {
+                    entry = bf.curEntry,
+                    currentprice = bf.startprice:GetValue() * 10000,
+                    currentwinner = nil,
+                    mode = mode,
+                    inc = inc,
+                    countdown = bf.countdown:GetValue(),
+                }
+                b:SetText(CANCEL .. "(" .. ctx.countdown .. ")")
+
+                local entry = bf.curEntry
+                local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
+
+                SendChatMessage(L["Start bid"] .. " " .. item .. " " .. L["Start price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
+
+                ctx.timer = C_Timer.NewTicker(1, function()
+                    ctx.countdown = ctx.countdown - 1
+
+                    b:SetText(CANCEL .. "(" .. ctx.countdown .. ")")
+
+                    if ctx.countdown <= 0 then
+                        ctx.timer:Cancel()
+                        b:SetText(START)
+
+                        if ctx.currentwinner then
+                            SendChatMessage(item .. " " .. L["Hammer Price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Winner"] .. " " .. ctx.currentwinner, "RAID")
+                            ctx.entry["beneficiary"] = ctx.currentwinner
+                            ctx.entry["cost"] = ctx.currentprice / 10000
+                            ctx.entry["lock"] = true
+                            GUI:UpdateLootTableFromDatabase()
+                        else
+                            SendChatMessage(item .. " " .. L["is bought in"], "RAID")
+                        end
+
+                        ctx = nil
+
+                        return
+                    end
+
+                    SendChatMessage(item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " ".. GetMoneyStringL(bidprice()) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)) , "RAID")
+                end)
+            end)
+
+            bf.CancelBid = function()
+                if ctx then
+                    ctx.timer:Cancel()
+                    SendChatMessage(L["Bid canceled"], "RAID")
+                    b:SetText(START)
+                end
+
+                ctx = nil
+            end
         end
 
         bf:Hide()
+        bf:SetScript("OnHide", bf.CancelBid)
 
         self.bidframe = bf
     end
@@ -935,6 +1047,16 @@ function GUI:Init()
 
 
             cellFrame.lockcheck:SetChecked(entry["lock"])
+
+            for _, c in pairs(rowFrame.cols) do
+                if c.textBox then
+                    if cellFrame.lockcheck:GetChecked() then
+                        c.textBox:Disable()
+                    else
+                        c.textBox:Enable()
+                    end
+                end
+            end
 
             cellFrame:SetScript("OnEnter", nil)
             cellFrame.counttext:Hide()
