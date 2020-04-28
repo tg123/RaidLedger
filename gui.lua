@@ -527,6 +527,12 @@ function GUI:Init()
         do
             local ctx = nil
 
+            local currentitem = function()
+                local entry = bf.curEntry
+                local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
+                item = item .. " (" .. entry["detail"]["count"] .. ")"
+                return item
+            end
          
 
             local bidprice = function()
@@ -559,8 +565,7 @@ function GUI:Init()
 
                 playerName = strsplit("-", playerName)
                 local bid = bidprice() / 10000
-                local entry = bf.curEntry
-                local item = entry["detail"]["item"] or entry["detail"]["displayname"] or ""
+                local item = currentitem()
 
                 if ask >= bid then
                     ctx.currentwinner = playerName
@@ -599,8 +604,7 @@ function GUI:Init()
                 }
                 b:SetText(CANCEL .. "(" .. ctx.countdown .. ")")
 
-                local entry = bf.curEntry
-                local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
+                local item = currentitem()
 
                 SendChatMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
 
