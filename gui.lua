@@ -290,14 +290,10 @@ function GUI:Init()
             counttext:SetPoint('BOTTOMRIGHT', itemTexture, -3, 3)
             counttext:SetJustifyH('RIGHT')
 
-            -- counttext:SetText("1")
-
             local itemtext = CreateFrame("Button", nil, bf);
             itemtext.text = itemtext:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            -- itemtext.text:SetAllPoints()
 
             itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 0, 0);
-            -- local itemtext = bf:CreateFontString(nil, "OVERLAY", "GameFontNormal");
             itemtext:SetPoint('LEFT', itemTexture, "RIGHT", 5, 0)
             itemtext:SetSize(400, 30)
             itemtext:EnableMouse(true)
@@ -305,8 +301,6 @@ function GUI:Init()
             itemtext:SetScript("OnClick", function()
                 ChatEdit_InsertLink(itemtext.link)
             end)
-
-            -- itemtext:SetText("aaa")
 
             bf.SetItem = function(item, count)
 
