@@ -567,7 +567,7 @@ function GUI:Init()
                     ctx.currentprice = ask * 10000
                     ctx.countdown = bf.countdown:GetValue()
 
-                    SendChatMessage(L["Bid accept"] .. " " .. item .. " " .. L["current price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
+                    SendChatMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
                 else
                     SendChatMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid), "RAID")
                 end
@@ -602,7 +602,8 @@ function GUI:Init()
                 local entry = bf.curEntry
                 local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
 
-                SendChatMessage(L["Start bid"] .. " " .. item .. " " .. L["Start price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
+                SendChatMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting
+                 price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
 
                 ctx.timer = C_Timer.NewTicker(1, function()
                     ctx.countdown = ctx.countdown - 1
