@@ -154,6 +154,18 @@ local clearAllFocus = (function()
     end
 end)()
 
+local function CreateBidFrame()
+
+    f:EnableMouse(true)
+    f:SetMovable(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetScript("OnDragStart", f.StartMoving)
+    f:SetScript("OnDragStop", f.StopMovingOrSizing)
+    f:SetScript("OnMouseDown", clearAllFocus)
+    f:Hide()
+
+end
+
 function GUI:Init()
 
 
@@ -234,6 +246,295 @@ function GUI:Init()
         end)
 
         self.hidelockedCheck = b
+    end
+
+    -- bid
+    do
+        local bf = CreateFrame("Frame", nil, f)
+        bf:SetWidth(350)
+        bf:SetHeight(300)
+        bf:SetBackdrop({
+            bgFile = "Interface\\FrameGeneral\\UI-Background-Marble",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            -- tile = true,
+            tileSize = 32,
+            edgeSize = 32,
+            insets = {left = 8, right = 8, top = 10, bottom = 10}
+        })
+    
+        -- bf:SetBackdropColor(1, 1, 1, 1)
+        bf:SetPoint("CENTER", f, 0, 0)
+        bf:SetToplevel(true)
+        bf:EnableMouse(true)
+        bf:SetFrameLevel(f:GetFrameLevel() + 10)
+
+        do
+            local b = CreateFrame("Button", nil, bf, "UIPanelCloseButton")
+            b:SetPoint("TOPRIGHT", bf, 0, 0);
+        end
+
+        do
+            local itemTexture = bf:CreateTexture()
+            itemTexture:SetTexCoord(0, 1, 0, 1)
+            itemTexture:Show()
+            itemTexture:SetPoint("TOPLEFT", bf, 20, -20)
+            itemTexture:SetWidth(30)
+            itemTexture:SetHeight(30)            
+            itemTexture:SetTexture(134400)
+
+            bf.itemTexture = itemTexture
+
+            local counttext = bf:CreateFontString(nil, 'OVERLAY')
+            counttext:SetFontObject('NumberFontNormal')
+            counttext:SetPoint('BOTTOMRIGHT', itemTexture, -3, 3)
+            counttext:SetJustifyH('RIGHT')
+
+            -- counttext:SetText("1")
+
+            local itemtext = CreateFrame("Button", nil, bf);
+            itemtext.text = itemtext:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            -- itemtext.text:SetAllPoints()
+
+            itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 0, 0);
+            -- local itemtext = bf:CreateFontString(nil, "OVERLAY", "GameFontNormal");
+            itemtext:SetPoint('LEFT', itemTexture, "RIGHT", 5, 0)
+            itemtext:SetSize(400, 30)
+            itemtext:EnableMouse(true)
+            itemtext:RegisterForClicks("AnyUp")
+            itemtext:SetScript("OnClick", function()
+                ChatEdit_InsertLink(itemtext.link)
+            end)
+
+            -- itemtext:SetText("aaa")
+
+            bf.SetItem = function(item, count)
+
+                counttext:SetText("1")
+
+                if tonumber(count) then
+                    counttext:SetText(count)
+                end
+                itemTexture:SetTexture(134400)
+
+                local _, itemLink = GetItemInfo(item)
+                if itemLink then
+                    itemtext.link = itemLink
+                    itemtext.text:SetText(itemLink)
+                else
+                    itemtext.link = nil
+                    itemtext.text:SetText(item)
+                end
+
+                local itemTexture =  GetItemIcon(item)
+
+                if itemTexture then
+                    bf.itemTexture:SetTexture(itemTexture)
+                end
+            end
+
+        end
+
+        do
+            local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+            s:SetOrientation('HORIZONTAL')
+            s:SetHeight(14)
+            s:SetWidth(160)
+            s:SetMinMaxValues(5, 30)
+            s:SetValueStep(1)
+            s.Low:SetText(SecondsToTime(5))
+            s.High:SetText(SecondsToTime(30))
+    
+            local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+            l:SetText(L["Count down time"])
+
+            s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -70)
+
+            s:SetScript("OnValueChanged", function(self, value)
+                s.Text:SetText(SecondsToTime(value))
+            end)
+
+            s:SetValue(10)
+
+            bf.countdown = s
+        end
+
+        do
+            local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+            s:SetOrientation('HORIZONTAL')
+            s:SetHeight(14)
+            s:SetWidth(160)
+            s:SetMinMaxValues(50, 1000)
+            s:SetValueStep(1)
+            s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(50))
+            s.High:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(1000))
+    
+            local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+            l:SetText(L["Starting price"])
+
+            s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -120)
+
+            s:SetScript("OnValueChanged", function(self, value)
+                value = math.floor(value)
+                s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
+            end)
+
+            s:SetValue(100)
+
+            bf.countdown = s
+        end
+
+        do
+            local l = bf:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            l:SetPoint("TOPLEFT", bf, 20, -160)
+            l:SetText(L["Bid mode"])
+
+            local usegold
+            local usepercent
+
+            local ensurechecked = function(self)
+                if self == usegold then
+                    usepercent:SetChecked(not usegold:GetChecked())
+                    return
+                end
+
+                if self == usepercent then
+                    usegold:SetChecked(not usepercent:GetChecked())
+                    return
+                end
+
+                if usegold:GetChecked() then
+                    usepercent:SetChecked(false)
+                    return
+                end
+
+                if usepercent:GetChecked() then
+                    usegold:SetChecked(false)
+                    return
+                end
+
+                usegold:SetChecked(true)
+                usepercent:SetChecked(false)
+            end
+
+            bf.GetBidMode = function()
+                if usegold:GetChecked() then
+                    return "GOLD", usegold.slide:GetValue()
+                end
+
+                if usepercent:GetChecked() then
+                    return "PERCENT", usepercent.slide:GetValue()
+                end                
+            end
+
+            local ensureone = function(self)
+                ensurechecked(self)
+                usegold.slide:Hide()
+                usepercent.slide:Hide()
+
+                if usegold:GetChecked() then
+                    usegold.slide:Show()
+                end
+
+                if usepercent:GetChecked() then
+                    usepercent.slide:Show()
+                end                
+            end
+
+            do
+                local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
+                b:SetPoint("TOPLEFT", bf, 30 + l:GetStringWidth(), -150)
+        
+                b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+                b.text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(""))
+                b:SetScript("OnClick", ensureone)
+
+                usegold = b
+
+                do
+                    local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+                    s:SetOrientation('HORIZONTAL')
+                    s:SetHeight(14)
+                    s:SetWidth(160)
+                    s:SetMinMaxValues(50, 1000)
+                    s:SetValueStep(1)
+                    s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(50))
+                    s.High:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(1000))
+            
+                    local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                    l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+                    l:SetText(L["Bid increment"])
+        
+                    s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -200)
+        
+                    s:SetScript("OnValueChanged", function(self, value)
+                        value = math.floor(value)
+                        s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
+                    end)
+        
+                    s:SetValue(100)
+                    s:Hide()
+        
+                    b.slide = s
+                end                
+            end
+
+            do
+                local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
+                b:SetPoint("TOPLEFT", bf, 90 + l:GetStringWidth(), -150)
+        
+                b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+                b.text:SetText("%")
+                b:SetScript("OnClick", ensureone)
+
+                usepercent = b
+
+                do
+                    local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+                    s:SetOrientation('HORIZONTAL')
+                    s:SetHeight(14)
+                    s:SetWidth(160)
+                    s:SetMinMaxValues(1, 100)
+                    s:SetValueStep(1)
+                    s.Low:SetText("1%")
+                    s.High:SetText("100%")
+            
+                    local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                    l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+                    l:SetText(L["Bid increment"])
+        
+                    s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -200)
+        
+                    s:SetScript("OnValueChanged", function(self, value)
+                        value = math.floor(value)
+                        s.Text:SetText(value .. "%")
+                    end)
+        
+                    s:SetValue(10)
+                    s:Hide()
+        
+                    b.slide = s
+                end                
+            end
+
+            ensureone()
+        end
+
+        do
+            local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+            b:SetWidth(100)
+            b:SetHeight(25)
+            b:SetPoint("BOTTOMRIGHT", -40, 15)
+            b:SetText(START)
+            -- b:SetScript("OnClick", function() f:Hide() end)
+        end
+
+        bf:Hide()
+
+        self.bidframe = bf
     end
 
     -- split member and editbox
@@ -540,6 +841,24 @@ function GUI:Init()
             end)
         end
 
+        local bidframe = self.bidframe
+        local bidClick = function(self)
+
+            if bidframe:IsShown() then
+                return
+            end
+
+            local entry = self:GetParent().curEntry
+
+            local item = entry["detail"]["item"] or entry["detail"]["displayname"]
+
+            if item and item ~= "" then
+                bidframe.SetItem(item, entry["detail"]["count"])
+                bidframe.curEntry = entry
+                bidframe:Show()
+            end
+        end
+
         local iconUpdate = CreateCellUpdate(function(cellFrame, entry, idx, rowFrame)
             local tooltip = self.itemtooltip
             
@@ -726,7 +1045,7 @@ function GUI:Init()
         end)
 
         local beneficiaryUpdate = CreateCellUpdate(function(cellFrame, entry)
-            if not (cellFrame.textBox) then
+            if not cellFrame.textBox then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
                 cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
                 cellFrame.textBox:SetWidth(120)
@@ -735,6 +1054,14 @@ function GUI:Init()
                 cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
                 AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteRaidRoster)
                 popOnFocus(cellFrame.textBox)
+            end
+
+            if not cellFrame.bidButton then
+                cellFrame.bidButton = CreateFrame("Button", nil, cellFrame, "GameMenuButtonTemplate")
+                cellFrame.bidButton:SetPoint("LEFT", cellFrame.textBox, "RIGHT", 10, 0)
+                cellFrame.bidButton:SetSize(25, 25)
+                cellFrame.bidButton:SetText("B")
+                cellFrame.bidButton:SetScript("OnClick", bidClick)
             end
 
             cellFrame.textBox.customTextChangedCallback = function(t)
@@ -752,7 +1079,13 @@ function GUI:Init()
                 return true
             end
 
+            cellFrame.curEntry = entry
             cellFrame.textBox:SetText(entry.beneficiary or "")
+            cellFrame.bidButton:Hide()
+
+            if entry["type"] == "CREDIT" then
+                cellFrame.bidButton:Show()
+            end
         end)
 
 
