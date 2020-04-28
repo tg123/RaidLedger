@@ -1466,6 +1466,7 @@ function GUI:Init()
         local lootLogFrame = self.lootLogFrame
         local exportEditbox = self.exportEditbox
         local countEdit = self.countEdit
+        local hidelockedCheck = self.hidelockedCheck
 
         local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
         b:SetWidth(120)
@@ -1476,11 +1477,13 @@ function GUI:Init()
             if exportEditbox:GetParent():IsShown() then
                 lootLogFrame:Show()
                 countEdit:Show()
+                hidelockedCheck:Show()
                 exportEditbox:GetParent():Hide()
                 b:SetText(L["Export as text"])
             else
-                countEdit:Hide()
                 lootLogFrame:Hide()
+                countEdit:Hide()
+                hidelockedCheck:Hide()
                 exportEditbox:GetParent():Show()
                 b:SetText(L["Close text export"])
             end
