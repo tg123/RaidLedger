@@ -352,10 +352,10 @@ function GUI:Init()
             s:SetOrientation('HORIZONTAL')
             s:SetHeight(14)
             s:SetWidth(160)
-            s:SetMinMaxValues(5, 30)
+            s:SetMinMaxValues(5, 60)
             s:SetValueStep(1)
             s.Low:SetText(SecondsToTime(5))
-            s.High:SetText(SecondsToTime(30))
+            s.High:SetText(SecondsToTime(60))
     
             local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             l:SetPoint("RIGHT", s, "LEFT", -20, 1)
@@ -367,7 +367,7 @@ function GUI:Init()
                 s.Text:SetText(SecondsToTime(value))
             end)
 
-            s:SetValue(10)
+            s:SetValue(20)
 
             bf.countdown = s
         end
@@ -565,6 +565,14 @@ function GUI:Init()
                 return bid
             end
 
+            local SendRaidMessage = function(text)
+                if UnitIsGroupLeader('player') or UnitIsGroupAssistant('player') then
+                    SendChatMessage(text, "RAID_WARNING")
+                else
+                    SendChatMessage(text, "RAID")
+                end
+            end
+
             local evt = function(text, playerName)
                 if not ctx then
                     return
@@ -584,9 +592,9 @@ function GUI:Init()
                     ctx.currentprice = ask * 10000
                     ctx.countdown = bf.countdown:GetValue()
 
-                    SendChatMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
+                    SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " " .. GetMoneyStringL(bidprice()))
                 else
-                    SendChatMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid), "RAID")
+                    SendRaidMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid * 10000))
                 end
                 
             end
@@ -618,7 +626,7 @@ function GUI:Init()
 
                 local item = currentitem()
 
-                SendChatMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice), "RAID")
+                SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice))
 
                 ctx.timer = C_Timer.NewTicker(1, function()
                     ctx.countdown = ctx.countdown - 1
@@ -630,13 +638,13 @@ function GUI:Init()
                         b:SetText(START)
 
                         if ctx.currentwinner then
-                            SendChatMessage(item .. " " .. L["Hammer Price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Winner"] .. " " .. ctx.currentwinner, "RAID")
+                            SendRaidMessage(item .. " " .. L["Hammer Price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Winner"] .. " " .. ctx.currentwinner)
                             ctx.entry["beneficiary"] = ctx.currentwinner
                             ctx.entry["cost"] = ctx.currentprice / 10000
                             ctx.entry["lock"] = true
                             GUI:UpdateLootTableFromDatabase()
                         else
-                            SendChatMessage(item .. " " .. L["is bought in"], "RAID")
+                            SendRaidMessage(item .. " " .. L["is bought in"])
                         end
 
                         ctx = nil
@@ -644,14 +652,16 @@ function GUI:Init()
                         return
                     end
 
-                    SendChatMessage(item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " ".. GetMoneyStringL(bidprice()) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)) , "RAID")
+                    if ctx.countdown <= 5 or (ctx.countdown % 5 == 0) then
+                        SendRaidMessage(item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " ".. GetMoneyStringL(bidprice()) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
+                    end
                 end)
             end)
 
             bf.CancelBid = function()
                 if ctx then
                     ctx.timer:Cancel()
-                    SendChatMessage(L["Bid canceled"], "RAID")
+                    SendRaidMessage(L["Bid canceled"], "RAID")
                     b:SetText(START)
                 end
 
