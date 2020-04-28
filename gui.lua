@@ -530,7 +530,7 @@ function GUI:Init()
             local currentitem = function()
                 local entry = bf.curEntry
                 local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
-                item = item .. " (" .. entry["detail"]["count"] .. ")"
+                item = item .. " (" .. (entry["detail"]["count"] or 1) .. ")"
                 return item
             end
          
