@@ -594,7 +594,7 @@ function GUI:Init()
                     ctx.currentprice = ask * 10000
                     ctx.countdown = bf.countdown:GetValue()
 
-                    SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " " .. GetMoneyStringL(bidprice()))
+                    SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " " .. GetMoneyStringL(bidprice()) .. " ".. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
                 else
                     SendRaidMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid * 10000))
                 end
@@ -669,7 +669,7 @@ function GUI:Init()
 
                     local item = currentitem()
 
-                    SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice))
+                    SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
 
                     ctx.timer = C_Timer.NewTicker(1, function()
                         ctx.countdown = ctx.countdown - 1
@@ -1276,8 +1276,11 @@ function GUI:Init()
                 cellFrame.bidButton = CreateFrame("Button", nil, cellFrame, "GameMenuButtonTemplate")
                 cellFrame.bidButton:SetPoint("LEFT", cellFrame.textBox, "RIGHT", 10, 0)
                 cellFrame.bidButton:SetSize(25, 25)
-                cellFrame.bidButton:SetText("B")
                 cellFrame.bidButton:SetScript("OnClick", bidClick)
+                local icon = cellFrame.bidButton:CreateTexture(nil, 'ARTWORK')
+                icon:SetTexture("Interface\\GroupFrame\\UI-Group-MasterLooter")
+                icon:SetPoint("CENTER", -1, 0)
+                icon:SetSize(15, 15)
             end
 
             cellFrame.textBox.customTextChangedCallback = function(t)
