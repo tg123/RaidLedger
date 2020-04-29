@@ -604,71 +604,129 @@ function GUI:Init()
             RegEvent("CHAT_MSG_RAID_LEADER", evt)
             RegEvent("CHAT_MSG_RAID", evt)
 
-            local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
-            b:SetWidth(100)
-            b:SetHeight(25)
-            b:SetPoint("BOTTOMRIGHT", -40, 15)
-            b:SetText(START)
-            b:SetScript("OnClick", function() 
-                if ctx then
-                    bf.CancelBid()
-                    return
-                end
-
-                local mode, inc = bf.GetBidMode()
-                ctx = {
-                    entry = bf.curEntry,
-                    currentprice = bf.startprice:GetValue() * 10000,
-                    currentwinner = nil,
-                    mode = mode,
-                    inc = inc,
-                    countdown = bf.countdown:GetValue(),
-                }
-                b:SetText(CANCEL .. "(" .. ctx.countdown .. ")")
-
-                local item = currentitem()
-
-                SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice))
-
-                ctx.timer = C_Timer.NewTicker(1, function()
-                    ctx.countdown = ctx.countdown - 1
-
-                    b:SetText(CANCEL .. "(" .. ctx.countdown .. ")")
-
-                    if ctx.countdown <= 0 then
-                        ctx.timer:Cancel()
-                        b:SetText(START)
-
-                        if ctx.currentwinner then
-                            SendRaidMessage(item .. " " .. L["Hammer Price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Winner"] .. " " .. ctx.currentwinner)
-                            ctx.entry["beneficiary"] = ctx.currentwinner
-                            ctx.entry["cost"] = ctx.currentprice / 10000
-                            ctx.entry["lock"] = true
-                            GUI:UpdateLootTableFromDatabase()
-                        else
-                            SendRaidMessage(item .. " " .. L["is bought in"])
+            local moretimebtn
+            local lesstimebtn
+            do
+                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+                b:SetWidth(40)
+                b:SetHeight(25)
+                b:SetPoint("BOTTOMRIGHT", -140, 15)
+                b:SetText("-5s")
+                b:Hide()
+                b:SetScript("OnClick", function()
+                    if ctx then
+                        if ctx.countdown <= 5 then
+                            return
+                        elseif ctx.countdown < 10 then
+                            ctx.countdown = 5
+                        elseif ctx.countdown >= 10 then
+                            ctx.countdown = ctx.countdown - 5 
                         end
+                    end
+                    bf.UpdateButtonCountdown()
+                end)
+                lesstimebtn = b
+            end
 
-                        ctx = nil
+            do
+                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+                b:SetWidth(40)
+                b:SetHeight(25)
+                b:SetPoint("BOTTOMRIGHT", -180, 15)
+                b:SetText("+5s")
+                b:Hide()
+                b:SetScript("OnClick", function()
+                    if ctx then
+                        ctx.countdown = ctx.countdown + 5 
+                    end
+                    bf.UpdateButtonCountdown()
+                end)
+                moretimebtn = b
+            end
 
+            do
+                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+                b:SetWidth(100)
+                b:SetHeight(25)
+                b:SetPoint("BOTTOMRIGHT", -40, 15)
+                b:SetText(START)
+                b:SetScript("OnClick", function() 
+                    if ctx then
+                        bf.CancelBid()
                         return
                     end
 
-                    if ctx.countdown <= 5 or (ctx.countdown % 5 == 0) then
-                        SendRaidMessage(item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " ".. GetMoneyStringL(bidprice()) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
-                    end
-                end)
-            end)
+                    local mode, inc = bf.GetBidMode()
+                    ctx = {
+                        entry = bf.curEntry,
+                        currentprice = bf.startprice:GetValue() * 10000,
+                        currentwinner = nil,
+                        mode = mode,
+                        inc = inc,
+                        countdown = bf.countdown:GetValue(),
+                    }
+                    bf.UpdateButtonCountdown()
 
-            bf.CancelBid = function()
-                if ctx then
-                    ctx.timer:Cancel()
-                    SendRaidMessage(L["Bid canceled"], "RAID")
-                    b:SetText(START)
+                    local item = currentitem()
+
+                    SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice))
+
+                    ctx.timer = C_Timer.NewTicker(1, function()
+                        ctx.countdown = ctx.countdown - 1
+
+                        bf.UpdateButtonCountdown()
+
+                        if ctx.countdown <= 0 then
+                            ctx.timer:Cancel()
+
+                            if ctx.currentwinner then
+                                SendRaidMessage(item .. " " .. L["Hammer Price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Winner"] .. " " .. ctx.currentwinner)
+                                ctx.entry["beneficiary"] = ctx.currentwinner
+                                ctx.entry["cost"] = ctx.currentprice / 10000
+                                ctx.entry["lock"] = true
+                                GUI:UpdateLootTableFromDatabase()
+                            else
+                                SendRaidMessage(item .. " " .. L["is bought in"])
+                            end
+
+                            ctx = nil
+                            bf.UpdateButtonCountdown()
+
+                            return
+                        end
+
+                        if ctx.countdown <= 5 or (ctx.countdown % 5 == 0) then
+                            SendRaidMessage(item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " ".. GetMoneyStringL(bidprice()) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
+                        end
+                    end)
+                end)
+
+                bf.CancelBid = function()
+                    if ctx then
+                        ctx.timer:Cancel()
+                        SendRaidMessage(L["Bid canceled"], "RAID")
+                    end
+
+                    ctx = nil
+                    bf.UpdateButtonCountdown()
                 end
 
-                ctx = nil
+                bf.UpdateButtonCountdown = function()
+                    if ctx then
+                        b:SetText(CANCEL .. "(" .. GREEN_FONT_COLOR:WrapTextInColorCode(ctx.countdown) .. ")")
+                        moretimebtn:Show()
+                        lesstimebtn:Show()
+                    else
+                        b:SetText(START)
+                        moretimebtn:Hide()
+                        lesstimebtn:Hide()
+                    end
+                end
             end
+
+
+
+
         end
 
         bf:Hide()
