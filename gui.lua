@@ -252,8 +252,8 @@ function GUI:Init()
     -- bid
     do
         local bf = CreateFrame("Frame", nil, f)
-        bf:SetWidth(350)
-        bf:SetHeight(300)
+        bf:SetWidth(290)
+        bf:SetHeight(280)
         bf:SetBackdrop({
             bgFile = "Interface\\FrameGeneral\\UI-Background-Marble",
             edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
@@ -283,7 +283,7 @@ function GUI:Init()
             itemTexture:SetPoint("TOPLEFT", bf, 20, -20)
             itemTexture:SetWidth(30)
             itemTexture:SetHeight(30)            
-            itemTexture:SetTexture(134400)
+            itemTexture:SetTexture(134400) -- question mark
 
 
             bf.itemTexture = itemTexture
@@ -293,10 +293,12 @@ function GUI:Init()
             counttext:SetPoint('BOTTOMRIGHT', itemTexture, -3, 3)
             counttext:SetJustifyH('RIGHT')
 
-            local itemtext = CreateFrame("Button", nil, bf);
+            local itemtext = CreateFrame("Button", nil, bf)
             itemtext.text = itemtext:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 45, 0)
+            itemtext.text:SetWidth(230)
+            itemtext.text:SetJustifyH("LEFT")
 
-            itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 45, 0);
             itemtext:SetPoint('LEFT', itemTexture, "RIGHT", -40, 0)
             itemtext:SetSize(30, 30)
             itemtext:EnableMouse(true)
@@ -331,7 +333,7 @@ function GUI:Init()
                 if itemLink then
                     itemtext.link = itemLink
                     itemtext.text:SetText(itemLink)
-                    itemtext:SetWidth(itemtext.text:GetStringWidth() + 45)
+                    itemtext:SetWidth(math.min(230, itemtext.text:GetStringWidth() + 45))
 
                 else
                     itemtext.link = nil
