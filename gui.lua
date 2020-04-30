@@ -674,7 +674,7 @@ function GUI:Init()
                     ctx.currentprice = ask * 10000
                     ctx.countdown = bf.countdown:GetValue()
 
-                    SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " " .. GetMoneyStringL(bidprice()) .. " ".. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
+                    SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " " .. GetMoneyStringL(bidprice()) .. " ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
                 else
                     SendRaidMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid * 10000))
                 end
@@ -686,6 +686,7 @@ function GUI:Init()
 
             local moretimebtn
             local lesstimebtn
+            local controlbtn
             do
                 local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
                 b:SetWidth(40)
@@ -712,7 +713,7 @@ function GUI:Init()
                 local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
                 b:SetWidth(40)
                 b:SetHeight(25)
-                b:SetPoint("BOTTOMRIGHT", -180, 15)
+                b:SetPoint("BOTTOMRIGHT", -230, 15)
                 b:SetText("+5s")
                 b:Hide()
                 b:SetScript("OnClick", function()
@@ -726,10 +727,43 @@ function GUI:Init()
 
             do
                 local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+                b:SetWidth(50)
+                b:SetHeight(25)
+                b:SetPoint("BOTTOMRIGHT", -180, 15)
+                -- b:SetText(L["Pause"])
+                b:Hide()
+                b:SetScript("OnClick", function()
+                    if ctx then
+                        ctx.pause = not ctx.pause
+                    end
+
+                    bf.UpdateButtonCountdown()
+                end)
+                controlbtn = b
+            end
+
+            do
+                
+                local tooltip = GUI.commtooltip
+
+
+                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
                 b:SetWidth(100)
                 b:SetHeight(25)
                 b:SetPoint("BOTTOMRIGHT", -40, 15)
                 b:SetText(START)
+
+                b:SetScript("OnEnter", function()
+                    tooltip:SetOwner(b, "ANCHOR_RIGHT")
+                    tooltip:SetText(L["CTRL + Click to start and then pause timer"])
+                    tooltip:Show()
+                end)
+
+                b:SetScript("OnLeave", function()
+                    tooltip:Hide()
+                    tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                end)
+
                 b:SetScript("OnClick", function() 
                     if ctx then
                         bf.CancelBid()
@@ -745,13 +779,22 @@ function GUI:Init()
                         inc = inc,
                         countdown = bf.countdown:GetValue(),
                     }
+
+                    if IsControlKeyDown() then
+                        ctx.pause = true
+                    end
+
                     bf.UpdateButtonCountdown()
 
                     local item = currentitem()
 
-                    SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
+                    SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
 
                     ctx.timer = C_Timer.NewTicker(1, function()
+                        if ctx.pause then
+                            return
+                        end
+
                         ctx.countdown = ctx.countdown - 1
 
                         bf.UpdateButtonCountdown()
@@ -775,7 +818,12 @@ function GUI:Init()
                             return
                         end
 
-                        if ctx.countdown <= 5 or (ctx.countdown % 5 == 0) then
+                        local sendalert = ctx.countdown <= 5
+                        sendalert = sendalert or (ctx.countdown <= 15 and (ctx.countdown % 5 == 0))
+                        sendalert = sendalert or (ctx.countdown <= 30 and (ctx.countdown % 10 == 0))
+                        sendalert = sendalert or (ctx.countdown % 30 == 0)
+
+                        if sendalert then
                             SendRaidMessage(item .. " " .. L["Current price"] .. " " .. GetMoneyStringL(ctx.currentprice) .. " " .. L["Bid price"] .. " ".. GetMoneyStringL(bidprice()) .. " " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
                         end
                     end)
@@ -796,10 +844,18 @@ function GUI:Init()
                         b:SetText(CANCEL .. "(" .. GREEN_FONT_COLOR:WrapTextInColorCode(ctx.countdown) .. ")")
                         moretimebtn:Show()
                         lesstimebtn:Show()
+                        controlbtn:Show()
+
+                        if ctx.pause then
+                            controlbtn:SetText(L["Go"])
+                        else
+                            controlbtn:SetText(L["Pause"])
+                        end
                     else
                         b:SetText(START)
                         moretimebtn:Hide()
                         lesstimebtn:Hide()
+                        controlbtn:Hide()
                     end
                 end
             end
