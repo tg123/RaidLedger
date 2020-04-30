@@ -347,6 +347,42 @@ function GUI:Init()
 
         end
 
+        local slideShowMoneyFrame = function(self, button)
+            if button == "RightButton" then
+                self:SetValueStep(1)
+                OpenStackSplitFrame(999999, self, "BOTTOMLEFT", "TOPLEFT", 1)
+                StackSplitText:SetText(self:GetValue())
+                StackSplitFrame.split = self:GetValue()
+                UpdateStackSplitFrame(999999)
+            else
+                StackSplitFrame:Hide()
+                self:SetValueStep(self.slidestep)
+                self:SetMinMaxValues(self.slidemin, self.slidemax)
+            end
+
+        end
+
+        local slideMoneySet = function(owner, split)
+            if owner.moneyslide then
+                local min = math.min(split, owner.slidemin)
+                local max = math.max(split, owner.slidemax)
+                owner:SetMinMaxValues(min, max)
+                owner:SetValueStep(1)
+                owner:SetValue(split)
+            end
+        end
+        
+        do
+            hooksecurefunc(StackSplitText, "SetText", function(self, value)
+                if StackSplitFrame.owner.moneyslide then
+                    if not strfind(value, "MoneyFrame") then
+                        self:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
+                    end
+                end
+            end)
+        end
+
+
         do
             local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
             s:SetOrientation('HORIZONTAL')
@@ -373,6 +409,8 @@ function GUI:Init()
         end
 
         do
+            local tooltip = self.commtooltip
+
             local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
             s:SetOrientation('HORIZONTAL')
             s:SetHeight(14)
@@ -392,6 +430,24 @@ function GUI:Init()
             s:SetScript("OnValueChanged", function(self, value)
                 value = math.floor(value)
                 s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
+            end)
+
+            s.moneyslide = true
+            s.SplitStack = slideMoneySet
+            s.slidestep = s:GetValueStep()
+            s.slidemin, s.slidemax = s:GetMinMaxValues()
+            s:SetScript("OnMouseDown", slideShowMoneyFrame)
+            s:SetScript("OnMouseUp", slideShowMoneyFrame)
+
+            s:SetScript("OnEnter", function()
+                tooltip:SetOwner(s, "ANCHOR_RIGHT")
+                tooltip:SetText(L["Right click to fine-tune"])
+                tooltip:Show()
+            end)
+
+            s:SetScript("OnLeave", function()
+                tooltip:Hide()
+                tooltip:SetOwner(UIParent, "ANCHOR_NONE")
             end)
 
             s:SetValue(100)
@@ -468,6 +524,8 @@ function GUI:Init()
                 usegold = b
 
                 do
+                    local tooltip = self.commtooltip
+
                     local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
                     s:SetOrientation('HORIZONTAL')
                     s:SetHeight(14)
@@ -489,6 +547,24 @@ function GUI:Init()
                         s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
                     end)
         
+                    s.moneyslide = true
+                    s.SplitStack = slideMoneySet
+                    s.slidestep = s:GetValueStep()
+                    s.slidemin, s.slidemax = s:GetMinMaxValues()
+                    s:SetScript("OnMouseDown", slideShowMoneyFrame)
+                    s:SetScript("OnMouseUp", slideShowMoneyFrame)
+
+                    s:SetScript("OnEnter", function()
+                        tooltip:SetOwner(s, "ANCHOR_RIGHT")
+                        tooltip:SetText(L["Right click to fine-tune"])
+                        tooltip:Show()
+                    end)
+    
+                    s:SetScript("OnLeave", function()
+                        tooltip:Hide()
+                        tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                    end)
+
                     s:SetValue(50)
                     s:Hide()
         
