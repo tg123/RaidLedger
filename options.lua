@@ -3,7 +3,6 @@ local L = ADDONSELF.L
 local RegEvent = ADDONSELF.regevent
 local Database = ADDONSELF.db
 
-
 local f = CreateFrame("Frame", nil, UIParent)
 f.name = L["Raid Ledger"]
 InterfaceOptions_AddCategory(f)
@@ -101,6 +100,85 @@ RegEvent("ADDON_LOADED", function()
         end)
 
         UIDropDownMenu_SetSelectedValue(t, Database:GetConfigOrDefault("autoaddloot", AUTOADDLOOT_TYPE_RAID))
+    end
+
+    do
+        local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
+        b:SetPoint("TOPLEFT", f, 310, -100)
+
+        b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+        b.text:SetText(L["Minimap Icon"])
+        b:SetChecked(Database:GetConfigOrDefault("minimapicon", true))
+        b:SetScript("OnClick", function()
+            Database:SetConfig("minimapicon", b:GetChecked())
+
+            local icon = LibStub("LibDBIcon-1.0")
+            if b:GetChecked() then
+                icon:Show("RaidLedger")
+            else
+                icon:Hide("RaidLedger")
+            end
+        end)
+    end
+
+    do
+        local raidbutton = nil
+
+        local createbtn = function()
+            if raidbutton then
+                return
+            end
+
+            if _G.RaidFrame then
+                local b = CreateFrame("Button", nil, _G.RaidFrame, "UIPanelButtonTemplate")
+                b:SetWidth(100)
+                b:SetHeight(20)
+                b:SetPoint("TOPRIGHT", -25, 0)
+                b:SetText(L["Raid Ledger"])
+                b:SetScript("OnClick", function()
+                    local GUI = ADDONSELF.gui
+                    if GUI.mainframe:IsShown() then
+                        GUI.mainframe:Hide()
+                    else
+                        GUI.mainframe:Show()
+                    end
+                end)
+
+                raidbutton = b
+            end
+        end
+
+
+        local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
+        b:SetPoint("TOPLEFT", f, 470, -100)
+
+        b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+        b.text:SetText(L["Raid Frame Button"])
+        b:SetChecked(Database:GetConfigOrDefault("raidbutton", true))
+
+        local showorhide = function()
+            createbtn()
+            if not raidbutton then
+                return
+            end
+
+            if b:GetChecked() then
+                raidbutton:Show()
+            else
+                raidbutton:Hide()
+            end
+
+        end
+
+        showorhide()
+
+        b:SetScript("OnClick", function()
+            Database:SetConfig("raidbutton", b:GetChecked())
+            showorhide()
+        end)
+
     end
 
     local editDebitTemplate

@@ -1751,21 +1751,6 @@ RegEvent("ADDON_LOADED", function()
     -- raid frame handler
 
     do
-        if _G.RaidFrame then
-            local b = CreateFrame("Button", nil, _G.RaidFrame, "UIPanelButtonTemplate")
-            b:SetWidth(100)
-            b:SetHeight(20)
-            b:SetPoint("TOPRIGHT", -25, 0)
-            b:SetText(L["Raid Ledger"])
-            b:SetScript("OnClick", function()
-                if GUI.mainframe:IsShown() then
-                    GUI.mainframe:Hide()
-                else
-                    GUI.mainframe:Show()
-                end
-            end)
-        end
-
         local hooked = false
 
         hooksecurefunc("RaidFrame_LoadUI", function()
