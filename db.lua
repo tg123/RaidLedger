@@ -39,7 +39,7 @@ end
 function db:GetConfigOrDefault(key, def)
     local config = GetConfig()
 
-    if not config[key] then
+    if config[key] == nil then
         config[key] = def
     end
 

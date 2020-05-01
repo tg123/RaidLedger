@@ -75,12 +75,16 @@ RegEvent("ADDON_LOADED", function()
     icon:Register("RaidLedger", ldb:NewDataObject("Bunnies!", {
             icon = "Interface\\Icons\\inv_misc_note_03",
             OnClick = function() 
-                GUI:Show()
+                if GUI.mainframe:IsShown() then
+                    GUI.mainframe:Hide()
+                else
+                    GUI.mainframe:Show()
+                end
             end,
             OnTooltipShow = function(tooltip)
                 tooltip:AddLine(L["Raid Ledger"])
             end,
-        }),  { hide = false })
+        }),  { hide = not Database:GetConfigOrDefault("autoaddloot", true) })
 end)
 
 
