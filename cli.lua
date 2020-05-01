@@ -68,19 +68,21 @@ RegEvent("CHAT_MSG_LOOT", function(chatmsg)
     Database:AddLoot(itemLink, itemCount, playerName, 0);
 end)
 
--- RegEvent("ADDON_LOADED", function()
---     AutoAddLoot = Database:GetConfigOrDefault("autoaddloot", AUTOADDLOOT_TYPE_RAID)
--- end)
+RegEvent("ADDON_LOADED", function()
+    local ldb = LibStub("LibDataBroker-1.1")
+    local icon = LibStub("LibDBIcon-1.0")
+    
+    icon:Register("RaidLedger", ldb:NewDataObject("Bunnies!", {
+            icon = "Interface\\Icons\\inv_misc_note_03",
+            OnClick = function() 
+                GUI:Show()
+            end,
+            OnTooltipShow = function(tooltip)
+                tooltip:AddLine(L["Raid Ledger"])
+            end,
+        }),  { hide = false })
+end)
 
--- local function ShowCurrentAutoLootType()
---     if AutoAddLoot == AUTOADDLOOT_TYPE_ALL then
---         Print(L["Auto recording loot: On"])
---     elseif AutoAddLoot == AUTOADDLOOT_TYPE_RAID then
---         Print(L["Auto recording loot: In Raid Only"])
---     elseif AutoAddLoot == AUTOADDLOOT_TYPE_DISABLE then
---         Print(L["Auto recording loot: Off"])
---     end
--- end
 
 SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
     local cmd, what = msg:match("^(%S*)%s*(%S*)%s*$")
