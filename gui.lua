@@ -399,6 +399,8 @@ function GUI:Init()
             local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             l:SetPoint("RIGHT", s, "LEFT", -20, 1)
             l:SetText(L["Count down time"])
+            bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
+
 
             s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -70)
 
@@ -427,6 +429,8 @@ function GUI:Init()
             local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             l:SetPoint("RIGHT", s, "LEFT", -20, 1)
             l:SetText(L["Starting price"])
+            bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
+
 
             s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -120)
 
@@ -542,6 +546,8 @@ function GUI:Init()
                     local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
                     l:SetPoint("RIGHT", s, "LEFT", -20, 1)
                     l:SetText(L["Bid increment"])
+
+                    bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
         
                     s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -200)
         
