@@ -1335,6 +1335,7 @@ function GUI:Init()
                 cellFrame.textBox:SetHeight(30)
                 cellFrame.textBox:SetAutoFocus(false)
                 cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
+                cellFrame.textBox:SetScript("OnEnterPressed", cellFrame.textBox.ClearFocus)
                 popOnFocus(cellFrame.textBox)
 
                 if entry["lock"] then
@@ -1407,6 +1408,8 @@ function GUI:Init()
                 cellFrame.textBox:SetHeight(30)
                 cellFrame.textBox:SetAutoFocus(false)
                 cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
+                cellFrame.textBox:SetScript("OnEnterPressed", cellFrame.textBox.ClearFocus)
+
                 AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteRaidRoster)
                 popOnFocus(cellFrame.textBox)
 
@@ -1494,6 +1497,8 @@ function GUI:Init()
                 cellFrame.textBox:SetAutoFocus(false)
                 cellFrame.textBox:SetMaxLetters(10)
                 cellFrame.textBox:SetScript("OnChar", mustnumber)
+                cellFrame.textBox:SetScript("OnEnterPressed", cellFrame.textBox.ClearFocus)
+                cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
 
                 if entry["lock"] then
                     cellFrame.textBox:Disable()
