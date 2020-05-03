@@ -72,7 +72,7 @@ RegEvent("ADDON_LOADED", function()
     local ldb = LibStub("LibDataBroker-1.1")
     local icon = LibStub("LibDBIcon-1.0")
 
-    icon:Register("RaidLedger", ldb:NewDataObject("Bunnies!", {
+    icon:Register("RaidLedger", ldb:NewDataObject("RaidLedger", {
             icon = "Interface\\Icons\\inv_misc_note_03",
             OnClick = function() 
                 if GUI.mainframe:IsShown() then
