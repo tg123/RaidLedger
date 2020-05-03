@@ -505,7 +505,7 @@ RegEvent("ADDON_LOADED", function()
             edit:SetScript("OnEscapePressed", edit.ClearFocus)
     
             t:SetScrollChild(edit)
-            edit:SetText(Database:GetConfigOrDefault("filteritems", L["# one item per line, can be item name or item id"]))
+            edit:SetText(Database:GetConfigOrDefault("filteritems", L["# one item per line, can be item name or item id"] .. "\n" .. L["# line starts with # will be ignored"] .. "\n"))
         end    
     
           
