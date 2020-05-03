@@ -71,7 +71,7 @@ end)
 RegEvent("ADDON_LOADED", function()
     local ldb = LibStub("LibDataBroker-1.1")
     local icon = LibStub("LibDBIcon-1.0")
-    
+
     icon:Register("RaidLedger", ldb:NewDataObject("Bunnies!", {
             icon = "Interface\\Icons\\inv_misc_note_03",
             OnClick = function() 
@@ -84,7 +84,7 @@ RegEvent("ADDON_LOADED", function()
             OnTooltipShow = function(tooltip)
                 tooltip:AddLine(L["Raid Ledger"])
             end,
-        }),  { hide = not Database:GetConfigOrDefault("autoaddloot", true) })
+        }),  { hide = not Database:GetConfigOrDefault("minimapicon", true) })
 end)
 
 
