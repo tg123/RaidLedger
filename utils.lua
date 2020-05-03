@@ -297,7 +297,7 @@ ADDONSELF.genreport = function(items, n, channel, conf)
 
         if c > 0 then
             table.insert(lines, "RaidLedger:.... " .. L["Credit"] .. " ....")
-            table.insert(lines, "RaidLedger: " .. L["Top [%d] contributors"]:format(c))
+            -- table.insert(lines, "RaidLedger: " .. L["Top [%d] contributors"]:format(c))
         end
 
         for i = 1, c do
@@ -305,8 +305,8 @@ ADDONSELF.genreport = function(items, n, channel, conf)
                 local l = looter[i]
                 table.insert(lines, i .. ". " .. L["Credit"] .. " " .. l["looter"] .. " [" .. GetMoneyStringL(l["cost"]) .. "]")
 
-                for _, item in pairs(l["items"]) do
-                    table.insert(lines, "... " .. l["looter"] .. " " .. item)
+                for j, item in pairs(l["items"]) do
+                    table.insert(lines, "... " .. j .. ". " .. l["looter"] .. " " .. item)
                 end
             end
         end
