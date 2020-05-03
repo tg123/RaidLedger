@@ -25,8 +25,12 @@
 ## Author: Boshi Lian(farmer1992@gmail.com)
 ## Version: @project-version@
 
-lib\LibDBIcon-1.0\LibDBIcon-1.0\lib.xml
-lib\LibDBIcon-1.0\embeds.xml
+lib\LibStub\LibStub.lua
+lib\CallbackHandler-1.0\CallbackHandler-1.0.lua
+lib\LibDataBroker-1.1\LibDataBroker-1.1.lua
+
+lib\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
 lib\lib-st\Core.lua
 lib\LibDeformat-3.0\LibDeformat-3.0.lua
 
