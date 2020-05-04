@@ -98,51 +98,65 @@ local clearledger = function()
     StaticPopup_Show("RAIDLEDGER_CLEARMSG")
 end
 
-local cleartoast = AlertFrame:AddSimpleAlertFrameSubSystem("MoneyWonAlertFrameTemplate", function(frame, text)
 
-    frame.Icon:SetTexture("Interface\\Icons\\inv_misc_note_03")
-    frame.Label:SetText(L["Raid Ledger"])
-    frame.Amount:SetText(L["Click here to clear ledger"])
-    frame.Amount:SetWidth(180)
-    frame.Amount:SetFontObject(GameFontWhite)
-    frame:SetScript("OnClick", clearledger)
+do
+    -- some pharc addon overwrite AlertFrame
+    local frame = EnumerateFrames()
+    while frame do
+        if frame:GetName() == "AlertFrame" then
 
-    if not frame.closebtn then
-        b = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-        b:SetPoint("TOPRIGHT", frame, 0, 0);
-        frame.closebtn = b
-    end
+            local cleartoast = frame:AddSimpleAlertFrameSubSystem("MoneyWonAlertFrameTemplate", function(frame, text)
 
-end)
+                frame.Icon:SetTexture("Interface\\Icons\\inv_misc_note_03")
+                frame.Label:SetText(L["Raid Ledger"])
+                frame.Amount:SetText(L["Click here to clear ledger"])
+                frame.Amount:SetWidth(180)
+                frame.Amount:SetFontObject(GameFontWhite)
+                frame:SetScript("OnClick", clearledger)
 
-local lastzone = nil
+                if not frame.closebtn then
+                    b = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+                    b:SetPoint("TOPRIGHT", frame, 0, 0);
+                    frame.closebtn = b
+                end
 
-C_Timer.NewTicker(5, function()
-    local zone = GetInstanceInfo()
-    if not zone then
-        return
-    end
+            end)
 
-    if zone == "" then
-        return
-    end
+            local lastzone = nil
 
-    local _, type = IsInInstance()
+            C_Timer.NewTicker(5, function()
 
-    if type == "raid" or type == "party" then
+                local zone = GetInstanceInfo()
+                if not zone then
+                    return
+                end
 
-        if lastzone ~= zone then
-            if #Database:GetCurrentLedger()["items"] > 0 then
-                cleartoast:AddAlert()
-            end
+                if zone == "" then
+                    return
+                end
+
+                local _, type = IsInInstance()
+
+                if type == "raid" or type == "party" then
+
+                    if lastzone ~= zone then
+                        if #Database:GetCurrentLedger()["items"] > 0 then
+                            cleartoast:AddAlert()
+                        end
+                    end
+
+                end
+
+                lastzone = zone
+
+            end)
+
+
+            break
         end
-
+        frame = EnumerateFrames(frame)
     end
-
-    lastzone = zone
-
-end)
-
+end
 
 SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
     local cmd, what = msg:match("^(%S*)%s*(%S*)%s*$")
