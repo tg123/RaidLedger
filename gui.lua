@@ -831,7 +831,7 @@ function GUI:Init()
                         -- sendalert = sendalert or (ctx.countdown % 30 == 0)
 
                         if sendalert then
-                            SendRaidMessage(item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
+                            SendRaidMessage(" " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
                         end
                     end)
                 end)
