@@ -1409,6 +1409,7 @@ function GUI:Init()
                 cellFrame.textBox:SetAutoFocus(false)
                 cellFrame.textBox:SetScript("OnEscapePressed", cellFrame.textBox.ClearFocus)
                 cellFrame.textBox:SetScript("OnEnterPressed", cellFrame.textBox.ClearFocus)
+                cellFrame.textBox.raidledgerbeneficiary = true
 
                 AutoCompleteEditBox_SetAutoCompleteSource(cellFrame.textBox, autoCompleteRaidRoster)
                 popOnFocus(cellFrame.textBox)

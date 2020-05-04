@@ -20,7 +20,14 @@ hooksecurefunc("SetItemRef", function(link)
         elseif linkType == "player" then
             local playerName = strsplit("-", target)
             Print(L["Compensation added"] .. " " .. playerName)
-            Database:AddDebit("", playerName)
+
+            local edit = GetCurrentKeyBoardFocus()
+
+            if edit and edit.raidledgerbeneficiary then
+                edit:SetText(playerName)
+            else
+                Database:AddDebit("", playerName)
+            end
         end
         ScrollFrame_OnVerticalScroll(GUI.lootLogFrame.scrollframe, 0)
     end
