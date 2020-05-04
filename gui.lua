@@ -1130,8 +1130,29 @@ function GUI:Init()
             return data
         end
 
+        local lastchat = {}
+        local onraidchat = function(text, playerName)
+            playerName = strsplit("-", playerName)
+            lastchat[playerName] = time()
+
+            local min = playerName
+            for p in pairs(lastchat) do
+                if lastchat[p] < lastchat[min] then
+                    min = p
+                end
+            end
+
+            if #lastchat > 10 then
+                lastchat[min] = nil
+            end
+        end
+
+        RegEvent("CHAT_MSG_RAID_LEADER", onraidchat)
+        RegEvent("CHAT_MSG_RAID", onraidchat)
+
         local autoCompleteRaidRoster = function(text)
             local data = {}
+            local tmp = {}
 
             for i = 1, MAX_RAID_MEMBERS do
                 local name, _, subgroup, _, class = GetRaidRosterInfo(i)
@@ -1147,12 +1168,20 @@ function GUI:Init()
                     b = b or (strfind(class, string.lower(text)))
 
                     if b then
-                        tinsert(data, {
-                            ["name"] = name,
-                            ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
-                        })
+                        tinsert(tmp, name)
                     end
                 end
+            end
+
+            table.sort(tmp, function(a, b)
+                return (lastchat[a] or 0) > (lastchat[b] or 0)
+            end)
+
+            for _, name in pairs(tmp) do 
+                tinsert(data, {
+                    ["name"] = name,
+                    ["priority"] = LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
+                })
             end
 
             return data
