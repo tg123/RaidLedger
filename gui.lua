@@ -826,9 +826,9 @@ function GUI:Init()
                         end
 
                         local sendalert = ctx.countdown <= 5
-                        sendalert = sendalert or (ctx.countdown <= 15 and (ctx.countdown % 5 == 0))
-                        sendalert = sendalert or (ctx.countdown <= 30 and (ctx.countdown % 10 == 0))
-                        sendalert = sendalert or (ctx.countdown % 30 == 0)
+                        -- sendalert = sendalert or (ctx.countdown <= 15 and (ctx.countdown % 5 == 0))
+                        -- sendalert = sendalert or (ctx.countdown <= 30 and (ctx.countdown % 10 == 0))
+                        -- sendalert = sendalert or (ctx.countdown % 30 == 0)
 
                         if sendalert then
                             SendRaidMessage(item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
@@ -873,7 +873,11 @@ function GUI:Init()
         end
 
         bf:Hide()
-        bf:SetScript("OnHide", bf.CancelBid)
+        bf:SetScript("OnHide", function() 
+            if GUI.mainframe:IsShown() then
+                bf.CancelBid()
+            end
+        end)
 
         self.bidframe = bf
     end
