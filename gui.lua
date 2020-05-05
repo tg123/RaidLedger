@@ -1505,9 +1505,16 @@ function GUI:Init()
             },
             { 
                 costtype = "PROFIT_PERCENT",
-                text = " % " .. L["Net Profit"], 
+                text =  DIM_GREEN_FONT_COLOR:WrapTextInColorCode(" % " .. L["Net Profit"]), 
                 func = function() 
                     setCostType("PROFIT_PERCENT")
+                end, 
+            },
+            { 
+                costtype = "REVENUE_PERCENT",
+                text = LIGHTBLUE_FONT_COLOR:WrapTextInColorCode(" % " .. L["Revenue"]), 
+                func = function() 
+                    setCostType("REVENUE_PERCENT")
                 end, 
             },
             { 
@@ -1543,7 +1550,9 @@ function GUI:Init()
             local type = entry["costtype"] or "GOLD"
 
             if type == "PROFIT_PERCENT" then
-                cellFrame.text:SetText("%")
+                cellFrame.text:SetText(DIM_GREEN_FONT_COLOR:WrapTextInColorCode("%"))
+            elseif type == "REVENUE_PERCENT" then
+                cellFrame.text:SetText(LIGHTBLUE_FONT_COLOR:WrapTextInColorCode("%"))
             elseif type == "MUL_AVG" then
                 cellFrame.text:SetText("*")
             else

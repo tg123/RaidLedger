@@ -71,6 +71,7 @@ local calcavg = function(items, n, oncredit, ondebit, conf)
 
 
     local profitPercentItems = {}
+    local revenuePercentItems = {}
     local mulAvgItems = {}
 
     for _, item in pairs(items or {}) do
@@ -91,6 +92,8 @@ local calcavg = function(items, n, oncredit, ondebit, conf)
                 ondebit(item, c)
             elseif ct == "PROFIT_PERCENT" then
                 table.insert( profitPercentItems, item)
+            elseif ct == "REVENUE_PERCENT" then
+                table.insert( revenuePercentItems, item)
             elseif ct == "MUL_AVG" then
                 saltN = saltN + c
                 table.insert(mulAvgItems, item)
@@ -99,6 +102,17 @@ local calcavg = function(items, n, oncredit, ondebit, conf)
     end
 
     -- before profit
+
+    do
+        for _, item in pairs(revenuePercentItems) do
+            local p = item["cost"] or 0
+            local c = math.floor(revenue * (p / 100.0))
+
+            expense = expense + c
+            item["costcache"] = c
+            ondebit(item, c)
+        end
+    end
 
     local profit = math.max(revenue - expense, 0)
     -- after profit
@@ -167,7 +181,9 @@ local function GenExportLine(item, c)
     local s = "[" ..  n .. "] " .. " (" .. cnt .. ") " .. l .. " " .. GetMoneyStringL(c) 
 
     if ct == "PROFIT_PERCENT" then
-        s = s .. " (" .. (item["cost"] or 0) .. " %" .. L["Net Profit"] .. ")"
+        s = s .. " (" .. (item["cost"] or 0) .. " % " .. L["Net Profit"] .. ")"
+    elseif ct == "REVENUE_PERCENT" then
+        s = s .. " (" .. (item["cost"] or 0) .. " % " .. L["Revenue"] .. ")"
     elseif ct == "MUL_AVG" then
         s = s .. " (" .. (item["cost"] or 0) .. " *" .. L["Per Member credit"] .. ")"
     end
@@ -249,6 +265,8 @@ ADDONSELF.genreport = function(items, n, channel, conf)
 
         if ct == "PROFIT_PERCENT" then
             s = s .. " (" .. (item["cost"] or 0) .. " % " .. L["Net Profit"] .. ")"
+        elseif ct == "REVENUE_PERCENT" then
+            s = s .. " (" .. (item["cost"] or 0) .. " % " .. L["Revenue"] .. ")"
         elseif ct == "MUL_AVG" then
             s = s .. " (" .. (item["cost"] or 0) .. " * " .. L["Per Member credit"] .. ")"
         end
