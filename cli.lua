@@ -137,7 +137,7 @@ do
 
                 local _, type = IsInInstance()
 
-                if type == "raid" or type == "party" then
+                if type == "raid" then
 
                     if lastzone ~= zone then
                         if #Database:GetCurrentLedger()["items"] > 0 then
@@ -166,7 +166,7 @@ SlashCmdList["RAIDLEDGER"] = function(msg, editbox)
 
         Print(L["Shift + item/name to add to record"])
         Print(L["Right click to remove record"])
-        Print(L["Shift + Right click to remove ALL SAME record"])
+        -- Print(L["Shift + Right click to remove ALL SAME record"])
         -- ShowCurrentAutoLootType()
         -- Print("[".. L["/raidledger"] .. " toggle] " .. L["toggle Auto recording on/off"])
 
