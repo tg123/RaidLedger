@@ -885,7 +885,7 @@ function GUI:Init()
     -- split member and editbox
     do
         local t = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
-        t:SetWidth(40)
+        t:SetWidth(30)
         t:SetHeight(25)
         t:SetPoint("BOTTOMLEFT", f, 350, 95)
         t:SetAutoFocus(false)
