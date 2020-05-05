@@ -251,653 +251,653 @@ function GUI:Init()
     end
 
     -- bid
-    do
-        local bf = CreateFrame("Frame", nil, f)
-        bf:SetWidth(290)
-        bf:SetHeight(310)
-        bf:SetBackdrop({
-            bgFile = "Interface\\FrameGeneral\\UI-Background-Marble",
-            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-            -- tile = true,
-            tileSize = 32,
-            edgeSize = 32,
-            insets = {left = 8, right = 8, top = 10, bottom = 10}
-        })
+    -- do
+    --     local bf = CreateFrame("Frame", nil, f)
+    --     bf:SetWidth(290)
+    --     bf:SetHeight(310)
+    --     bf:SetBackdrop({
+    --         bgFile = "Interface\\FrameGeneral\\UI-Background-Marble",
+    --         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+    --         -- tile = true,
+    --         tileSize = 32,
+    --         edgeSize = 32,
+    --         insets = {left = 8, right = 8, top = 10, bottom = 10}
+    --     })
     
-        -- bf:SetBackdropColor(1, 1, 1, 1)
-        bf:SetPoint("CENTER", f, 0, 0)
-        bf:SetToplevel(true)
-        bf:EnableMouse(true)
-        bf:SetFrameLevel(f:GetFrameLevel() + 10)
+    --     -- bf:SetBackdropColor(1, 1, 1, 1)
+    --     bf:SetPoint("CENTER", f, 0, 0)
+    --     bf:SetToplevel(true)
+    --     bf:EnableMouse(true)
+    --     bf:SetFrameLevel(f:GetFrameLevel() + 10)
 
-        do
-            local b = CreateFrame("Button", nil, bf, "UIPanelCloseButton")
-            b:SetPoint("TOPRIGHT", bf, 0, 0);
-        end
+    --     do
+    --         local b = CreateFrame("Button", nil, bf, "UIPanelCloseButton")
+    --         b:SetPoint("TOPRIGHT", bf, 0, 0);
+    --     end
 
-        do
-            local tooltip = self.itemtooltip
+    --     do
+    --         local tooltip = self.itemtooltip
 
-            local itemTexture = bf:CreateTexture()
-            itemTexture:SetTexCoord(0, 1, 0, 1)
-            itemTexture:Show()
-            itemTexture:SetPoint("TOPLEFT", bf, 20, -20)
-            itemTexture:SetWidth(30)
-            itemTexture:SetHeight(30)            
-            itemTexture:SetTexture(134400) -- question mark
+    --         local itemTexture = bf:CreateTexture()
+    --         itemTexture:SetTexCoord(0, 1, 0, 1)
+    --         itemTexture:Show()
+    --         itemTexture:SetPoint("TOPLEFT", bf, 20, -20)
+    --         itemTexture:SetWidth(30)
+    --         itemTexture:SetHeight(30)            
+    --         itemTexture:SetTexture(134400) -- question mark
 
 
-            bf.itemTexture = itemTexture
+    --         bf.itemTexture = itemTexture
 
-            local counttext = bf:CreateFontString(nil, 'OVERLAY')
-            counttext:SetFontObject('NumberFontNormal')
-            counttext:SetPoint('BOTTOMRIGHT', itemTexture, -3, 3)
-            counttext:SetJustifyH('RIGHT')
+    --         local counttext = bf:CreateFontString(nil, 'OVERLAY')
+    --         counttext:SetFontObject('NumberFontNormal')
+    --         counttext:SetPoint('BOTTOMRIGHT', itemTexture, -3, 3)
+    --         counttext:SetJustifyH('RIGHT')
 
-            local itemtext = CreateFrame("Button", nil, bf)
-            itemtext.text = itemtext:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 45, 0)
-            itemtext.text:SetWidth(230)
-            itemtext.text:SetJustifyH("LEFT")
+    --         local itemtext = CreateFrame("Button", nil, bf)
+    --         itemtext.text = itemtext:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --         itemtext.text:SetPoint("LEFT", itemtext, "LEFT", 45, 0)
+    --         itemtext.text:SetWidth(230)
+    --         itemtext.text:SetJustifyH("LEFT")
 
-            itemtext:SetPoint('LEFT', itemTexture, "RIGHT", -40, 0)
-            itemtext:SetSize(30, 30)
-            itemtext:EnableMouse(true)
-            itemtext:RegisterForClicks("AnyUp")
-            itemtext:SetScript("OnClick", function()
-                ChatEdit_InsertLink(itemtext.link)
-            end)
+    --         itemtext:SetPoint('LEFT', itemTexture, "RIGHT", -40, 0)
+    --         itemtext:SetSize(30, 30)
+    --         itemtext:EnableMouse(true)
+    --         itemtext:RegisterForClicks("AnyUp")
+    --         itemtext:SetScript("OnClick", function()
+    --             ChatEdit_InsertLink(itemtext.link)
+    --         end)
 
-            itemtext:SetScript("OnEnter", function()
-                if itemtext.link then
-                    tooltip:SetOwner(itemtext, "ANCHOR_CURSOR")
-                    tooltip:SetHyperlink(itemtext.link)
-                    tooltip:Show()
-                end
-            end)
+    --         itemtext:SetScript("OnEnter", function()
+    --             if itemtext.link then
+    --                 tooltip:SetOwner(itemtext, "ANCHOR_CURSOR")
+    --                 tooltip:SetHyperlink(itemtext.link)
+    --                 tooltip:Show()
+    --             end
+    --         end)
 
-            itemtext:SetScript("OnLeave", function()
-                tooltip:Hide()
-                tooltip:SetOwner(itemtext, "ANCHOR_NONE")
-            end)
+    --         itemtext:SetScript("OnLeave", function()
+    --             tooltip:Hide()
+    --             tooltip:SetOwner(itemtext, "ANCHOR_NONE")
+    --         end)
 
-            bf.SetItem = function(item, count)
+    --         bf.SetItem = function(item, count)
 
-                counttext:SetText("1")
+    --             counttext:SetText("1")
 
-                if tonumber(count) then
-                    counttext:SetText(count)
-                end
-                itemTexture:SetTexture(134400)
+    --             if tonumber(count) then
+    --                 counttext:SetText(count)
+    --             end
+    --             itemTexture:SetTexture(134400)
 
-                local _, itemLink = GetItemInfo(item)
-                if itemLink then
-                    itemtext.link = itemLink
-                    itemtext.text:SetText(itemLink)
-                    itemtext:SetWidth(math.min(230, itemtext.text:GetStringWidth() + 45))
+    --             local _, itemLink = GetItemInfo(item)
+    --             if itemLink then
+    --                 itemtext.link = itemLink
+    --                 itemtext.text:SetText(itemLink)
+    --                 itemtext:SetWidth(math.min(230, itemtext.text:GetStringWidth() + 45))
 
-                else
-                    itemtext.link = nil
-                    itemtext.text:SetText(item)
-                end
+    --             else
+    --                 itemtext.link = nil
+    --                 itemtext.text:SetText(item)
+    --             end
 
-                local itemTexture =  GetItemIcon(item)
+    --             local itemTexture =  GetItemIcon(item)
 
-                if itemTexture then
-                    bf.itemTexture:SetTexture(itemTexture)
-                end
-            end
+    --             if itemTexture then
+    --                 bf.itemTexture:SetTexture(itemTexture)
+    --             end
+    --         end
 
-        end
+    --     end
 
-        local slideShowMoneyFrame = function(self, button)
-            if button == "RightButton" then
-                self:SetValueStep(1)
-                OpenStackSplitFrame(999999, self, "BOTTOMLEFT", "TOPLEFT", 1)
-                StackSplitText:SetText(self:GetValue())
-                StackSplitFrame.split = self:GetValue()
-                UpdateStackSplitFrame(999999)
-            else
-                StackSplitFrame:Hide()
-                self:SetValueStep(self.slidestep)
-                self:SetMinMaxValues(self.slidemin, self.slidemax)
-            end
+    --     local slideShowMoneyFrame = function(self, button)
+    --         if button == "RightButton" then
+    --             self:SetValueStep(1)
+    --             OpenStackSplitFrame(999999, self, "BOTTOMLEFT", "TOPLEFT", 1)
+    --             StackSplitText:SetText(self:GetValue())
+    --             StackSplitFrame.split = self:GetValue()
+    --             UpdateStackSplitFrame(999999)
+    --         else
+    --             StackSplitFrame:Hide()
+    --             self:SetValueStep(self.slidestep)
+    --             self:SetMinMaxValues(self.slidemin, self.slidemax)
+    --         end
 
-        end
+    --     end
 
-        local slideMoneySet = function(owner, split)
-            if owner.moneyslide then
-                local min = math.min(split, owner.slidemin)
-                local max = math.max(split, owner.slidemax)
-                owner:SetMinMaxValues(min, max)
-                owner:SetValueStep(1)
-                owner:SetValue(split)
-            end
-        end
+    --     local slideMoneySet = function(owner, split)
+    --         if owner.moneyslide then
+    --             local min = math.min(split, owner.slidemin)
+    --             local max = math.max(split, owner.slidemax)
+    --             owner:SetMinMaxValues(min, max)
+    --             owner:SetValueStep(1)
+    --             owner:SetValue(split)
+    --         end
+    --     end
         
-        do
-            hooksecurefunc(StackSplitText, "SetText", function(self, value)
-                if StackSplitFrame.owner.moneyslide then
-                    if not strfind(value, "MoneyFrame") then
-                        self:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
-                    end
-                end
-            end)
-        end
+    --     do
+    --         hooksecurefunc(StackSplitText, "SetText", function(self, value)
+    --             if StackSplitFrame.owner.moneyslide then
+    --                 if not strfind(value, "MoneyFrame") then
+    --                     self:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
+    --                 end
+    --             end
+    --         end)
+    --     end
 
 
-        do
-            local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
-            s:SetOrientation('HORIZONTAL')
-            s:SetHeight(14)
-            s:SetWidth(160)
-            s:SetMinMaxValues(5, 60)
-            s:SetValueStep(1)
-            s:SetObeyStepOnDrag(true)
-            s.Low:SetText(SecondsToTime(5))
-            s.High:SetText(SecondsToTime(60))
+    --     do
+    --         local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+    --         s:SetOrientation('HORIZONTAL')
+    --         s:SetHeight(14)
+    --         s:SetWidth(160)
+    --         s:SetMinMaxValues(5, 60)
+    --         s:SetValueStep(1)
+    --         s:SetObeyStepOnDrag(true)
+    --         s.Low:SetText(SecondsToTime(5))
+    --         s.High:SetText(SecondsToTime(60))
     
-            local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            l:SetPoint("RIGHT", s, "LEFT", -20, 1)
-            l:SetText(L["Count down time"])
-            bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
+    --         local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --         l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+    --         l:SetText(L["Count down time"])
+    --         bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
 
 
-            s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -70)
+    --         s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -70)
 
-            s:SetScript("OnValueChanged", function(self, value)
-                s.Text:SetText(SecondsToTime(value))
-            end)
+    --         s:SetScript("OnValueChanged", function(self, value)
+    --             s.Text:SetText(SecondsToTime(value))
+    --         end)
 
-            s:SetValue(20)
+    --         s:SetValue(20)
 
-            bf.countdown = s
-        end
+    --         bf.countdown = s
+    --     end
 
-        do
-            local tooltip = self.commtooltip
+    --     do
+    --         local tooltip = self.commtooltip
 
-            local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
-            s:SetOrientation('HORIZONTAL')
-            s:SetHeight(14)
-            s:SetWidth(160)
-            s:SetMinMaxValues(50, 5000)
-            s:SetValueStep(50)
-            s:SetObeyStepOnDrag(true)
-            s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(50))
-            s.High:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(5000))
+    --         local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+    --         s:SetOrientation('HORIZONTAL')
+    --         s:SetHeight(14)
+    --         s:SetWidth(160)
+    --         s:SetMinMaxValues(50, 5000)
+    --         s:SetValueStep(50)
+    --         s:SetObeyStepOnDrag(true)
+    --         s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(50))
+    --         s.High:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(5000))
     
-            local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            l:SetPoint("RIGHT", s, "LEFT", -20, 1)
-            l:SetText(L["Starting price"])
-            bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
+    --         local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --         l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+    --         l:SetText(L["Starting price"])
+    --         bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
 
 
-            s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -120)
+    --         s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -120)
 
-            s:SetScript("OnValueChanged", function(self, value)
-                value = math.floor(value)
-                s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
-            end)
+    --         s:SetScript("OnValueChanged", function(self, value)
+    --             value = math.floor(value)
+    --             s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
+    --         end)
 
-            s.moneyslide = true
-            s.SplitStack = slideMoneySet
-            s.slidestep = s:GetValueStep()
-            s.slidemin, s.slidemax = s:GetMinMaxValues()
-            s:SetScript("OnMouseDown", slideShowMoneyFrame)
-            s:SetScript("OnMouseUp", slideShowMoneyFrame)
+    --         s.moneyslide = true
+    --         s.SplitStack = slideMoneySet
+    --         s.slidestep = s:GetValueStep()
+    --         s.slidemin, s.slidemax = s:GetMinMaxValues()
+    --         s:SetScript("OnMouseDown", slideShowMoneyFrame)
+    --         s:SetScript("OnMouseUp", slideShowMoneyFrame)
 
-            s:SetScript("OnEnter", function()
-                tooltip:SetOwner(s, "ANCHOR_RIGHT")
-                tooltip:SetText(L["Right click to fine-tune"])
-                tooltip:Show()
-            end)
+    --         s:SetScript("OnEnter", function()
+    --             tooltip:SetOwner(s, "ANCHOR_RIGHT")
+    --             tooltip:SetText(L["Right click to fine-tune"])
+    --             tooltip:Show()
+    --         end)
 
-            s:SetScript("OnLeave", function()
-                tooltip:Hide()
-                tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-            end)
+    --         s:SetScript("OnLeave", function()
+    --             tooltip:Hide()
+    --             tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+    --         end)
 
-            s:SetValue(100)
+    --         s:SetValue(100)
 
-            bf.startprice = s
-        end
+    --         bf.startprice = s
+    --     end
 
-        do
-            local l = bf:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            l:SetPoint("TOPLEFT", bf, 20, -160)
-            l:SetText(L["Bid mode"])
+    --     do
+    --         local l = bf:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --         l:SetPoint("TOPLEFT", bf, 20, -160)
+    --         l:SetText(L["Bid mode"])
 
-            local usegold
-            local usepercent
+    --         local usegold
+    --         local usepercent
 
-            local ensurechecked = function(self)
-                if self == usegold then
-                    usepercent:SetChecked(not usegold:GetChecked())
-                    return
-                end
+    --         local ensurechecked = function(self)
+    --             if self == usegold then
+    --                 usepercent:SetChecked(not usegold:GetChecked())
+    --                 return
+    --             end
 
-                if self == usepercent then
-                    usegold:SetChecked(not usepercent:GetChecked())
-                    return
-                end
+    --             if self == usepercent then
+    --                 usegold:SetChecked(not usepercent:GetChecked())
+    --                 return
+    --             end
 
-                if usegold:GetChecked() then
-                    usepercent:SetChecked(false)
-                    return
-                end
+    --             if usegold:GetChecked() then
+    --                 usepercent:SetChecked(false)
+    --                 return
+    --             end
 
-                if usepercent:GetChecked() then
-                    usegold:SetChecked(false)
-                    return
-                end
+    --             if usepercent:GetChecked() then
+    --                 usegold:SetChecked(false)
+    --                 return
+    --             end
 
-                usegold:SetChecked(true)
-                usepercent:SetChecked(false)
-            end
+    --             usegold:SetChecked(true)
+    --             usepercent:SetChecked(false)
+    --         end
 
-            bf.GetBidMode = function()
-                if usegold:GetChecked() then
-                    return "GOLD", usegold.slide:GetValue()
-                end
+    --         bf.GetBidMode = function()
+    --             if usegold:GetChecked() then
+    --                 return "GOLD", usegold.slide:GetValue()
+    --             end
 
-                if usepercent:GetChecked() then
-                    return "PERCENT", usepercent.slide:GetValue()
-                end                
-            end
+    --             if usepercent:GetChecked() then
+    --                 return "PERCENT", usepercent.slide:GetValue()
+    --             end                
+    --         end
 
-            local ensureone = function(self)
-                ensurechecked(self)
-                usegold.slide:Hide()
-                usepercent.slide:Hide()
+    --         local ensureone = function(self)
+    --             ensurechecked(self)
+    --             usegold.slide:Hide()
+    --             usepercent.slide:Hide()
 
-                if usegold:GetChecked() then
-                    usegold.slide:Show()
-                end
+    --             if usegold:GetChecked() then
+    --                 usegold.slide:Show()
+    --             end
 
-                if usepercent:GetChecked() then
-                    usepercent.slide:Show()
-                end                
-            end
+    --             if usepercent:GetChecked() then
+    --                 usepercent.slide:Show()
+    --             end                
+    --         end
 
-            do
-                local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
-                b:SetPoint("TOPLEFT", bf, 30 + l:GetStringWidth(), -150)
+    --         do
+    --             local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
+    --             b:SetPoint("TOPLEFT", bf, 30 + l:GetStringWidth(), -150)
         
-                b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
-                b.text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(""))
-                b:SetScript("OnClick", ensureone)
+    --             b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --             b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+    --             b.text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(""))
+    --             b:SetScript("OnClick", ensureone)
 
-                usegold = b
+    --             usegold = b
 
-                do
-                    local tooltip = self.commtooltip
+    --             do
+    --                 local tooltip = self.commtooltip
 
-                    local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
-                    s:SetOrientation('HORIZONTAL')
-                    s:SetHeight(14)
-                    s:SetWidth(160)
-                    s:SetMinMaxValues(10, 500)
-                    s:SetValueStep(10)
-                    s:SetObeyStepOnDrag(true)
-                    s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(10))
-                    s.High:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(500))
+    --                 local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+    --                 s:SetOrientation('HORIZONTAL')
+    --                 s:SetHeight(14)
+    --                 s:SetWidth(160)
+    --                 s:SetMinMaxValues(10, 500)
+    --                 s:SetValueStep(10)
+    --                 s:SetObeyStepOnDrag(true)
+    --                 s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(10))
+    --                 s.High:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(500))
             
-                    local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                    l:SetPoint("RIGHT", s, "LEFT", -20, 1)
-                    l:SetText(L["Bid increment"])
+    --                 local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --                 l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+    --                 l:SetText(L["Bid increment"])
 
-                    bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
+    --                 bf:SetWidth(math.max(bf:GetWidth(), l:GetStringWidth() + 220))
         
-                    s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -200)
+    --                 s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -200)
         
-                    s:SetScript("OnValueChanged", function(self, value)
-                        value = math.floor(value)
-                        s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
-                    end)
+    --                 s:SetScript("OnValueChanged", function(self, value)
+    --                     value = math.floor(value)
+    --                     s.Text:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(value))
+    --                 end)
         
-                    s.moneyslide = true
-                    s.SplitStack = slideMoneySet
-                    s.slidestep = s:GetValueStep()
-                    s.slidemin, s.slidemax = s:GetMinMaxValues()
-                    s:SetScript("OnMouseDown", slideShowMoneyFrame)
-                    s:SetScript("OnMouseUp", slideShowMoneyFrame)
+    --                 s.moneyslide = true
+    --                 s.SplitStack = slideMoneySet
+    --                 s.slidestep = s:GetValueStep()
+    --                 s.slidemin, s.slidemax = s:GetMinMaxValues()
+    --                 s:SetScript("OnMouseDown", slideShowMoneyFrame)
+    --                 s:SetScript("OnMouseUp", slideShowMoneyFrame)
 
-                    s:SetScript("OnEnter", function()
-                        tooltip:SetOwner(s, "ANCHOR_RIGHT")
-                        tooltip:SetText(L["Right click to fine-tune"])
-                        tooltip:Show()
-                    end)
+    --                 s:SetScript("OnEnter", function()
+    --                     tooltip:SetOwner(s, "ANCHOR_RIGHT")
+    --                     tooltip:SetText(L["Right click to fine-tune"])
+    --                     tooltip:Show()
+    --                 end)
     
-                    s:SetScript("OnLeave", function()
-                        tooltip:Hide()
-                        tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-                    end)
+    --                 s:SetScript("OnLeave", function()
+    --                     tooltip:Hide()
+    --                     tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+    --                 end)
 
-                    s:SetValue(50)
-                    s:Hide()
+    --                 s:SetValue(50)
+    --                 s:Hide()
         
-                    b.slide = s
-                end                
-            end
+    --                 b.slide = s
+    --             end                
+    --         end
 
-            do
-                local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
-                b:SetPoint("TOPLEFT", bf, 90 + l:GetStringWidth(), -150)
+    --         do
+    --             local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
+    --             b:SetPoint("TOPLEFT", bf, 90 + l:GetStringWidth(), -150)
         
-                b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
-                b.text:SetText("%")
-                b:SetScript("OnClick", ensureone)
+    --             b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --             b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+    --             b.text:SetText("%")
+    --             b:SetScript("OnClick", ensureone)
 
-                usepercent = b
+    --             usepercent = b
 
-                do
-                    local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
-                    s:SetOrientation('HORIZONTAL')
-                    s:SetHeight(14)
-                    s:SetWidth(160)
-                    s:SetMinMaxValues(1, 100)
-                    s:SetValueStep(1)
-                    s:SetObeyStepOnDrag(true)
-                    s.Low:SetText("1%")
-                    s.High:SetText("100%")
+    --             do
+    --                 local s = CreateFrame("Slider", nil, bf, "OptionsSliderTemplate")
+    --                 s:SetOrientation('HORIZONTAL')
+    --                 s:SetHeight(14)
+    --                 s:SetWidth(160)
+    --                 s:SetMinMaxValues(1, 100)
+    --                 s:SetValueStep(1)
+    --                 s:SetObeyStepOnDrag(true)
+    --                 s.Low:SetText("1%")
+    --                 s.High:SetText("100%")
             
-                    local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                    l:SetPoint("RIGHT", s, "LEFT", -20, 1)
-                    l:SetText(L["Bid increment"])
+    --                 local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --                 l:SetPoint("RIGHT", s, "LEFT", -20, 1)
+    --                 l:SetText(L["Bid increment"])
         
-                    s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -200)
+    --                 s:SetPoint("TOPLEFT", bf, 40 + l:GetStringWidth(), -200)
         
-                    s:SetScript("OnValueChanged", function(self, value)
-                        value = math.floor(value)
-                        s.Text:SetText(value .. "%")
-                    end)
+    --                 s:SetScript("OnValueChanged", function(self, value)
+    --                     value = math.floor(value)
+    --                     s.Text:SetText(value .. "%")
+    --                 end)
         
-                    s:SetValue(10)
-                    s:Hide()
+    --                 s:SetValue(10)
+    --                 s:Hide()
         
-                    b.slide = s
-                end                
-            end
+    --                 b.slide = s
+    --             end                
+    --         end
 
-            ensureone()
-        end
+    --         ensureone()
+    --     end
 
-        do
-            local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
-            b:SetPoint("TOPLEFT", bf, 15, -230)
+    --     do
+    --         local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
+    --         b:SetPoint("TOPLEFT", bf, 15, -230)
     
-            b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
-            b.text:SetText("/RA")
+    --         b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    --         b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+    --         b.text:SetText("/RA")
 
-            b:SetScript("OnClick", function() 
-                Database:SetConfig("bfusera", b:GetChecked())
-            end)
-            b:SetChecked(Database:GetConfigOrDefault("bfusera", true))            
+    --         b:SetScript("OnClick", function() 
+    --             Database:SetConfig("bfusera", b:GetChecked())
+    --         end)
+    --         b:SetChecked(Database:GetConfigOrDefault("bfusera", true))            
 
-            bf.usera = b
-        end
+    --         bf.usera = b
+    --     end
 
-        do
-            local ctx = nil
+    --     do
+    --         local ctx = nil
 
-            local currentitem = function()
-                local entry = bf.curEntry
-                local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
-                item = item .. " (" .. (entry["detail"]["count"] or 1) .. ")"
-                return item
-            end
+    --         local currentitem = function()
+    --             local entry = bf.curEntry
+    --             local item = entry["detail"]["item"] or entry["detail"]["displayname"]                
+    --             item = item .. " (" .. (entry["detail"]["count"] or 1) .. ")"
+    --             return item
+    --         end
          
 
-            local bidprice = function()
-                if not ctx then
-                    return 0
-                end
+    --         local bidprice = function()
+    --             if not ctx then
+    --                 return 0
+    --             end
 
-                local bid = ctx.currentprice
+    --             local bid = ctx.currentprice
 
-                if ctx.currentwinner then
-                    if ctx.mode == "GOLD" then
-                        bid = bid + ctx.inc * 10000
-                    elseif ctx.mode == "PERCENT" then
-                        bid = math.floor(bid * (1 + (ctx.inc / 100)) / 10000) * 10000
-                    end
-                end
+    --             if ctx.currentwinner then
+    --                 if ctx.mode == "GOLD" then
+    --                     bid = bid + ctx.inc * 10000
+    --                 elseif ctx.mode == "PERCENT" then
+    --                     bid = math.floor(bid * (1 + (ctx.inc / 100)) / 10000) * 10000
+    --                 end
+    --             end
 
-                return bid
-            end
+    --             return bid
+    --         end
 
-            local SendRaidMessage = function(text)
-                if bf.usera:GetChecked() and (UnitIsGroupLeader('player') or UnitIsGroupAssistant('player')) then
-                    SendChatMessage(text, "RAID_WARNING")
-                else
-                    SendChatMessage(text, "RAID")
-                end
-            end
+    --         local SendRaidMessage = function(text)
+    --             if bf.usera:GetChecked() and (UnitIsGroupLeader('player') or UnitIsGroupAssistant('player')) then
+    --                 SendChatMessage(text, "RAID_WARNING")
+    --             else
+    --                 SendChatMessage(text, "RAID")
+    --             end
+    --         end
 
-            local evt = function(text, playerName)
-                if not ctx then
-                    return
-                end
+    --         local evt = function(text, playerName)
+    --             if not ctx then
+    --                 return
+    --             end
 
-                local ask = tonumber(text)
-                if not ask then
-                    return
-                end
+    --             local ask = tonumber(text)
+    --             if not ask then
+    --                 return
+    --             end
 
-                playerName = strsplit("-", playerName)
-                local bid = bidprice() / 10000
-                local item = currentitem()
+    --             playerName = strsplit("-", playerName)
+    --             local bid = bidprice() / 10000
+    --             local item = currentitem()
 
-                if ask >= bid then
-                    ctx.currentwinner = playerName
-                    ctx.currentprice = ask * 10000
-                    ctx.countdown = bf.countdown:GetValue()
+    --             if ask >= bid then
+    --                 ctx.currentwinner = playerName
+    --                 ctx.currentprice = ask * 10000
+    --                 ctx.countdown = bf.countdown:GetValue()
                     
-                    -- L["Bid price"]
-                    SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
-                else
-                    SendRaidMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid * 10000))
-                end
+    --                 -- L["Bid price"]
+    --                 SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
+    --             else
+    --                 SendRaidMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid * 10000))
+    --             end
                 
-            end
+    --         end
 
-            RegEvent("CHAT_MSG_RAID_LEADER", evt)
-            RegEvent("CHAT_MSG_RAID", evt)
+    --         RegEvent("CHAT_MSG_RAID_LEADER", evt)
+    --         RegEvent("CHAT_MSG_RAID", evt)
 
-            local moretimebtn
-            local lesstimebtn
-            local controlbtn
-            do
-                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
-                b:SetWidth(40)
-                b:SetHeight(25)
-                b:SetPoint("BOTTOMRIGHT", -140, 15)
-                b:SetText("-5s")
-                b:Hide()
-                b:SetScript("OnClick", function()
-                    if ctx then
-                        if ctx.countdown <= 5 then
-                            return
-                        elseif ctx.countdown < 10 then
-                            ctx.countdown = 5
-                        elseif ctx.countdown >= 10 then
-                            ctx.countdown = ctx.countdown - 5 
-                        end
-                    end
-                    bf.UpdateButtonCountdown()
-                end)
-                lesstimebtn = b
-            end
+    --         local moretimebtn
+    --         local lesstimebtn
+    --         local controlbtn
+    --         do
+    --             local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+    --             b:SetWidth(40)
+    --             b:SetHeight(25)
+    --             b:SetPoint("BOTTOMRIGHT", -140, 15)
+    --             b:SetText("-5s")
+    --             b:Hide()
+    --             b:SetScript("OnClick", function()
+    --                 if ctx then
+    --                     if ctx.countdown <= 5 then
+    --                         return
+    --                     elseif ctx.countdown < 10 then
+    --                         ctx.countdown = 5
+    --                     elseif ctx.countdown >= 10 then
+    --                         ctx.countdown = ctx.countdown - 5 
+    --                     end
+    --                 end
+    --                 bf.UpdateButtonCountdown()
+    --             end)
+    --             lesstimebtn = b
+    --         end
 
-            do
-                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
-                b:SetWidth(40)
-                b:SetHeight(25)
-                b:SetPoint("BOTTOMRIGHT", -230, 15)
-                b:SetText("+5s")
-                b:Hide()
-                b:SetScript("OnClick", function()
-                    if ctx then
-                        ctx.countdown = ctx.countdown + 5 
-                    end
-                    bf.UpdateButtonCountdown()
-                end)
-                moretimebtn = b
-            end
+    --         do
+    --             local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+    --             b:SetWidth(40)
+    --             b:SetHeight(25)
+    --             b:SetPoint("BOTTOMRIGHT", -230, 15)
+    --             b:SetText("+5s")
+    --             b:Hide()
+    --             b:SetScript("OnClick", function()
+    --                 if ctx then
+    --                     ctx.countdown = ctx.countdown + 5 
+    --                 end
+    --                 bf.UpdateButtonCountdown()
+    --             end)
+    --             moretimebtn = b
+    --         end
 
-            do
-                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
-                b:SetWidth(50)
-                b:SetHeight(25)
-                b:SetPoint("BOTTOMRIGHT", -180, 15)
-                -- b:SetText(L["Pause"])
-                b:Hide()
-                b:SetScript("OnClick", function()
-                    if ctx then
-                        ctx.pause = not ctx.pause
-                    end
+    --         do
+    --             local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+    --             b:SetWidth(50)
+    --             b:SetHeight(25)
+    --             b:SetPoint("BOTTOMRIGHT", -180, 15)
+    --             -- b:SetText(L["Pause"])
+    --             b:Hide()
+    --             b:SetScript("OnClick", function()
+    --                 if ctx then
+    --                     ctx.pause = not ctx.pause
+    --                 end
 
-                    bf.UpdateButtonCountdown()
-                end)
-                controlbtn = b
-            end
+    --                 bf.UpdateButtonCountdown()
+    --             end)
+    --             controlbtn = b
+    --         end
 
-            do
+    --         do
                 
-                local tooltip = GUI.commtooltip
+    --             local tooltip = GUI.commtooltip
 
 
-                local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
-                b:SetWidth(100)
-                b:SetHeight(25)
-                b:SetPoint("BOTTOMRIGHT", -40, 15)
-                b:SetText(START)
+    --             local b = CreateFrame("Button", nil, bf, "GameMenuButtonTemplate")
+    --             b:SetWidth(100)
+    --             b:SetHeight(25)
+    --             b:SetPoint("BOTTOMRIGHT", -40, 15)
+    --             b:SetText(START)
 
-                b:SetScript("OnEnter", function()
-                    tooltip:SetOwner(b, "ANCHOR_RIGHT")
-                    tooltip:SetText(L["CTRL + Click to start and then pause timer"])
-                    tooltip:Show()
-                end)
+    --             b:SetScript("OnEnter", function()
+    --                 tooltip:SetOwner(b, "ANCHOR_RIGHT")
+    --                 tooltip:SetText(L["CTRL + Click to start and then pause timer"])
+    --                 tooltip:Show()
+    --             end)
 
-                b:SetScript("OnLeave", function()
-                    tooltip:Hide()
-                    tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-                end)
+    --             b:SetScript("OnLeave", function()
+    --                 tooltip:Hide()
+    --                 tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+    --             end)
 
-                b:SetScript("OnClick", function() 
-                    if ctx then
-                        bf.CancelBid()
-                        return
-                    end
+    --             b:SetScript("OnClick", function() 
+    --                 if ctx then
+    --                     bf.CancelBid()
+    --                     return
+    --                 end
 
-                    local mode, inc = bf.GetBidMode()
-                    ctx = {
-                        entry = bf.curEntry,
-                        currentprice = bf.startprice:GetValue() * 10000,
-                        currentwinner = nil,
-                        mode = mode,
-                        inc = inc,
-                        countdown = bf.countdown:GetValue(),
-                    }
+    --                 local mode, inc = bf.GetBidMode()
+    --                 ctx = {
+    --                     entry = bf.curEntry,
+    --                     currentprice = bf.startprice:GetValue() * 10000,
+    --                     currentwinner = nil,
+    --                     mode = mode,
+    --                     inc = inc,
+    --                     countdown = bf.countdown:GetValue(),
+    --                 }
 
-                    if IsControlKeyDown() then
-                        ctx.pause = true
-                    end
+    --                 if IsControlKeyDown() then
+    --                     ctx.pause = true
+    --                 end
 
-                    bf.UpdateButtonCountdown()
+    --                 bf.UpdateButtonCountdown()
 
-                    local item = currentitem()
+    --                 local item = currentitem()
 
-                    SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
+    --                 SendRaidMessage(L["Start bid"] .. " " .. item .. " " .. L["Starting price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
 
-                    ctx.timer = C_Timer.NewTicker(1, function()
-                        if ctx.pause then
-                            return
-                        end
+    --                 ctx.timer = C_Timer.NewTicker(1, function()
+    --                     if ctx.pause then
+    --                         return
+    --                     end
 
-                        ctx.countdown = ctx.countdown - 1
+    --                     ctx.countdown = ctx.countdown - 1
 
-                        bf.UpdateButtonCountdown()
+    --                     bf.UpdateButtonCountdown()
 
-                        if ctx.countdown <= 0 then
-                            ctx.timer:Cancel()
+    --                     if ctx.countdown <= 0 then
+    --                         ctx.timer:Cancel()
 
-                            if ctx.currentwinner then
-                                SendRaidMessage(item .. " " .. L["Hammer Price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. L["Winner"] .. " " .. ctx.currentwinner)
-                                ctx.entry["beneficiary"] = ctx.currentwinner
-                                ctx.entry["cost"] = ctx.currentprice / 10000
-                                ctx.entry["lock"] = true
-                                GUI:UpdateLootTableFromDatabase()
-                            else
-                                SendRaidMessage(item .. " " .. L["is bought in"])
-                            end
+    --                         if ctx.currentwinner then
+    --                             SendRaidMessage(item .. " " .. L["Hammer Price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. L["Winner"] .. " " .. ctx.currentwinner)
+    --                             ctx.entry["beneficiary"] = ctx.currentwinner
+    --                             ctx.entry["cost"] = ctx.currentprice / 10000
+    --                             ctx.entry["lock"] = true
+    --                             GUI:UpdateLootTableFromDatabase()
+    --                         else
+    --                             SendRaidMessage(item .. " " .. L["is bought in"])
+    --                         end
 
-                            ctx = nil
-                            bf.UpdateButtonCountdown()
+    --                         ctx = nil
+    --                         bf.UpdateButtonCountdown()
 
-                            return
-                        end
+    --                         return
+    --                     end
 
-                        local sendalert = ctx.countdown <= 5
-                        -- sendalert = sendalert or (ctx.countdown <= 15 and (ctx.countdown % 5 == 0))
-                        -- sendalert = sendalert or (ctx.countdown <= 30 and (ctx.countdown % 10 == 0))
-                        -- sendalert = sendalert or (ctx.countdown % 30 == 0)
+    --                     local sendalert = ctx.countdown <= 5
+    --                     -- sendalert = sendalert or (ctx.countdown <= 15 and (ctx.countdown % 5 == 0))
+    --                     -- sendalert = sendalert or (ctx.countdown <= 30 and (ctx.countdown % 10 == 0))
+    --                     -- sendalert = sendalert or (ctx.countdown % 30 == 0)
 
-                        if sendalert then
-                            SendRaidMessage(" " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
-                        end
-                    end)
-                end)
+    --                     if sendalert then
+    --                         SendRaidMessage(" " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< " .. L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown)))
+    --                     end
+    --                 end)
+    --             end)
 
-                bf.CancelBid = function()
-                    if ctx then
-                        ctx.timer:Cancel()
-                        SendRaidMessage(L["Bid canceled"], "RAID")
-                    end
+    --             bf.CancelBid = function()
+    --                 if ctx then
+    --                     ctx.timer:Cancel()
+    --                     SendRaidMessage(L["Bid canceled"], "RAID")
+    --                 end
 
-                    ctx = nil
-                    bf.UpdateButtonCountdown()
-                end
+    --                 ctx = nil
+    --                 bf.UpdateButtonCountdown()
+    --             end
 
-                bf.UpdateButtonCountdown = function()
-                    if ctx then
-                        b:SetText(CANCEL .. "(" .. GREEN_FONT_COLOR:WrapTextInColorCode(ctx.countdown) .. ")")
-                        moretimebtn:Show()
-                        lesstimebtn:Show()
-                        controlbtn:Show()
+    --             bf.UpdateButtonCountdown = function()
+    --                 if ctx then
+    --                     b:SetText(CANCEL .. "(" .. GREEN_FONT_COLOR:WrapTextInColorCode(ctx.countdown) .. ")")
+    --                     moretimebtn:Show()
+    --                     lesstimebtn:Show()
+    --                     controlbtn:Show()
 
-                        if ctx.pause then
-                            controlbtn:SetText(L["Go"])
-                        else
-                            controlbtn:SetText(L["Pause"])
-                        end
-                    else
-                        b:SetText(START)
-                        moretimebtn:Hide()
-                        lesstimebtn:Hide()
-                        controlbtn:Hide()
-                    end
-                end
-            end
-
-
+    --                     if ctx.pause then
+    --                         controlbtn:SetText(L["Go"])
+    --                     else
+    --                         controlbtn:SetText(L["Pause"])
+    --                     end
+    --                 else
+    --                     b:SetText(START)
+    --                     moretimebtn:Hide()
+    --                     lesstimebtn:Hide()
+    --                     controlbtn:Hide()
+    --                 end
+    --             end
+    --         end
 
 
-        end
 
-        bf:Hide()
-        bf:SetScript("OnHide", function() 
-            if GUI.mainframe:IsShown() then
-                bf.CancelBid()
-            end
-        end)
 
-        self.bidframe = bf
-    end
+    --     end
+
+    --     bf:Hide()
+    --     bf:SetScript("OnHide", function() 
+    --         if GUI.mainframe:IsShown() then
+    --             bf.CancelBid()
+    --         end
+    --     end)
+
+    --     self.bidframe = bf
+    -- end
 
     -- split member and editbox
     do
