@@ -885,7 +885,7 @@ function GUI:Init()
     -- split member and editbox
     do
         local t = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
-        t:SetWidth(50)
+        t:SetWidth(40)
         t:SetHeight(25)
         t:SetPoint("BOTTOMLEFT", f, 350, 95)
         t:SetAutoFocus(false)
@@ -895,11 +895,10 @@ function GUI:Init()
         t:SetScript("OnChar", mustnumber)
 
         local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
-        b:SetPoint("RIGHT", t, 40, 0)
-
-        b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
-        b.text:SetText(L["Input only"])
+        b:SetNormalTexture("Interface\\Buttons\\LockButton-UnLocked-Up")
+        b:SetPushedTexture("Interface\\Buttons\\LockButton-UnLocked-Down")
+        b:SetCheckedTexture("Interface\\Buttons\\LockButton-Locked-Up")
+        b:SetPoint("RIGHT", t, 30, 0)
 
         local tooltip = GUI.commtooltip
 
