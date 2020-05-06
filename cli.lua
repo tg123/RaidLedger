@@ -12,11 +12,11 @@ hooksecurefunc("SetItemRef", function(link)
         local linkType, target = strsplit(":", link)
 
         if linkType == "item" then
-            local _, itemLink = GetItemInfo(target)
-            if itemLink then
-                Print(L["Item added"] .. " " .. itemLink)
-                Database:AddLoot(itemLink, 1, "", 0, true)
-            end
+            -- local _, itemLink = GetItemInfo(target)
+            -- if itemLink then
+            --     Print(L["Item added"] .. " " .. itemLink)
+            --     Database:AddLoot(itemLink, 1, "", 0, true)
+            -- end
         elseif linkType == "player" then
             local playerName = strsplit("-", target)
             Print(L["Compensation added"] .. " " .. playerName)
