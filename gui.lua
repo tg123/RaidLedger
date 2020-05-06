@@ -1819,6 +1819,7 @@ function GUI:Init()
                     for _, item in pairs(items or {}) do
                         local c = item["cost"] or 0
                         local t = item["type"]
+                        local cnt = item["detail"]["count"] or 1
 
                         if t == "CREDIT" and c == 0 then
                             local i = item["detail"]["item"] or ""
@@ -1830,7 +1831,7 @@ function GUI:Init()
 
                             if i ~= "" then
                                 countby[i] = countby[i] or 0
-                                countby[i] = countby[i] + 1
+                                countby[i] = countby[i] + cnt
                             end
 
                         end
