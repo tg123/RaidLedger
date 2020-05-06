@@ -253,6 +253,8 @@ RegEvent("ADDON_LOADED", function()
                                 costtype = "GOLD"
                             elseif costtype == "%" then
                                 costtype = "PROFIT_PERCENT"
+                            elseif costtype == "%%" then
+                                costtype = "REVENUE_PERCENT"
                             elseif costtype == "*" then
                                 costtype = "MUL_AVG"
                             else
@@ -451,6 +453,8 @@ RegEvent("ADDON_LOADED", function()
                             x = d .. " " .. c .. " G"
                         elseif ct == "PROFIT_PERCENT" then
                             x = d .. " " .. c .. " %"
+                        elseif ct == "REVENUE_PERCENT" then
+                            x = d .. " " .. c .. " %%"
                         elseif ct == "MUL_AVG" then
                             x = d .. " " .. c .. " *"
                         end
