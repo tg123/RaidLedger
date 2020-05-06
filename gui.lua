@@ -12,6 +12,7 @@ local Print = ADDONSELF.print
 local calcavg = ADDONSELF.calcavg
 local GenExport = ADDONSELF.genexport
 local GenReport = ADDONSELF.genreport
+local SendToChatSlowly = ADDONSELF.sendchat
 local GetMoneyStringL = ADDONSELF.GetMoneyStringL
 
 local function GetRosterNumber()
@@ -1694,47 +1695,179 @@ function GUI:Init()
         icon:SetPoint('TOPLEFT', 10, -5)
         icon:SetSize(16, 16)
 
-        local channel = "RAID"
+        local optctx = {
+            channel = "RAID",
+            filterzero = false,
+        }
 
         local setReportChannel = function(self)
-            channel = self.arg1
+            optctx.channel = self.arg1
             b:SetText(self.value)
+            CloseDropDownMenus()
+        end
+    
+        local reportChannelChecked = function(self)
+            return self.arg1 == optctx.channel
         end
 
         local channelTypeMenu = {
-            {   
-                arg1 = "RAID",
-                text = RAID, 
-                func = setReportChannel, 
+            {
+                isTitle = true,
+                text = CHANNEL,
+                notCheckable = true,
+            }, -- 0
+            { 
+                text = CHANNEL, 
+                hasArrow = true,
+                notCheckable = true,
+                menuList = {
+                    {   
+                        arg1 = "RAID",
+                        text = RAID, 
+                        func = setReportChannel, 
+                        checked = reportChannelChecked,
+                    },
+                    {   
+                        arg1 = "GUILD",
+                        text = GUILD, 
+                        func = setReportChannel, 
+                        checked = reportChannelChecked,
+                    },
+                    {   
+                        arg1 = nil,
+                        text = L["Last used"], 
+                        func = setReportChannel, 
+                        checked = reportChannelChecked,
+                    },
+                } 
+            }, -- 1
+            {
+                isTitle = true,
+                text = L["Report"],
+                notCheckable = true,
             },
-            {   
-                arg1 = "GUILD",
-                text = GUILD, 
-                func = setReportChannel, 
+            {
+                text = L["Report"] .. " " .. L["Subgroup total"], 
+                func = function()
+
+                    local c = 0
+                    local groups = {}
+    
+                    for i = 1, MAX_RAID_MEMBERS do
+                        local name, _, subgroup = GetRaidRosterInfo(i)
+                        if name then
+                            groups[subgroup] = (groups[subgroup] or {
+                                members = {},
+                                assist = nil,
+                            })
+
+                            local rt = GetRaidTargetIndex("raid" .. i)
+                            if not groups[subgroup].assist and rt then
+                                groups[subgroup].assist = " {rt" .. i .. "} " .. UnitName("raid" .. i) .. " {rt" .. i .. "} "
+                            end
+                            
+                            groups[subgroup].members[name] = true
+                        end
+                    end
+    
+                    local specials = {}
+                    local _, avg = calcavg(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), nil, function(entry, cost)
+                        local b = entry["beneficiary"]
+
+                        specials[b] = specials[b] or 0
+                        specials[b] = specials[b] + cost
+                    end, {
+                        rounddown = GUI.rouddownCheck:GetChecked(),
+                    })
+
+                    local lines = {}
+                    table.insert(lines, L["Per Member"] .. ": " .. GetMoneyStringL(avg))
+
+                    for i, g in pairs(groups) do
+
+                        local teamtotal = 0
+
+                        for m in pairs(g.members) do
+                            teamtotal = teamtotal + avg
+                            if specials[m] and specials[m] > 0 then
+                                teamtotal = teamtotal + specials[m]
+                            end
+                        end
+
+                        table.insert(lines, GROUP .. i .. " " .. (g.assist and g.assist or "") .. " " .. L["Subgroup total"] .. ": " .. GetMoneyStringL(teamtotal))
+
+                        for m in pairs(g.members) do
+                            if specials[m] and specials[m] > 0 then
+                                table.insert(lines, "  ... " .. m .. " " .. GetMoneyStringL(avg) .. " + " .. GetMoneyStringL(specials[m]) .. " = " .. GetMoneyStringL(avg + specials[m]))
+                            end
+                        end
+                    end
+
+                    table.insert(lines, L["Per Member"] .. ": " .. GetMoneyStringL(avg))
+    
+                    SendToChatSlowly(lines, optctx.channel)
+                end, 
+                notCheckable = true,
             },
-            {   
-                arg1 = "YELL",
-                text = YELL, 
-                func = setReportChannel, 
+            {
+                text = L["Report"] .. " " .. L["0 credit items"], 
+                func = function()
+                    local items = Database:GetCurrentLedger()["items"]
+                    local lines = {}
+                    local countby = {}
+
+                    for _, item in pairs(items or {}) do
+                        local c = item["cost"] or 0
+                        local t = item["type"]
+
+                        if t == "CREDIT" and c == 0 then
+                            local i = item["detail"]["item"] or ""
+                            local cnt = item["detail"]["count"] or 1
+                            local d = item["detail"]["displayname"] or ""
+                            if not GetItemInfoFromHyperlink(i) then
+                                i = d
+                            end
+
+                            if i ~= "" then
+                                countby[i] = countby[i] or 0
+                                countby[i] = countby[i] + 1
+                            end
+
+                        end
+                    end
+
+                    for i, c in pairs(countby) do
+                        table.insert(lines, i .. " * " .. c)
+                    end
+
+                    SendToChatSlowly(lines, optctx.channel)
+                end, 
+                notCheckable = true,
             },
-            {   
-                arg1 = nil,
-                text = L["Last used"], 
-                func = setReportChannel, 
+            {
+                isTitle = true,
+                text = OPTIONS,
+                notCheckable = true,
+            },
+            {
+                text = FILTER .. " " .. L["0 credit items"], 
+                isNotRadio = true,
+                func = function(self)
+                    optctx.filterzero = not optctx.filterzero
+                end, 
+                checked = function(self)
+                    return optctx.filterzero
+                end
             },
         }        
 
         b:SetScript("OnClick", function(self, button)
             if button == "RightButton" then
-
-                for _, m in pairs(channelTypeMenu) do
-                    m.checked = m.arg1 == channel
-                end
-
                 EasyMenu(channelTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
             else
-                GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), channel, {
+                GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), optctx.channel, {
                     short = IsControlKeyDown(),
+                    filterzero = optctx.filterzero,
                     rounddown = GUI.rouddownCheck:GetChecked(),
                 })
             end

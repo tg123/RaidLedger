@@ -191,6 +191,27 @@ local function GenExportLine(item, c)
     return s
 end
 
+ local function sendchat(lines, channel)
+    local SendToChat = SendToCurrrentChannel
+    if channel then
+        SendToChat = function(msg)
+            SendChatMessage(msg, channel)
+        end
+    end
+
+    local SendToChatTimer = function(t)
+        SendToChat(t.Arg1)
+    end
+
+    -- borrow from [details]
+    for i = 1, #lines do 
+        local timer = C_Timer.NewTimer (i * 200 / 1000, SendToChatTimer)
+        timer.Arg1 = lines[i]
+    end
+end
+
+ADDONSELF.sendchat = sendchat
+
 ADDONSELF.genexport = function(items, n, conf)
     local s = L["Raid Ledger"] .. CRLF
     s = s .. L["Feedback"] .. ": farmer1992@gmail.com" .. CRLF
@@ -242,7 +263,12 @@ ADDONSELF.genreport = function(items, n, channel, conf)
         if not GetItemInfoFromHyperlink(i) then
             i = d
         end
-        table.insert( grp[l]["items"], i .. " (" .. cnt .. ") " .. GetMoneyStringL(c))
+
+        if conf.filterzero and c == 0 then
+            -- skip
+        else
+            table.insert( grp[l]["items"], i .. " (" .. cnt .. ") " .. GetMoneyStringL(c))
+        end
 
         -- table.insert(lines, string.format(L["Credit"] .. ": %s -> [%s] %s", i, l, GetMoneyStringL(c)))
 
@@ -359,22 +385,6 @@ ADDONSELF.genreport = function(items, n, channel, conf)
     table.insert(lines, L["Split into"]  .. ": " .. n)
     table.insert(lines, "RaidLedger: ..." .. L["Per Member credit"] .. ": [" .. avg .. (conf.rounddown and (" (" .. L["Round down"] .. ")]...") or "]..."))
 
-    local SendToChat = SendToCurrrentChannel
-    if channel then
-        SendToChat = function(msg)
-            SendChatMessage(msg, channel)
-        end
-    end
-
-    local SendToChatTimer = function(t)
-        SendToChat(t.Arg1)
-    end
-
-    -- borrow from [details]
-    for i = 1, #lines do 
-        local timer = C_Timer.NewTimer (i * 200 / 1000, SendToChatTimer)
-        timer.Arg1 = lines[i]
-    end
-
+    sendchat(lines, channel)
 
 end
