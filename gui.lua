@@ -1771,6 +1771,17 @@ function GUI:Init()
                 notCheckable = true,
             },
             {
+                text = L["Summary"], 
+                func = function()
+                    GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), optctx.channel, {
+                        short = true,
+                        filterzero = optctx.filterzero,
+                        rounddown = GUI.rouddownCheck:GetChecked(),
+                    })
+                end, 
+                notCheckable = true,
+            },
+            {
                 text = L["Subgroup total"], 
                 func = function()
 
@@ -1870,7 +1881,29 @@ function GUI:Init()
                 notCheckable = true,
             },
             {
-                text = L["Expense"], 
+                text = L["Credit"], 
+                func = function()
+                    local lines = {}
+                    local _, _, revenue = calcavg(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), function(item, cost)
+
+                        if cost > 0 then
+                            table.insert(lines, ADDONSELF.GenExportLine(item, cost, true))
+                        end
+
+                    end, nil, {
+                        rounddown = GUI.rouddownCheck:GetChecked(),
+                    })
+
+                    revenue = GetMoneyStringL(revenue)
+                    table.insert(lines, L["Revenue"] .. ": " .. revenue)
+
+                    SendToChatSlowly(lines, optctx.channel)
+                    
+                end, 
+                notCheckable = true,
+            },
+            {
+                text = L["Debit"], 
                 func = function()
                     GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), optctx.channel, {
                         expenseonly = true,
