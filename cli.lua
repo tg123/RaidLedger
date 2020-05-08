@@ -33,15 +33,29 @@ hooksecurefunc("SetItemRef", function(link)
     end
 end)
 
-hooksecurefunc("HandleModifiedItemClick", function(link)
-    if GUI.mainframe:IsShown() then
-        local _, itemLink = GetItemInfo(link)
-        if itemLink then
-            Print(L["Item added"] .. " " .. itemLink)
-            Database:AddLoot(itemLink, 1, "", 0, true)
+do
+    local lasttime = 0
+    local lastlink = nil
+
+    hooksecurefunc("HandleModifiedItemClick", function(link)
+        if lastlink == link then
+            if time() - lasttime < 2 then
+                return
+            end
         end
-    end
-end)
+
+        if GUI.mainframe:IsShown() then
+            local _, itemLink = GetItemInfo(link)
+            if itemLink then
+                Print(L["Item added"] .. " " .. itemLink)
+                Database:AddLoot(itemLink, 1, "", 0, true)
+            end
+
+            lasttime = time()
+            lastlink = link
+        end
+    end)
+end
 
 local AUTOADDLOOT_TYPE_ALL = 0
 -- local AUTOADDLOOT_TYPE_PARTY = 1
