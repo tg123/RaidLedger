@@ -162,7 +162,7 @@ end
 ADDONSELF.calcavg = calcavg
 
 
-local function GenExportLine(item, c)
+local function GenExportLine(item, c, uselink)
     local l = item["beneficiary"] or L["[Unknown]"]
     local i = item["detail"]["item"] or ""
     local cnt = item["detail"]["count"] or 1
@@ -170,15 +170,23 @@ local function GenExportLine(item, c)
     local t = item["type"]
     local ct = item["costtype"]
 
-    local n = GetItemInfo(i) or d
-    n = n ~= "" and n or nil
-    n = n or L["Other"]
+    local n, link = GetItemInfo(i)
+    if uselink then
+        n = link
+    end
+    n = n or d
+    n = n ~= "" and n or L["Other"]
 
     if t == "DEBIT" then
         n = d or L["Compensation"]
     end
 
-    local s = "[" ..  n .. "] " .. " (" .. cnt .. ") " .. l .. " " .. GetMoneyStringL(c) 
+    if not uselink then
+        n = "[" ..  n .. "]"
+    end
+
+
+    local s = n .. " (" .. cnt .. ") " .. l .. " " .. GetMoneyStringL(c) 
 
     if ct == "PROFIT_PERCENT" then
         s = s .. " (" .. (item["cost"] or 0) .. " % " .. L["Net Profit"] .. ")"
@@ -190,6 +198,8 @@ local function GenExportLine(item, c)
 
     return s
 end
+
+ADDONSELF.GenExportLine = GenExportLine
 
  local function sendchat(lines, channel)
     local SendToChat = SendToCurrrentChannel
@@ -356,6 +366,10 @@ ADDONSELF.genreport = function(items, n, channel, conf)
         end
     end
 
+    if conf.expenseonly then
+        wipe(lines)
+    end
+
     if expense > 0 then
         table.insert(lines, "RaidLedger:.... " .. L["Debit"] .. " ....")
 
@@ -368,6 +382,11 @@ ADDONSELF.genreport = function(items, n, channel, conf)
                 table.insert(lines, "... " .. l["beneficiary"] .. " " .. item)
             end
         end
+    end
+
+    if conf.expenseonly then
+        sendchat(lines, channel)
+        return
     end
 
     if conf.short then

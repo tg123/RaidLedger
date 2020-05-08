@@ -1638,8 +1638,6 @@ function GUI:Init()
         self.lootLogFrame.frame:SetPoint("TOPLEFT", f, "TOPLEFT", 30, -50)
 
         self.lootLogFrame:RegisterEvents({
-
-
             ["OnClick"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, sttable, button, ...)
                 clearAllFocus()
                 local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, sttable)
@@ -1677,6 +1675,17 @@ function GUI:Init()
                     ChatEdit_InsertLink(entry["detail"]["item"])
                 end
             end,
+
+            ["OnDoubleClick"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, sttable, button, ...)
+                local item, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, sttable)
+
+                if not item then
+                    return
+                end
+
+                SendChatMessage(ADDONSELF.GenExportLine(item, item["costcache"], true), f.reportopt.channel)
+
+            end,
         })
     end
 
@@ -1712,6 +1721,8 @@ function GUI:Init()
             channel = "RAID",
             filterzero = false,
         }
+
+        f.reportopt = optctx
 
         local setReportChannel = function(self)
             optctx.channel = self.arg1
@@ -1859,6 +1870,15 @@ function GUI:Init()
                 notCheckable = true,
             },
             {
+                text = L["Expense"], 
+                func = function()
+                    GenReport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), optctx.channel, {
+                        expenseonly = true,
+                    })
+                end, 
+                notCheckable = true,
+            },
+            {
                 isTitle = true,
                 text = OPTIONS,
                 notCheckable = true,
@@ -1920,13 +1940,13 @@ function GUI:Init()
         b:SetScript("OnClick", function()
             if exportEditbox:GetParent():IsShown() then
                 lootLogFrame:Show()
-                countEdit:Show()
+                countEdit:Enable()
                 hidelockedCheck:Show()
                 exportEditbox:GetParent():Hide()
                 b:SetText(L["Export as text"])
             else
                 lootLogFrame:Hide()
-                countEdit:Hide()
+                countEdit:Disable()
                 hidelockedCheck:Hide()
                 exportEditbox:GetParent():Show()
                 b:SetText(L["Close text export"])
