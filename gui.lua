@@ -1684,16 +1684,29 @@ function GUI:Init()
     -- report btn
     do
         local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
-        b:SetWidth(120)
+        b:SetWidth(95)
         b:SetHeight(25)
         b:SetPoint("BOTTOMLEFT", 40, 15)
         b:SetText(RAID)
-        -- b:SetText(L["Report"] .. " :" .. RAID)
         b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        local icon = b:CreateTexture(nil, 'ARTWORK')
-        icon:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ArmoryChat")
-        icon:SetPoint('TOPLEFT', 10, -5)
-        icon:SetSize(16, 16)
+        do
+            local icon = b:CreateTexture(nil, 'ARTWORK')
+            icon:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ArmoryChat")
+            icon:SetPoint('TOPLEFT', 10, -5)
+            icon:SetSize(16, 16)
+        end
+
+        local ba = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
+        ba:SetWidth(25)
+        ba:SetHeight(25)
+        ba:SetPoint("LEFT", b, "RIGHT", 0, 0)
+        ba:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+        do
+            local icon = ba:CreateTexture(nil, 'ARTWORK')
+            icon:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+            icon:SetPoint('CENTER', 1, 0)
+            icon:SetSize(16, 16)
+        end
 
         local optctx = {
             channel = "RAID",
@@ -1747,7 +1760,7 @@ function GUI:Init()
                 notCheckable = true,
             },
             {
-                text = L["Report"] .. " " .. L["Subgroup total"], 
+                text = L["Subgroup total"], 
                 func = function()
 
                     local c = 0
@@ -1810,7 +1823,7 @@ function GUI:Init()
                 notCheckable = true,
             },
             {
-                text = L["Report"] .. " " .. L["0 credit items"], 
+                text = L["0 credit items"], 
                 func = function()
                     local items = Database:GetCurrentLedger()["items"]
                     local lines = {}
@@ -1872,6 +1885,10 @@ function GUI:Init()
                     rounddown = GUI.rouddownCheck:GetChecked(),
                 })
             end
+        end)
+
+        ba:SetScript("OnClick", function(self, button)
+            EasyMenu(channelTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
         end)
 
         local tooltip = GUI.commtooltip
