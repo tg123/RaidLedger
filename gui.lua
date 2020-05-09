@@ -1162,12 +1162,12 @@ function GUI:Init()
                 local name, _, subgroup, _, class = GetRaidRosterInfo(i)
 
                 if name then
-                    name = string.lower(name)
+                    local namelower = string.lower(name)
                     class = string.lower(class)
 
                     local b = text == ""
                     b = b or (text == "#ONFOCUS")
-                    b = b or (strfind(name, string.lower(text)))
+                    b = b or (strfind(namelower, string.lower(text)))
                     b = b or (tonumber(text) == subgroup)
                     b = b or (strfind(class, string.lower(text)))
 
