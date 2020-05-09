@@ -890,10 +890,12 @@ function GUI:Init()
         t:SetHeight(25)
         t:SetPoint("BOTTOMLEFT", f, 350, 95)
         t:SetAutoFocus(false)
-        t:SetMaxLetters(4)
+        t:SetMaxLetters(6)
         -- t:SetNumeric(true)
         t:SetScript("OnTextChanged", function() self:UpdateSummary() end)
         t:SetScript("OnChar", mustnumber)
+        t:SetScript("OnEnterPressed", t.ClearFocus)
+
 
         local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
         b:SetNormalTexture("Interface\\Buttons\\LockButton-UnLocked-Up")
