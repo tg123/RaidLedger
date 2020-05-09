@@ -41,17 +41,17 @@ end
 
 local currTrade = nil
 
-local function UpdateCheckButton()
-    -- print(1)
-end
+-- local function UpdateCheckButton()
+--     -- print(1)
+-- end
 
-RegEvent("TRADE_SHOW", function()
-    addtoCheckbtn:SetChecked(UnitInRaid("player"))
-end)
+-- RegEvent("TRADE_SHOW", function()
+--     addtoCheckbtn:SetChecked(UnitInRaid("player"))
+-- end)
 
-RegEvent("TRADE_UPDATE", UpdateCheckButton)
-RegEvent("TRADE_PLAYER_ITEM_CHANGED", UpdateCheckButton)
-RegEvent("TRADE_MONEY_CHANGED", UpdateCheckButton)
+-- RegEvent("TRADE_UPDATE", UpdateCheckButton)
+-- RegEvent("TRADE_PLAYER_ITEM_CHANGED", UpdateCheckButton)
+-- RegEvent("TRADE_MONEY_CHANGED", UpdateCheckButton)
 
 RegEvent("TRADE_ACCEPT_UPDATE", function(p, t)
     currTrade = {
