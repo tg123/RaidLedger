@@ -42,4 +42,5 @@ db.lua
 options.lua
 gui.lua
 
+trade.lua
 cli.lua
