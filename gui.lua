@@ -254,7 +254,7 @@ function GUI:Init()
     do
         local bf = CreateFrame("Frame", nil, f)
         bf:SetWidth(290)
-        bf:SetHeight(280)
+        bf:SetHeight(310)
         bf:SetBackdrop({
             bgFile = "Interface\\FrameGeneral\\UI-Background-Marble",
             edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
@@ -626,6 +626,22 @@ function GUI:Init()
         end
 
         do
+            local b = CreateFrame("CheckButton", nil, bf, "UICheckButtonTemplate")
+            b:SetPoint("TOPLEFT", bf, 15, -230)
+    
+            b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+            b.text:SetText("/RA")
+
+            b:SetScript("OnClick", function() 
+                Database:SetConfig("bfusera", b:GetChecked())
+            end)
+            b:SetChecked(Database:GetConfigOrDefault("bfusera", true))            
+
+            bf.usera = b
+        end
+
+        do
             local ctx = nil
 
             local currentitem = function()
@@ -655,7 +671,7 @@ function GUI:Init()
             end
 
             local SendRaidMessage = function(text)
-                if UnitIsGroupLeader('player') or UnitIsGroupAssistant('player') then
+                if bf.usera:GetChecked() and (UnitIsGroupLeader('player') or UnitIsGroupAssistant('player')) then
                     SendChatMessage(text, "RAID_WARNING")
                 else
                     SendChatMessage(text, "RAID")
