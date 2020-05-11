@@ -952,7 +952,11 @@ function GUI:Init()
         b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
         b:SetPoint("BOTTOMLEFT", f, 195, 60)
         b.text:SetText(L["Round per member credit down"])
-        b:SetScript("OnClick", function() GUI:UpdateSummary() end)
+        b:SetScript("OnClick", function() 
+            GUI:UpdateSummary() 
+            Database:SetConfig("rounddownchecked", b:GetChecked())
+        end)
+        b:SetChecked(Database:GetConfigOrDefault("rounddownchecked", false))
 
         self.rouddownCheck = b
     end
@@ -1526,6 +1530,17 @@ function GUI:Init()
                     setCostType("MUL_AVG")
                 end, 
             },
+            { 
+                text = "", 
+                isTitle = true, 
+            },
+            {
+                text = CANCEL,
+                notCheckable = true,
+                func = function(self)
+                    CloseDropDownMenus()
+                end, 
+            },
         }        
 
 
@@ -1721,7 +1736,7 @@ function GUI:Init()
 
         local optctx = {
             channel = "RAID",
-            filterzero = false,
+            filterzero = Database:GetConfigOrDefault("filterzero", false),
         }
 
         f.reportopt = optctx
@@ -1923,10 +1938,22 @@ function GUI:Init()
                 isNotRadio = true,
                 func = function(self)
                     optctx.filterzero = not optctx.filterzero
+                    Database:SetConfig("filterzero", optctx.filterzero)
                 end, 
                 checked = function(self)
                     return optctx.filterzero
                 end
+            },
+            { 
+                text = "", 
+                isTitle = true, 
+            },
+            {
+                text = CANCEL,
+                notCheckable = true,
+                func = function(self)
+                    CloseDropDownMenus()
+                end, 
             },
         }        
 
