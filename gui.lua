@@ -1180,6 +1180,10 @@ function GUI:Init()
             local data = {}
             local tmp = {}
 
+            if strbyte(text) == strbyte("%") then
+                return data
+            end
+
             for i = 1, MAX_RAID_MEMBERS do
                 local name, _, subgroup, _, class = GetRaidRosterInfo(i)
 
