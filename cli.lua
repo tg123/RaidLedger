@@ -44,7 +44,7 @@ do
             end
         end
 
-        if GUI.mainframe:IsShown() then
+        if GUI.mainframe:IsShown() and not ChatEdit_GetActiveWindow() then
             local _, itemLink = GetItemInfo(link)
             if itemLink then
                 Print(L["Item added"] .. " " .. itemLink)
