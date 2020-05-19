@@ -2094,14 +2094,15 @@ function GUI:Init()
         local exportEditbox = self.exportEditbox
         local countEdit = self.countEdit
         local hidelockedCheck = self.hidelockedCheck
-
         local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
+
         b:SetWidth(120)
         b:SetHeight(25)
         b:SetPoint("BOTTOMLEFT", 40, 60)
         b:SetText(L["Export as text"])
-        b:SetScript("OnClick", function()
-            if exportEditbox:GetParent():IsShown() then
+
+        local onclick = function(opt, force)
+            if exportEditbox:GetParent():IsShown() and not force then
                 lootLogFrame:Show()
                 countEdit:Enable()
                 hidelockedCheck:Show()
@@ -2115,23 +2116,59 @@ function GUI:Init()
                 b:SetText(L["Close text export"])
             end
 
-            exportEditbox:SetText(GenExport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), {
+            exportEditbox:SetText(GenExport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), opt))
+        end
+
+        b:SetScript("OnClick", function()
+            onclick({
                 rounddown = self.rouddownCheck:GetChecked()
-            }))
+            })
         end)
 
+        local formatMenu = {
+            {
+                isTitle = true,
+                text = L["Export as text"],
+                notCheckable = true,
+            }, -- 0
+            {
+                text = L["Excel csv"],
+                notCheckable = true,
+                func = function()
+                    onclick({
+                        format = "csv"
+                    }, true)
+                end,
+            },            
+            { 
+                text = "", 
+                isTitle = true, 
+                notCheckable = true,
+            },
+            {
+                text = CANCEL,
+                notCheckable = true,
+                func = function(self)
+                    CloseDropDownMenus()
+                end, 
+            },
+        }    
         
-        -- local ba = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
-        -- ba:SetWidth(25)
-        -- ba:SetHeight(25)
-        -- ba:SetPoint("LEFT", b, "RIGHT", 0, 0)
-        -- ba:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        -- do
-        --     local icon = ba:CreateTexture(nil, 'ARTWORK')
-        --     icon:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
-        --     icon:SetPoint('CENTER', 1, 0)
-        --     icon:SetSize(16, 16)
-        -- end
+        local ba = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
+        ba:SetWidth(25)
+        ba:SetHeight(25)
+        ba:SetPoint("LEFT", b, "RIGHT", 0, 0)
+        ba:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+        do
+            local icon = ba:CreateTexture(nil, 'ARTWORK')
+            icon:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+            icon:SetPoint('CENTER', 1, 0)
+            icon:SetSize(16, 16)
+        end
+
+        ba:SetScript("OnClick", function(self, button)
+            EasyMenu(formatMenu, menuFrame, "cursor", 0 , 0, "MENU");
+        end)        
     end
 
 end
