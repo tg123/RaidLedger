@@ -1032,7 +1032,7 @@ function GUI:Init()
         local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
         b:SetWidth(100)
         b:SetHeight(25)
-        b:SetPoint("BOTTOMLEFT", 180, 15)
+        b:SetPoint("BOTTOMLEFT", 195, 15)
         b:SetText(L["Clear"])
         b:SetScript("OnClick", function()
             StaticPopup_Show("RAIDLEDGER_CLEARMSG")
@@ -1050,10 +1050,25 @@ function GUI:Init()
             Database:AddCredit("")
             ScrollFrame_OnVerticalScroll(self.lootLogFrame.scrollframe, 0) -- move to top
         end)
+        
     end
 
     -- debit
     do
+
+        local applytemplate = function(idx)
+            local t = ADDONSELF.GetDebitTemplate(idx)
+            if #t == 0 then
+                Print(L["Cannot find any debit entry in template, please check your template in options"])
+                return
+            end
+
+            for _, d in pairs(t) do
+                Database:AddDebit(d.reason, "", d.cost, d.costtype)
+            end
+
+        end
+
         local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
         b:SetWidth(60)
         b:SetHeight(25)
@@ -1062,16 +1077,7 @@ function GUI:Init()
         b:SetScript("OnClick", function()
 
             if IsControlKeyDown() then
-                local t = ADDONSELF.GetCurrentDebitTemplate()
-                if #t == 0 then
-                    Print(L["Cannot find any debit entry in template, please check your template in options"])
-                    return
-                end
-
-                for _, d in pairs(t) do
-                    Database:AddDebit(d.reason, "", d.cost, d.costtype)
-                end
-
+                applytemplate()
             else
                 Database:AddDebit(L["Compensation"])
             end
@@ -1091,6 +1097,81 @@ function GUI:Init()
             tooltip:Hide()
             tooltip:SetOwner(UIParent, "ANCHOR_NONE")
         end)
+
+        local templateMenu = {
+            {
+                isTitle = true,
+                text = L["Debit Template"],
+                notCheckable = true,
+            }, -- 0
+            {
+                text = OPTIONS,
+                notCheckable = true,
+                func = function()
+                    InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
+                    InterfaceOptionsFrame_OpenToCategory(L["Raid Ledger"])
+                end,
+            },            
+            { 
+                text = "", 
+                isTitle = true, 
+                notCheckable = true,
+            },
+            {
+                text = CANCEL,
+                notCheckable = true,
+                func = function(self)
+                    CloseDropDownMenus()
+                end, 
+            },
+        }    
+
+        local ba = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
+        ba:SetWidth(25)
+        ba:SetHeight(25)
+        ba:SetPoint("LEFT", b, "RIGHT", 0, 0)
+        ba:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+        do
+            local icon = ba:CreateTexture(nil, 'ARTWORK')
+            icon:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+            icon:SetPoint('CENTER', 1, 0)
+            icon:SetSize(16, 16)
+        end
+
+        ba:SetScript("OnClick", function(self, button)
+
+            local templates = Database:GetConfigOrDefault("debittemplates", {})
+
+
+            if #templates > 0 then
+
+                while #templateMenu > 4 do
+                    table.remove(templateMenu, 3)
+                end
+
+
+                table.insert(templateMenu, 3, {
+                    text = "", 
+                    isTitle = true, 
+                    notCheckable = true,
+                })
+
+                for i, t in pairs(templates) do
+                    local ii = i
+                    table.insert(templateMenu, 4, {
+                        text = t.name, 
+                        notCheckable = true,
+                        func = function()
+                            applytemplate(ii)
+                        end
+                    })
+
+                end
+            end
+
+            EasyMenu(templateMenu, menuFrame, "cursor", 0 , 0, "MENU");
+        end)
+
 
     end
 
@@ -1730,7 +1811,7 @@ function GUI:Init()
     -- report btn
     do
         local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
-        b:SetWidth(95)
+        b:SetWidth(120)
         b:SetHeight(25)
         b:SetPoint("BOTTOMLEFT", 40, 15)
         b:SetText(RAID)
@@ -2038,6 +2119,19 @@ function GUI:Init()
                 rounddown = self.rouddownCheck:GetChecked()
             }))
         end)
+
+        
+        -- local ba = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
+        -- ba:SetWidth(25)
+        -- ba:SetHeight(25)
+        -- ba:SetPoint("LEFT", b, "RIGHT", 0, 0)
+        -- ba:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+        -- do
+        --     local icon = ba:CreateTexture(nil, 'ARTWORK')
+        --     icon:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+        --     icon:SetPoint('CENTER', 1, 0)
+        --     icon:SetSize(16, 16)
+        -- end
     end
 
 end
