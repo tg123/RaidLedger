@@ -421,10 +421,10 @@ function GUI:Init()
             s:SetOrientation('HORIZONTAL')
             s:SetHeight(14)
             s:SetWidth(160)
-            s:SetMinMaxValues(50, 5000)
-            s:SetValueStep(50)
+            s:SetMinMaxValues(10, 5000)
+            s:SetValueStep(10)
             s:SetObeyStepOnDrag(true)
-            s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(50))
+            s.Low:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(10))
             s.High:SetText(GOLD_AMOUNT_TEXTURE_STRING:format(5000))
     
             local l = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -575,7 +575,7 @@ function GUI:Init()
                         tooltip:SetOwner(UIParent, "ANCHOR_NONE")
                     end)
 
-                    s:SetValue(50)
+                    s:SetValue(10)
                     s:Hide()
         
                     b.slide = s
