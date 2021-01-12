@@ -1791,6 +1791,29 @@ function GUI:Init()
                     StaticPopup_Show("RAIDLEDGER_DELETE_ITEM")
                 else
                     ChatEdit_InsertLink(entry["detail"]["item"])
+
+                    if IsShiftKeyDown() then
+                        local ledger = Database:GetCurrentLedger()
+                        if idx == #ledger["items"] then
+                            return
+                        end
+                        local nextEntry = ledger["items"][idx+1]
+                        ledger["items"][idx] = nextEntry
+                        ledger["items"][idx+1] = entry
+                        GUI:UpdateLootTableFromDatabase()
+                    end
+
+                    if IsAltKeyDown() then
+                        local ledger = Database:GetCurrentLedger()
+                        if idx == 1 then
+                            return
+                        end
+                        local previousEntry = ledger["items"][idx-1]
+                        ledger["items"][idx] = previousEntry
+                        ledger["items"][idx-1] = entry
+                        GUI:UpdateLootTableFromDatabase()
+                    end
+
                 end
             end,
 
