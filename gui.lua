@@ -171,7 +171,7 @@ end
 function GUI:Init()
 
 
-    local f = CreateFrame("Frame", nil, UIParent)
+    local f = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
     f:SetWidth(650)
     f:SetHeight(550)
     f:SetBackdrop({
@@ -252,7 +252,7 @@ function GUI:Init()
 
     -- bid
     do
-        local bf = CreateFrame("Frame", nil, f)
+        local bf = CreateFrame("Frame", nil, f, BackdropTemplateMixin and "BackdropTemplate" or nil)
         bf:SetWidth(290)
         bf:SetHeight(310)
         bf:SetBackdrop({
@@ -1612,7 +1612,7 @@ function GUI:Init()
             },
             { 
                 costtype = "PROFIT_PERCENT",
-                text =  DIM_GREEN_FONT_COLOR:WrapTextInColorCode(" % " .. L["Net Profit"]), 
+                text =  GREEN_FONT_COLOR:WrapTextInColorCode(" % " .. L["Net Profit"]), 
                 func = function() 
                     setCostType("PROFIT_PERCENT")
                 end, 

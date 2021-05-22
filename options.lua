@@ -3,7 +3,7 @@ local L = ADDONSELF.L
 local RegEvent = ADDONSELF.regevent
 local Database = ADDONSELF.db
 
-local f = CreateFrame("Frame", nil, UIParent)
+local f = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 f.name = L["Raid Ledger"]
 InterfaceOptions_AddCategory(f)
 
@@ -187,16 +187,16 @@ RegEvent("ADDON_LOADED", function()
         t:SetPoint("TOPLEFT", f, 25, -180)
         t:SetWidth(550)
         t:SetHeight(200)
-        t:SetBackdrop({ 
-            bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-            tile = true,
-            tileEdge = true,
-            tileSize = 16,
-            edgeSize = 16,
-            insets = { left = 2, right = 2, top = 2, bottom = 2 },    
-        })
-        t:SetBackdropColor(0, 0, 0);
+        -- t:SetBackdrop({ 
+        --     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+        --     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+        --     tile = true,
+        --     tileEdge = true,
+        --     tileSize = 16,
+        --     edgeSize = 16,
+        --     insets = { left = 2, right = 2, top = 2, bottom = 2 },    
+        -- })
+        -- t:SetBackdropColor(0, 0, 0);
     
 
         local edit = CreateFrame("EditBox", nil, t)
@@ -479,16 +479,16 @@ RegEvent("ADDON_LOADED", function()
             t:SetPoint("TOPLEFT", f, 25, -400)
             t:SetWidth(550)
             t:SetHeight(100)
-            t:SetBackdrop({ 
-                bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-                edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-                tile = true,
-                tileEdge = true,
-                tileSize = 16,
-                edgeSize = 16,
-                insets = { left = 2, right = 2, top = 2, bottom = 2 },    
-            })
-            t:SetBackdropColor(0, 0, 0);
+            -- t:SetBackdrop({ 
+            --     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+            --     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+            --     tile = true,
+            --     tileEdge = true,
+            --     tileSize = 16,
+            --     edgeSize = 16,
+            --     insets = { left = 2, right = 2, top = 2, bottom = 2 },    
+            -- })
+            -- t:SetBackdropColor(0, 0, 0);
         
     
             local edit = CreateFrame("EditBox", nil, t)

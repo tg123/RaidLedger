@@ -623,7 +623,7 @@ do
 
 	function lib:CreateST(cols, numRows, rowHeight, highlight, parent)
 		local st = {};
-		local f = CreateFrame("Frame", nil, parent);
+		local f = CreateFrame("Frame", nil, parent, BackdropTemplateMixin and "BackdropTemplate" or nil);
 		st.showing = true;
 		st.frame = f;
 
