@@ -1,4 +1,4 @@
-## Interface: 20501
+## Interface: 11400
 ## Title: Raid Ledger
 ## Title-deDE: @localization(locale="deDE", key="TITLE")@
 ## Title-esES: @localization(locale="esES", key="TITLE")@
