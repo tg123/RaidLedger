@@ -162,7 +162,7 @@ local function GetFilteritemsSet(s)
     return set
 end
 
-function db:AddOrUpdateLoot(item, count, beneficiary, cost)
+function db:AddOrUpdateLoot(item, count, beneficiary, cost, isoutstanding)
     local itemName, itemLink, itemRarity, _, _, _, _, itemStackCount = GetItemInfo(item)
 
     local ledger = self:GetCurrentLedger()
@@ -171,6 +171,7 @@ function db:AddOrUpdateLoot(item, count, beneficiary, cost)
             if entry.detail.item == itemLink and entry.cost == 0 and entry.detail.count == count then
                 entry.beneficiary = beneficiary
                 entry.cost = cost
+                entry.outstanding= isoutstanding
                 self:OnLedgerItemsChange()
                 return
             end

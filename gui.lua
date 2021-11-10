@@ -173,7 +173,7 @@ function GUI:Init()
 
     local f = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
     f:SetWidth(650)
-    f:SetHeight(550)
+    f:SetHeight(600)
     f:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
@@ -1724,6 +1724,25 @@ function GUI:Init()
 
         end)
 
+        local outstandingUpdate = CreateCellUpdate(function (cellFrame, entry, idx, rowFrame)
+            cellFrame.curEntry = entry
+            if not cellFrame.outstandingCheck then
+                cellFrame.outstandingCheck = CreateFrame("CheckButton", nil, cellFrame, "UICheckButtonTemplate")
+                cellFrame.outstandingCheck:SetPoint("RIGHT", cellFrame, "RIGHT")
+                cellFrame.outstandingCheck:SetScript("OnClick", function ()
+                    for _, c in pairs(rowFrame.cols) do
+                        if cellFrame.outstandingCheck:GetChecked() then
+                            cellFrame.curEntry["outstanding"] = true
+                        else
+                            cellFrame.curEntry["outstanding"] = false
+                        end
+                    end
+                    GUI:UpdateLootTableFromDatabase()
+                end)
+            end
+            cellFrame.outstandingCheck:SetChecked(entry["outstanding"])
+        end)
+
         self.lootLogFrame = ScrollingTable:CreateST({
             {
                 ["name"] = "",
@@ -1749,6 +1768,12 @@ function GUI:Init()
                 ["width"] = 100,
                 ["align"] = "RIGHT",
                 ["DoCellUpdate"] = valueUpdate,
+            },
+            {
+                ["name"] = L["Outstanding Payment"],
+                ["width"] = 50,
+                ["align"] = "RIGHT",
+                ["DoCellUpdate"] = outstandingUpdate,
             }
         }, 12, 30, nil, f)
 
@@ -2027,6 +2052,44 @@ function GUI:Init()
                         expenseonly = true,
                     })
                 end, 
+                notCheckable = true,
+            },
+            {
+                text = L["Outstanding Payment"],
+                func = function ()
+                    local items = Database:GetCurrentLedger()["items"]
+                    local lines = {}
+                    local debtor = {}
+
+                    for _, item in pairs(items or {}) do
+                        if item["outstanding"] then
+                            local b = item["beneficiary"]
+                            local c = item["cost"]
+                            local i = item["detail"]["item"] or ""
+                            local d = item["detail"]["displayname"] or ""
+                            if not GetItemInfoFromHyperlink(i) then
+                                i = d
+                            end
+                            if not debtor[b] then
+                                debtor[b] = {
+                                    amount = 0,
+                                    items = {},
+                                }
+                            end
+                            debtor[b]["amount"] = debtor[b]["amount"] + c
+                            table.insert(debtor[b]["items"], {i, c})
+                        end
+                    end
+
+                    for k, p in pairs(debtor) do
+                        table.insert(lines, k .. L["owes"] .. GetMoneyStringL(p["amount"] * 10000) .. L["outstanding balance"] .. ":")
+                        for _, i in pairs(p["items"]) do
+                            table.insert(lines, i[1] .. " " .. GetMoneyStringL(i[2] * 10000))
+                        end
+                    end
+
+                    SendToChatSlowly(lines, optctx.channel)
+                end,
                 notCheckable = true,
             },
             {
