@@ -49,6 +49,12 @@ local function SendToCurrrentChannel(msg)
     elseif chatType == "BN_WHISPER" then
         BNSendWhisper(BNet_GetBNetIDAccount(whisperTo), msg)
     else
+        if chatType == "SAY" or chatType "YELL" or chatType == "CHANNEL" then
+            if not IsInInstance() then
+                ADDONSELF.print(L["You can send messages to this channel when you are in an instance only"])
+                return
+            end
+        end
         SendChatMessage(msg, chatType)
     end
 end
