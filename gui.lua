@@ -172,8 +172,8 @@ function GUI:Init()
 
 
     local f = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
-    f:SetWidth(650)
-    f:SetHeight(600)
+    f:SetWidth(690)
+    f:SetHeight(550)
     f:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
@@ -1371,12 +1371,13 @@ function GUI:Init()
                 cellFrame.lockcheck:SetScript("OnClick", function()
                     
                     for _, c in pairs(rowFrame.cols) do
-                        if c.textBox then
+                        local uiobj = c.textbox or c.checkbox
+                        if uiobj then
                             if cellFrame.lockcheck:GetChecked() then
-                                c.textBox:Disable()
+                                uiobj:Disable()
                                 cellFrame.curEntry["lock"] = true
                             else
-                                c.textBox:Enable()
+                                uiobj:Enable()
                                 cellFrame.curEntry["lock"] = false
                             end
                         end
@@ -1668,7 +1669,7 @@ function GUI:Init()
             local type = entry["costtype"] or "GOLD"
 
             if type == "PROFIT_PERCENT" then
-                cellFrame.text:SetText(DIM_GREEN_FONT_COLOR:WrapTextInColorCode("%"))
+                cellFrame.text:SetText(GREEN_FONT_COLOR:WrapTextInColorCode("%"))
             elseif type == "REVENUE_PERCENT" then
                 cellFrame.text:SetText(LIGHTBLUE_FONT_COLOR:WrapTextInColorCode("%"))
             elseif type == "MUL_AVG" then
@@ -1725,13 +1726,14 @@ function GUI:Init()
         end)
 
         local outstandingUpdate = CreateCellUpdate(function (cellFrame, entry, idx, rowFrame)
+            local tooltip = self.commtooltip
             cellFrame.curEntry = entry
-            if not cellFrame.outstandingCheck then
-                cellFrame.outstandingCheck = CreateFrame("CheckButton", nil, cellFrame, "UICheckButtonTemplate")
-                cellFrame.outstandingCheck:SetPoint("RIGHT", cellFrame, "RIGHT")
-                cellFrame.outstandingCheck:SetScript("OnClick", function ()
+            if not cellFrame.checkbox then
+                cellFrame.checkbox = CreateFrame("CheckButton", nil, cellFrame, "UICheckButtonTemplate")
+                cellFrame.checkbox:SetPoint("RIGHT", cellFrame, "RIGHT")
+                cellFrame.checkbox:SetScript("OnClick", function ()
                     for _, c in pairs(rowFrame.cols) do
-                        if cellFrame.outstandingCheck:GetChecked() then
+                        if cellFrame.checkbox:GetChecked() then
                             cellFrame.curEntry["outstanding"] = true
                         else
                             cellFrame.curEntry["outstanding"] = false
@@ -1739,8 +1741,29 @@ function GUI:Init()
                     end
                     GUI:UpdateLootTableFromDatabase()
                 end)
+
+                cellFrame.checkbox:SetScript("OnEnter", function()
+                    tooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+                    tooltip:SetText(L["Mark as outstanding payment"])
+                    tooltip:Show()
+                end)
+
+                cellFrame.checkbox:SetScript("OnLeave", function()
+                    tooltip:Hide()
+                    tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                end)
             end
-            cellFrame.outstandingCheck:SetChecked(entry["outstanding"])
+            cellFrame.checkbox:SetChecked(entry["outstanding"])
+
+            if entry["lock"] then
+                cellFrame.checkbox:Disable()
+            end
+
+            if entry["type"] == "CREDIT" then
+                cellFrame.checkbox:Show()
+            else
+                cellFrame.checkbox:Hide()
+            end
         end)
 
         self.lootLogFrame = ScrollingTable:CreateST({
@@ -1770,7 +1793,7 @@ function GUI:Init()
                 ["DoCellUpdate"] = valueUpdate,
             },
             {
-                ["name"] = L["Outstanding Payment"],
+                ["name"] = "|TInterface\\Common\\Icon-NoLoot:0:0:2:0|t  ",
                 ["width"] = 50,
                 ["align"] = "RIGHT",
                 ["DoCellUpdate"] = outstandingUpdate,
