@@ -495,7 +495,7 @@ RegEvent("ADDON_LOADED", function()
         
             local s = CreateFrame("ScrollFrame", nil, t, "UIPanelScrollFrameTemplate")
             s:SetWidth(510)
-            s:SetHeight(175)
+            s:SetHeight(75)
             s:SetPoint("TOPLEFT", 10, -10)        
     
             local edit = CreateFrame("EditBox", nil, s)
