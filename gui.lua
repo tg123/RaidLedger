@@ -1371,7 +1371,7 @@ function GUI:Init()
                 cellFrame.lockcheck:SetScript("OnClick", function()
                     
                     for _, c in pairs(rowFrame.cols) do
-                        local uiobj = c.textbox or c.checkbox
+                        local uiobj = c.textbox and c.textbox or c.checkbox
                         if uiobj then
                             if cellFrame.lockcheck:GetChecked() then
                                 uiobj:Disable()
@@ -1419,11 +1419,12 @@ function GUI:Init()
             cellFrame.lockcheck:SetChecked(entry["lock"])
 
             for _, c in pairs(rowFrame.cols) do
-                if c.textBox then
+                local uiobj = c.textbox and c.textbox or c.checkbox
+                if uiobj then
                     if cellFrame.lockcheck:GetChecked() then
-                        c.textBox:Disable()
+                        uiobj:Disable()
                     else
-                        c.textBox:Enable()
+                        uiobj:Enable()
                     end
                 end
             end
