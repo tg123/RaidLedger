@@ -156,17 +156,17 @@ local clearAllFocus = (function()
     end
 end)()
 
-local function CreateBidFrame()
+-- local function CreateBidFrame()
 
-    f:EnableMouse(true)
-    f:SetMovable(true)
-    f:RegisterForDrag("LeftButton")
-    f:SetScript("OnDragStart", f.StartMoving)
-    f:SetScript("OnDragStop", f.StopMovingOrSizing)
-    f:SetScript("OnMouseDown", clearAllFocus)
-    f:Hide()
+--     f:EnableMouse(true)
+--     f:SetMovable(true)
+--     f:RegisterForDrag("LeftButton")
+--     f:SetScript("OnDragStart", f.StartMoving)
+--     f:SetScript("OnDragStop", f.StopMovingOrSizing)
+--     f:SetScript("OnMouseDown", clearAllFocus)
+--     f:Hide()
 
-end
+-- end
 
 function GUI:Init()
 
@@ -269,6 +269,10 @@ function GUI:Init()
         bf:SetToplevel(true)
         bf:EnableMouse(true)
         bf:SetFrameLevel(f:GetFrameLevel() + 10)
+        bf:SetMovable(true)
+        bf:RegisterForDrag("LeftButton")
+        bf:SetScript("OnDragStart", function(self, ...) f:StartMoving(...) end)
+        bf:SetScript("OnDragStop", function(self, ...) f:StopMovingOrSizing(...) end)
 
         do
             local b = CreateFrame("Button", nil, bf, "UIPanelCloseButton")
