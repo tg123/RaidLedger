@@ -91,10 +91,19 @@ local function AddLootFromTrade(beneficiary, cost, items)
     end
 
     for _, item in ipairs(items) do
+        -- record outstanding amount
+        if isoutstanding then
+            StaticPopupDialogs["OUTSTANDING_AMOUNT"].OnAccept = function (self)
+                cost = tonumber(self.editBox:GetText())     
+                Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost, true)
+            end
+            StaticPopup_Show("OUTSTANDING_AMOUNT", item)
+        else
+            Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost / 10000, false)
+            Print(L["Item added"] .. " " .. item.item .. " " .. L["Beneficiary"] .. " " .. beneficiary .. " " ..
+                      GetMoneyString(cost))
+        end
         -- only record item in database
-        Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost / 10000, isoutstanding)
-        Print(L["Item added"] .. " " .. item.item .. " " .. L["Beneficiary"] .. " " .. beneficiary .. " " ..
-                  GetMoneyString(cost))
         -- only first item will be update cost and outstanding payment
         cost = 0
         isoutstanding = false
@@ -114,3 +123,17 @@ RegEvent("UI_INFO_MESSAGE", function(_, text)
 
     currTrade = nil
 end)
+
+StaticPopupDialogs["OUTSTANDING_AMOUNT"] = {
+    text = L["Input Outstanding Amount"],
+    button1 = ACCEPT,
+    button2 = CANCEL,
+    timeout = 0,
+    whileDead = 1,
+    hasEditBox = 1,
+    hideOnEscape = 1,
+    multiple = 0,
+    OnShow = function (self)
+        self.editBox:SetText("0")
+    end,
+}
