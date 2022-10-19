@@ -83,6 +83,10 @@ RegEvent("TRADE_ACCEPT_UPDATE", function(p, t)
     end
 end)
 
+local POPUPOUTSTANDING_TYPE_ALL = 0
+local POPUPOUTSTANDING_TYPE_RAID = 1
+local POPUPOUTSTANDING_TYPE_DISABLE = 2
+
 local function AddLootFromTrade(beneficiary, cost, items)
     local isoutstanding = false
     -- if cost is 0, may it is outstanding payment
@@ -92,12 +96,18 @@ local function AddLootFromTrade(beneficiary, cost, items)
 
     for _, item in ipairs(items) do
         -- record outstanding amount
-        if isoutstanding then
-            StaticPopupDialogs["OUTSTANDING_AMOUNT"].OnAccept = function (self)
-                cost = tonumber(self.editBox:GetText())     
-                Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost, true)
+        if isoutstanding then           
+            -- record first
+            Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost, true)
+            -- then popup
+            local popupoutstanding = Database:GetConfigOrDefault("popupoutstanding", POPUPOUTSTANDING_TYPE_RAID)
+            if popupoutstanding  == AUTOADDLOOT_TYPE_DISABLE then
+                StaticPopupDialogs["OUTSTANDING_AMOUNT"].OnAccept = function (self)
+                    cost = tonumber(self.editBox:GetText())     
+                    Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost, true)
+                end
+                StaticPopup_Show("OUTSTANDING_AMOUNT", item)
             end
-            StaticPopup_Show("OUTSTANDING_AMOUNT", item)
         else
             Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost / 10000, false)
             Print(L["Item added"] .. " " .. item.item .. " " .. L["Beneficiary"] .. " " .. beneficiary .. " " ..

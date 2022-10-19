@@ -102,9 +102,58 @@ RegEvent("ADDON_LOADED", function()
         UIDropDownMenu_SetSelectedValue(t, Database:GetConfigOrDefault("autoaddloot", AUTOADDLOOT_TYPE_RAID))
     end
 
+    -- popup outstanding input dialog
+    do
+        -- TODO const
+        local POPUPOUTSTANDING_TYPE_ALL = 0
+        -- local AUTOADDLOOT_TYPE_PARTY = 1
+        local POPUPOUTSTANDING_TYPE_RAID = 1
+        local POPUPOUTSTANDING_TYPE_DISABLE = 2
+
+        local t = CreateFrame("Frame", nil, f, "UIDropDownMenuTemplate")
+        t:SetPoint("TOPLEFT", f, 300, -100)
+
+        local tt = t:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        tt:SetPoint("BOTTOMLEFT", t, "TOPLEFT", 20, 0)
+        tt:SetText(L["Popup outstanding input dialog"])
+
+        local onclick = function(self)
+            UIDropDownMenu_SetSelectedValue(t, self.value)
+            Database:SetConfig("popupoutstanding", self.value)
+        end
+
+        UIDropDownMenu_Initialize(t, function()
+            do
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = ALL
+                info.value = 0
+                info.func = onclick
+                UIDropDownMenu_AddButton(info)
+            end
+
+            do
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = L["In Raid Only"]
+                info.value = 1
+                info.func = onclick
+                UIDropDownMenu_AddButton(info)
+            end
+
+            do
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = NONE
+                info.value = 2
+                info.func = onclick
+                UIDropDownMenu_AddButton(info)
+            end
+        end)
+
+        UIDropDownMenu_SetSelectedValue(t, Database:GetConfigOrDefault("popupoutstanding", POPUPOUTSTANDING_TYPE_RAID))
+    end
+
     do
         local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
-        b:SetPoint("TOPLEFT", f, 310, -100)
+        b:SetPoint("TOPLEFT", f, 20, -145)
 
         b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
@@ -151,7 +200,7 @@ RegEvent("ADDON_LOADED", function()
 
 
         local b = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
-        b:SetPoint("TOPLEFT", f, 470, -100)
+        b:SetPoint("TOPLEFT", f, 150, -145)
 
         b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
@@ -184,7 +233,7 @@ RegEvent("ADDON_LOADED", function()
     local editDebitTemplate
     do
         local t = CreateFrame("Frame", nil, f, BackdropTemplateMixin and "BackdropTemplate" or nil)
-        t:SetPoint("TOPLEFT", f, 25, -180)
+        t:SetPoint("TOPLEFT", f, 25, -230)
         t:SetWidth(550)
         t:SetHeight(200)
         t:SetBackdrop({ 
@@ -225,7 +274,7 @@ RegEvent("ADDON_LOADED", function()
 
     do
         local t = CreateFrame("Frame", nil, f, "UIDropDownMenuTemplate")
-        t:SetPoint("TOPLEFT", f, 5, -150)
+        t:SetPoint("TOPLEFT", f, 5, -200)
 
         local tt = t:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         tt:SetPoint("BOTTOMLEFT", t, "TOPLEFT", 20, 0)
@@ -479,7 +528,7 @@ RegEvent("ADDON_LOADED", function()
             tt:SetPoint("BOTTOMLEFT", t, "TOPLEFT", 10, 0)
             tt:SetText(L["Auto recording blacklist"])
 
-            t:SetPoint("TOPLEFT", f, 25, -400)
+            t:SetPoint("TOPLEFT", f, 25, -450)
             t:SetWidth(550)
             t:SetHeight(100)
             t:SetBackdrop({ 
