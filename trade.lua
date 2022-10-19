@@ -101,7 +101,7 @@ local function AddLootFromTrade(beneficiary, cost, items)
             Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost, true)
             -- then popup
             local popupoutstanding = Database:GetConfigOrDefault("popupoutstanding", POPUPOUTSTANDING_TYPE_RAID)
-            if popupoutstanding  == AUTOADDLOOT_TYPE_DISABLE then
+            if popupoutstanding  == POPUPOUTSTANDING_TYPE_ALL or (popupoutstanding == POPUPOUTSTANDING_TYPE_RAID and IsInRaid()) then
                 StaticPopupDialogs["OUTSTANDING_AMOUNT"].OnAccept = function (self)
                     cost = tonumber(self.editBox:GetText())     
                     Database:AddOrUpdateLoot(item.item, item.count, beneficiary, cost, true)
