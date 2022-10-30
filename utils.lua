@@ -188,7 +188,9 @@ local function GenExportLine(item, c, uselink)
     end
 
     if not uselink then
-        n = "[" ..  n .. "]"
+        local id = string.match(link or "", "item:(%d+)")
+        id = id and "(" .. id .. ")" or ""
+        n = "[" ..  n .. id .. "]"
     end
 
 
