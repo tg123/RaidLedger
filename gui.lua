@@ -674,15 +674,29 @@ function GUI:Init()
                 if not ctx then
                     return
                 end
-
+                
+                -- Adds the possibility of parsing out k or K could do toLowerCase operator instead of searching for k or K if need be
                 local ask = tonumber(text)
-                if not ask then
-                    return
-                end
-
-                playerName = strsplit("-", playerName)
-                local bid = bidprice() / 10000
-                local item = currentitem()
+			    if not ask then
+				    local suffix = text:sub(-1)
+					if suffix == "k" or suffix == "K" then
+					  local numStr = text:sub(1, -2)
+					  if #numStr > 0 and tonumber(numStr) then
+						ask = tonumber(numStr) * 1000
+					  else
+						return
+					  end
+					else
+					  return
+					end
+				end
+			  
+                -- Adds that if a single or multiple digit bid of 1-105 would multiply by 1000 allowing users to be able to bid without typing the whole number
+			    if ask < 105 then
+				    ask = ask * 1000
+			    else
+				    ask = ask
+			    end
 
                 if ask >= bid then
                     ctx.currentwinner = playerName
