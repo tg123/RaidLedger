@@ -674,20 +674,42 @@ function GUI:Init()
                 if not ctx then
                     return
                 end
-
+                
+                -- Adds the possibility of parsing out k or K to 1000
                 local ask = tonumber(text)
-                if not ask then
-                    return
-                end
+					if not ask then
+						local suffix = text:sub(-1)
+						if suffix == "k" or suffix == "K" then
+							local numStr = text:sub(1, -2)
+							if #numStr > 0 and tonumber(numStr) then
+								ask = tonumber(numStr) * 1000
+							else
+								return
+							end
+						else
+							return
+						end
+					end
+			  
+                -- If the current bid is over 1000 and the ask is under 999 allows to not type out the full number (1 = 1000, 998 = 998000, 1000 = 1000)
+				if ctx.currentprice > 999 then
+					if ask < 999 then
+						ask = ask * 1000
+					else
+						ask = ask
+					end
+				else
+					ask = ask
+				end
+					
+				playerName = strsplit("-", playerName)
+				local bid = bidprice() / 10000
+				local item = currentitem()
 
-                playerName = strsplit("-", playerName)
-                local bid = bidprice() / 10000
-                local item = currentitem()
-
-                if ask >= bid then
-                    ctx.currentwinner = playerName
-                    ctx.currentprice = ask * 10000
-                    ctx.countdown = bf.countdown:GetValue()
+				if ask >= bid then
+					ctx.currentwinner = playerName
+					ctx.currentprice = ask * 10000
+					ctx.countdown = bf.countdown:GetValue()
                     
                     -- L["Bid price"]
                     SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
