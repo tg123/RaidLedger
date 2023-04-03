@@ -691,17 +691,6 @@ function GUI:Init()
 						end
 					end
 			  
-                -- If the current bid is over 1000 and the ask is under 999 allows to not type out the full number (1 = 1000, 998 = 998000, 1000 = 1000)
-				if ctx.currentprice > 999 then
-					if ask < 999 then
-						ask = ask * 1000
-					else
-						ask = ask
-					end
-				else
-					ask = ask
-				end
-					
 				playerName = strsplit("-", playerName)
 				local bid = bidprice() / 10000
 				local item = currentitem()
