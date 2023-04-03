@@ -1,3 +1,36 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@RobbyG1989 
+tg123
+/
+RaidLedger
+Public
+Fork your own copy of tg123/RaidLedger
+Code
+Issues
+2
+Pull requests
+2
+Actions
+Projects
+Security
+Insights
+RaidLedger/gui.lua
+This commit does not belong to any branch on this repository, and may belong to a fork outside of the repository.
+@RobbyG1989
+RobbyG1989 Update gui.lua
+Latest commit bf99851 yesterday
+ History
+ 3 contributors
+@tg123@RobbyG1989@Verf
+2394 lines (1972 sloc)  82.5 KB
+
 local _, ADDONSELF = ...
 
 ADDONSELF.gui = {
@@ -675,42 +708,41 @@ function GUI:Init()
                     return
                 end
                 
-                -- Adds the possibility of parsing out k or K could do toLowerCase operator instead of searching for k or K if need be
+                -- Adds the possibility of parsing out k or K to 1000
                 local ask = tonumber(text)
-		if not ask then
-			local suffix = text:sub(-1)
-			if suffix == "k" or suffix == "K" then
-				local numStr = text:sub(1, -2)
-				if #numStr > 0 and tonumber(numStr) then
-					ask = tonumber(numStr) * 1000
-				else
-					return
-				end
-			else
-				return
-			end
-		end
+					if not ask then
+						local suffix = text:sub(-1)
+						if suffix == "k" or suffix == "K" then
+							local numStr = text:sub(1, -2)
+							if #numStr > 0 and tonumber(numStr) then
+								ask = tonumber(numStr) * 1000
+							else
+								return
+							end
+						else
+							return
+						end
+					end
 			  
-                -- Adds that if a single or multiple digit bid of 1-105 would multiply by 1000 allowing users to be able to bid without typing the whole number
-		if ask < 105 then
-			ask = ask * 1000
-		else
-			ask = ask
-		end
-				
-		playerName = strsplit("-", playerName)
-		local bid = bidprice() / 10000
-		local item = currentitem()
+                -- If the current bid is over 1000 and the ask is under 999 allows to not type out the full number (1 = 1000, 998 = 998000, 1000 = 1000)
+				if ctx.currentprice > 999 then
+					if ask < 999 then
+						ask = ask * 1000
+					else
+						ask = ask
+					end
+				else
+					ask = ask
+				end
+					
+				playerName = strsplit("-", playerName)
+				local bid = bidprice() / 10000
+				local item = currentitem()
 
-	  	if ask >= bid then
-		ctx.currentwinner = playerName
-		ctx.currentprice = ask * 10000
-		ctx.countdown = bf.countdown:GetValue()
-
-                if ask >= bid then
-                    ctx.currentwinner = playerName
-                    ctx.currentprice = ask * 10000
-                    ctx.countdown = bf.countdown:GetValue()
+				if ask >= bid then
+					ctx.currentwinner = playerName
+					ctx.currentprice = ask * 10000
+					ctx.countdown = bf.countdown:GetValue()
                     
                     -- L["Bid price"]
                     SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
@@ -2392,3 +2424,18 @@ StaticPopupDialogs["RAIDLEDGER_DELETE_ITEM"] = {
     hideOnEscape = 1,
     multiple = 0,
 }
+Footer
+© 2023 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+RaidLedger/gui.lua at bf99851222c2fc496d76e1dc977c918d5cae7a6e · tg123/RaidLedger
