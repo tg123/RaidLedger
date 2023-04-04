@@ -672,39 +672,47 @@ function GUI:Init()
 
             local evt = function(text, playerName)
                 if not ctx then
-                    return
+	    		return
                 end
                 
                 -- Adds the possibility of parsing out k or K to 1000
                 local ask = tonumber(text)
-					if not ask then
-						local suffix = text:sub(-1)
-						if suffix == "k" or suffix == "K" then
-							local numStr = text:sub(1, -2)
-							if #numStr > 0 and tonumber(numStr) then
-								ask = tonumber(numStr) * 1000
-							else
-								return
-							end
-						else
-							return
-						end
+			if not ask then
+				local suffix = text:sub(-1)
+				if suffix == "k" or suffix == "K" then
+					local numStr = text:sub(1, -2)
+					if #numStr > 0 and tonumber(numStr) then
+						ask = tonumber(numStr) * 1000
+					else
+						return
 					end
+				else
+					return
+				end
+			end
 			  
-				playerName = strsplit("-", playerName)
-				local bid = bidprice() / 10000
-				local item = currentitem()
+			playerName = strsplit("-", playerName)
+			local bid = bidprice() / 10000
+			local item = currentitem()
 
-				if ask >= bid then
-					ctx.currentwinner = playerName
-					ctx.currentprice = ask * 10000
-					ctx.countdown = bf.countdown:GetValue()
-                    
-                    -- L["Bid price"]
-                    SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
-                else
-                    SendRaidMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid * 10000))
-                end
+			if ask >= bid then
+				ctx.currentwinner = playerName
+				ctx.currentprice = ask * 10000
+				ctx.countdown = bf.countdown:GetValue()
+
+				-- L["Bid price"]
+				SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
+			elseif bid > 999 and ask < 999 then
+				ask = ask * 1000
+				ctx.currentwinner = playerName
+				ctx.currentprice = ask * 10000
+				ctx.countdown = bf.countdown:GetValue()
+
+				-- L["Bid price"]
+				SendRaidMessage(L["Bid accept"] .. " " .. item .. " " .. L["Current price"] .. " >>" .. GetMoneyStringL(ctx.currentprice) .. "<< ".. (ctx.pause and "" or L["Time left"] .. " " .. (SECOND_ONELETTER_ABBR:format(ctx.countdown))))
+			else
+				SendRaidMessage(L["Bid denied"] .. " " .. item .. " " .. L["Must bid higher than"] .. " " .. GetMoneyStringL(bid * 10000))
+			end
                 
             end
 
