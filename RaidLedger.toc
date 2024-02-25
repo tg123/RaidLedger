@@ -1,4 +1,7 @@
-## Interface: 30400
+## Interface: 30403
+## Interface-Classic: 11501
+## X-Curse-Project-ID: 349048
+## X-Wago-ID: aN0YLA6j
 ## Title: Raid Ledger
 ## Title-deDE: @localization(locale="deDE", key="TITLE")@
 ## Title-esES: @localization(locale="esES", key="TITLE")@
