@@ -1,5 +1,5 @@
 ## Interface: 30403
-## Interface-Classic: 11501
+## Interface-Classic: 11504
 ## X-Curse-Project-ID: 349048
 ## X-Wago-ID: aN0YLA6j
 ## Title: Raid Ledger

@@ -159,7 +159,7 @@ local calcavg = function(items, n, oncredit, ondebit, conf)
             ondebit(item, c)
         end
     end
-    
+
     profit = math.max(revenue - expense, 0)
 
     return profit, avg, revenue, expense
@@ -194,7 +194,7 @@ local function GenExportLine(item, c, uselink)
     end
 
 
-    local s = n .. " (" .. cnt .. ") " .. l .. " " .. GetMoneyStringL(c) 
+    local s = n .. " (" .. cnt .. ") " .. l .. " " .. GetMoneyStringL(c)
 
     if ct == "PROFIT_PERCENT" then
         s = s .. " (" .. (item["cost"] or 0) .. " % " .. L["Net Profit"] .. ")"
@@ -222,7 +222,7 @@ ADDONSELF.GenExportLine = GenExportLine
     end
 
     -- borrow from [details]
-    for i = 1, #lines do 
+    for i = 1, #lines do
         local timer = C_Timer.NewTimer (i * 200 / 1000, SendToChatTimer)
         timer.Arg1 = lines[i]
     end
@@ -244,11 +244,11 @@ local function csv(items, number)
         local n = GetItemInfo(i)
         n = n or d
         n = n ~= "" and n or L["Other"]
-    
+
         if t == "DEBIT" then
             n = d or L["Compensation"]
         end
-    
+
         n = "[" ..  n .. "]"
 
         local note = ""
@@ -448,7 +448,7 @@ ADDONSELF.genreport = function(items, n, channel, conf)
     if conf.short then
         wipe(lines)
     end
-    
+
     revenue = GetMoneyStringL(revenue)
     expense = GetMoneyStringL(expense)
     profit = GetMoneyStringL(profit)
